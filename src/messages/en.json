@@ -98,6 +98,83 @@
       "paymentClaimed": "Awaiting confirmation",
       "paid": "Paid",
       "void": "Void"
+    },
+    "editor": {
+      "backToList": "Back to invoices",
+      "tabs": {
+        "label": "Editor view",
+        "form": "Edit",
+        "preview": "Preview"
+      },
+      "previewLabel": "Invoice preview",
+      "autosave": {
+        "saving": "Saving…",
+        "saved": "Saved",
+        "error": "Couldn't save — try again",
+        "invalid": "Fix the highlighted fields"
+      },
+      "locked": "This invoice is locked and can't be edited.",
+      "sections": {
+        "client": "Client",
+        "details": "Details",
+        "items": "Items",
+        "totals": "Total",
+        "payment": "Payment accounts",
+        "notes": "Notes"
+      },
+      "client": {
+        "label": "Client",
+        "placeholder": "Search or select a client",
+        "clear": "Remove client",
+        "noResults": "No client found",
+        "none": "No clients yet.",
+        "add": "Add client",
+        "archivedTag": "Archived"
+      },
+      "details": {
+        "number": "Invoice number",
+        "issueDate": "Issue date",
+        "dueDate": "Due date",
+        "currency": "Currency",
+        "language": "Invoice language",
+        "termsLabel": "Quick due dates",
+        "onReceipt": "On receipt",
+        "days": "{count} days"
+      },
+      "items": {
+        "itemN": "Item {n}",
+        "name": "Item name",
+        "description": "Description",
+        "descriptionPlaceholder": "Description (optional)",
+        "quantity": "Qty",
+        "unit": "Unit",
+        "unitPrice": "Price",
+        "amount": "Amount",
+        "add": "Add item",
+        "remove": "Remove item {n}",
+        "empty": "No items yet."
+      },
+      "totals": {
+        "subtotal": "Subtotal",
+        "discount": "Discount",
+        "discountType": "Discount type",
+        "discountValue": "Discount value",
+        "discountNone": "None",
+        "discountPercent": "Percent (%)",
+        "discountFixed": "Fixed amount",
+        "total": "Total"
+      },
+      "payment": {
+        "manage": "Manage accounts",
+        "empty": "No payment accounts yet.",
+        "add": "Add account",
+        "default": "Default",
+        "archived": "Archived"
+      },
+      "notes": {
+        "label": "Notes",
+        "placeholder": "Notes for the client (optional)"
+      }
     }
   },
   "settings": {

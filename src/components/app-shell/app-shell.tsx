@@ -15,6 +15,9 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
   const t = useTranslations();
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+  // The invoice editor is a two-column workspace, so it gets the full width and no top padding
+  // (its own sticky header sits flush under the top bar).
+  const wide = /^\/invoices\/[^/]+\/edit(\/|$)/.test(pathname);
 
   // Onboarding is a focused step: no navigation until the user has moved past it.
   if (pathname.startsWith("/onboarding")) {
@@ -70,7 +73,9 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
       </Dialog>
 
       <main className="md:pl-60">
-        <div className="mx-auto w-full max-w-6xl px-4 py-6 md:p-8">{children}</div>
+        <div className={wide ? "w-full px-4 pb-8 md:px-6" : "mx-auto w-full max-w-6xl px-4 py-6 md:p-8"}>
+          {children}
+        </div>
       </main>
     </div>
   );

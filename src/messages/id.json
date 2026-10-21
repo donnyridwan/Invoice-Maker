@@ -98,6 +98,83 @@
       "paymentClaimed": "Menunggu konfirmasi",
       "paid": "Lunas",
       "void": "Void"
+    },
+    "editor": {
+      "backToList": "Kembali ke daftar invoice",
+      "tabs": {
+        "label": "Tampilan editor",
+        "form": "Isi",
+        "preview": "Preview"
+      },
+      "previewLabel": "Preview invoice",
+      "autosave": {
+        "saving": "Menyimpan…",
+        "saved": "Tersimpan",
+        "error": "Gagal menyimpan — coba lagi",
+        "invalid": "Perbaiki isian yang ditandai"
+      },
+      "locked": "Invoice ini sudah terkunci dan tidak bisa diubah.",
+      "sections": {
+        "client": "Klien",
+        "details": "Detail",
+        "items": "Item",
+        "totals": "Total",
+        "payment": "Rekening pembayaran",
+        "notes": "Catatan"
+      },
+      "client": {
+        "label": "Klien",
+        "placeholder": "Cari atau pilih klien",
+        "clear": "Hapus klien",
+        "noResults": "Klien tidak ditemukan",
+        "none": "Belum ada klien.",
+        "add": "Tambah klien",
+        "archivedTag": "Diarsipkan"
+      },
+      "details": {
+        "number": "Nomor invoice",
+        "issueDate": "Tanggal terbit",
+        "dueDate": "Jatuh tempo",
+        "currency": "Mata uang",
+        "language": "Bahasa invoice",
+        "termsLabel": "Jatuh tempo cepat",
+        "onReceipt": "Saat diterima",
+        "days": "{count} hari"
+      },
+      "items": {
+        "itemN": "Item {n}",
+        "name": "Nama item",
+        "description": "Deskripsi",
+        "descriptionPlaceholder": "Deskripsi (opsional)",
+        "quantity": "Qty",
+        "unit": "Satuan",
+        "unitPrice": "Harga",
+        "amount": "Jumlah",
+        "add": "Tambah item",
+        "remove": "Hapus item {n}",
+        "empty": "Belum ada item."
+      },
+      "totals": {
+        "subtotal": "Subtotal",
+        "discount": "Diskon",
+        "discountType": "Jenis diskon",
+        "discountValue": "Nilai diskon",
+        "discountNone": "Tidak ada",
+        "discountPercent": "Persen (%)",
+        "discountFixed": "Nominal",
+        "total": "Total"
+      },
+      "payment": {
+        "manage": "Kelola rekening",
+        "empty": "Belum ada rekening pembayaran.",
+        "add": "Tambah rekening",
+        "default": "Default",
+        "archived": "Diarsipkan"
+      },
+      "notes": {
+        "label": "Catatan",
+        "placeholder": "Catatan untuk klien (opsional)"
+      }
     }
   },
   "settings": {
