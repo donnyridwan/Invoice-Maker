@@ -18,6 +18,20 @@ describe("parseMoneyInput", () => {
     ["12.5", "USD", "en", 1250],
     ["0,005", "USD", "id", 1],
     ["Rp 2.000", "IDR", "id", 2000],
+    ["12.50", "USD", "id", 1250],
+    ["1,5", "USD", "en", 150],
+    ["Rp1.500.000,-", "IDR", "id", 1500000],
+    ["Rp1.500.000.-", "IDR", "id", 1500000],
+    ["1.500,50", "USD", "id", 150050],
+    ["1,500.50", "USD", "id", 150050],
+    ["US$ 1,250.00", "USD", "id", 125000],
+    ["IDR 2.000", "IDR", "id", 2000],
+    ["idr 2.000", "IDR", "id", 2000],
+    ["$12.50", "USD", "en", 1250],
+    ["€ 1.234,56", "EUR", "id", 123456],
+    ["RM 10", "MYR", "id", 1000],
+    ["S$ 2,000", "SGD", "en", 200000],
+    ["0.005", "USD", "en", 1],
   ] as const)("parses %s (%s, %s) to %d", (input, currency, locale, expected) => {
     expect(parseMoneyInput(input, currency, locale)).toBe(expected);
   });
@@ -26,6 +40,26 @@ describe("parseMoneyInput", () => {
     expect(parseMoneyInput("0,004", "USD", "id")).toBe(0);
     expect(parseMoneyInput("1,005", "USD", "id")).toBe(101);
     expect(parseMoneyInput("1.234,56", "IDR", "id")).toBe(1235);
+  });
+
+  it("rejects text, bad grouping and ambiguous garbage instead of guessing", () => {
+    for (const [input, currency, locale] of [
+      ["2,5jt", "IDR", "id"],
+      ["1.5jt", "IDR", "id"],
+      ["1e5", "IDR", "id"],
+      ["1.50.000", "IDR", "id"],
+      ["1.50.0", "IDR", "id"],
+      ["1,2,3.4", "USD", "en"],
+      ["1.500.000,5,5", "IDR", "id"],
+      ["0.005", "IDR", "id"],
+      ["1500.000", "IDR", "id"],
+      ["12,", "USD", "id"],
+      ["Rp", "IDR", "id"],
+      ["Rp -5", "IDR", "id"],
+      ["EUR EUR 5", "EUR", "id"],
+    ] as const) {
+      expect(parseMoneyInput(input, currency, locale), input).toBeNull();
+    }
   });
 
   it("returns null for invalid, negative, or empty input", () => {
