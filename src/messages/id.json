@@ -32,11 +32,16 @@
     "signIn": "Masuk",
     "signUp": "Daftar",
     "email": "Email",
-    "password": "Kata sandi",
+    "password": "Password",
     "name": "Nama",
     "noAccount": "Belum punya akun?",
     "haveAccount": "Sudah punya akun?",
-    "invalidCredentials": "Email atau kata sandi salah."
+    "invalidCredentials": "Email atau password salah",
+    "signInTitle": "Masuk ke akun Anda",
+    "signInDescription": "Gunakan email dan password yang Anda daftarkan.",
+    "signUpTitle": "Buat akun baru",
+    "signUpDescription": "Mulai membuat invoice profesional dalam hitungan menit.",
+    "emailTaken": "Email ini sudah terdaftar."
   },
   "onboarding": {
     "title": "Selamat datang di Invoice Maker",
@@ -124,6 +129,7 @@
     "invalidAmount": "Jumlah tidak valid.",
     "invalidCurrency": "Mata uang tidak didukung.",
     "invalidNumber": "Angka tidak valid.",
-    "notFound": "Data tidak ditemukan."
+    "notFound": "Data tidak ditemukan.",
+    "passwordMin": "Password minimal 8 karakter"
   }
 }

@@ -36,7 +36,12 @@
     "name": "Name",
     "noAccount": "Don't have an account?",
     "haveAccount": "Already have an account?",
-    "invalidCredentials": "Incorrect email or password."
+    "invalidCredentials": "Incorrect email or password",
+    "signInTitle": "Sign in to your account",
+    "signInDescription": "Use the email and password you registered with.",
+    "signUpTitle": "Create an account",
+    "signUpDescription": "Start creating professional invoices in minutes.",
+    "emailTaken": "This email is already registered."
   },
   "onboarding": {
     "title": "Welcome to Invoice Maker",
@@ -124,6 +129,7 @@
     "invalidAmount": "Invalid amount.",
     "invalidCurrency": "Unsupported currency.",
     "invalidNumber": "Invalid number.",
-    "notFound": "Not found."
+    "notFound": "Not found.",
+    "passwordMin": "Password must be at least 8 characters"
   }
 }
