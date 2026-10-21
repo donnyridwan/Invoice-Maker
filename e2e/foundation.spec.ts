@@ -216,3 +216,59 @@ test.describe("clients", () => {
     await expect(page.getByText("Halaman tidak ditemukan")).toBeVisible();
   });
 });
+
+test.describe("catalog", () => {
+  test("adds an item with an Indonesian price and rejects an invalid edit", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/catalog");
+    await expect(page.getByText("Katalog masih kosong")).toBeVisible();
+
+    await page.getByRole("button", { name: "Item baru" }).first().click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Nama", { exact: true }).fill("Desain logo");
+    await dialog.getByLabel("Satuan", { exact: true }).fill("proyek");
+    await dialog.getByLabel("Harga satuan").fill("1.500.000");
+    await expect(dialog.getByLabel("Mata uang")).toContainText("IDR");
+    await dialog.getByRole("button", { name: "Simpan" }).click();
+    await expect(dialog).toHaveCount(0);
+
+    const row = page.getByRole("row").filter({ hasText: "Desain logo" });
+    await expect(row).toContainText("proyek");
+    // Intl puts a no-break space between "Rp" and the amount.
+    await expect(row.getByRole("cell").nth(2)).toHaveText(/^Rp\s1\.500\.000$/);
+    expect(((await row.getByRole("cell").nth(2).textContent()) ?? "").replace(/ /g, " ")).toBe("Rp 1.500.000");
+
+    await row.getByRole("button", { name: "Aksi" }).click();
+    await page.getByRole("menuitem", { name: "Ubah" }).click();
+    const edit = page.getByRole("dialog");
+    await expect(edit.getByLabel("Harga satuan")).toHaveValue("1.500.000");
+    await edit.getByLabel("Harga satuan").fill("abc");
+    await edit.getByRole("button", { name: "Simpan" }).click();
+    await expect(edit.getByText("Jumlah tidak valid")).toBeVisible();
+
+    await edit.getByLabel("Harga satuan").fill("2.000.000");
+    await edit.getByRole("button", { name: "Simpan" }).click();
+    await expect(edit).toHaveCount(0);
+    await expect(row.getByRole("cell").nth(2)).toHaveText(/^Rp\s2\.000\.000$/);
+  });
+
+  test("archives and restores an item", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/catalog");
+    await page.getByRole("button", { name: "Item baru" }).first().click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Nama", { exact: true }).fill("Hosting");
+    await dialog.getByLabel("Harga satuan").fill("250.000");
+    await dialog.getByRole("button", { name: "Simpan" }).click();
+
+    const row = page.getByRole("row").filter({ hasText: "Hosting" });
+    await row.getByRole("button", { name: "Aksi" }).click();
+    await page.getByRole("menuitem", { name: "Arsipkan" }).click();
+    await expect(page.getByText("Katalog masih kosong")).toBeVisible();
+
+    await page.getByRole("link", { name: "Arsip", exact: true }).click();
+    await row.getByRole("button", { name: "Aksi" }).click();
+    await page.getByRole("menuitem", { name: "Pulihkan" }).click();
+    await expect(page.getByText("Belum ada item yang diarsipkan")).toBeVisible();
+  });
+});
