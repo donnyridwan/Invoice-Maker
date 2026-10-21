@@ -53,6 +53,26 @@ laporan lanjutan, aplikasi mobile native, custom domain, paket berbayar.
   [Square](https://mobbin.com/screens/830087fe-1ffe-40bf-b406-f277e8c12e0e)
 - Checklist onboarding: [Squarespace](https://mobbin.com/screens/97845c62-3be8-4cb2-a048-ec46ca5c8de4)
 
+## 2a. Gaya Visual
+
+Bersih seperti dashboard Stripe dan aplikasi pembayaran modern
+([Stripe home](https://mobbin.com/screens/e8ddbdc5-bc89-454f-9ebb-846905b83df4),
+[Stripe detail](https://mobbin.com/screens/e8f9d27d-7f88-472c-a70e-811faf24228a)):
+
+- Latar konten putih, sidebar putih dengan garis batas tipis, tanpa bayangan berat.
+- Font Inter, ukuran dasar 14px, judul halaman 24–28px semibold, angka
+  memakai `tabular-nums`.
+- Satu warna aksen indigo (`#5850EC`) untuk tombol utama, link, dan item
+  navigasi aktif. Warna lain hanya untuk status.
+- Border `#E3E8EE`, teks utama `#1A1F36`, teks sekunder `#697386`,
+  radius 6px.
+- Badge status pastel: hijau (Lunas), biru (Terkirim/Dilihat), kuning
+  (Menunggu konfirmasi), merah (Jatuh tempo), abu (Draft/Void).
+- Tabel padat dengan baris setinggi ±44px dan hover abu sangat muda.
+  Empty state memakai kotak bergaris putus-putus.
+- Template dokumen invoice ikut bersih dan minimal. Template default:
+  **Minimal**.
+
 ## 3. Arsitektur
 
 Satu aplikasi **Next.js (App Router, TypeScript)** di Vercel. Tidak ada service
@@ -61,7 +81,7 @@ terpisah.
 | Kebutuhan | Pilihan | Alasan |
 |---|---|---|
 | UI | Tailwind CSS + shadcn/ui | Cepat dibangun, komponen form lengkap |
-| Database | Neon Postgres + Drizzle ORM (drizzle-kit migrations) | Serverless, type-safe, migrasi tercatat di repo |
+| Database | Neon Postgres + Drizzle ORM (driver `postgres`, drizzle-kit migrations); Postgres 16 lokal untuk dev & test | Serverless, type-safe, migrasi tercatat di repo |
 | Auth | Better Auth (email + password, adapter Drizzle) | Session di DB sendiri, dukung verifikasi email opsional |
 | i18n UI | next-intl, locale `id` (default) & `en`, disimpan di cookie/profil (tanpa prefix URL) | |
 | PDF | Chromium headless (`puppeteer-core` + `@sparticuz/chromium` di Vercel) membuka halaman cetak | Satu template HTML untuk preview, link publik, dan PDF |
@@ -125,7 +145,7 @@ mata uang menentukan jumlah desimal (IDR & JPY = 0, USD/SGD/EUR = 2).
   `base_currency` (default `IDR`, untuk ringkasan), `default_currency`,
   `default_language` (`id|en`), `default_due_days` (default 14),
   `invoice_prefix` (default `INV-`), `next_invoice_number` (int),
-  `default_notes`, `ui_locale`.
+  `default_notes`, `ui_locale`, `onboarding_completed_at`.
 
 - **payment_accounts**: `type` (`bank|paypal|wise|swift|other`), `label`,
   `details` (jsonb: `bank_name`, `account_name`, `account_number`, `swift`,
