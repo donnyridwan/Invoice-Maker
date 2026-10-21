@@ -288,6 +288,21 @@ describe("invoice lifecycle", () => {
       expect(await viewedEvents(draft.id)).toHaveLength(1);
     });
 
+    it("skips link-preview bots and still records the next real visit", async () => {
+      const u = await setupUser();
+      const draft = await sentInvoice(u.id);
+      const t = await token(draft.id);
+
+      await recordPublicView(t, null, "WhatsApp/2.23.20.0 A");
+      await recordPublicView(t, null, "facebookexternalhit/1.1");
+      expect((await getInvoice(u.id, draft.id)).firstViewedAt).toBeNull();
+      expect(await viewedEvents(draft.id)).toHaveLength(0);
+
+      await recordPublicView(t, null, "Mozilla/5.0 (iPhone) Safari/604.1");
+      expect((await getInvoice(u.id, draft.id)).firstViewedAt).toBeInstanceOf(Date);
+      expect(await viewedEvents(draft.id)).toHaveLength(1);
+    });
+
     it("does nothing for a draft, a void invoice or an unknown token", async () => {
       const u = await setupUser();
       const draft = await makeDraft(u.id);

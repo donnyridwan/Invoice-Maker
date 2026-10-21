@@ -209,6 +209,14 @@ export async function settlePendingClaims(tx: Tx, invoiceId: string): Promise<vo
   }
 }
 
+/** The invoice is void: whatever is still waiting for a decision is rejected (nothing can be paid any more). */
+export async function rejectPendingClaims(tx: Tx, invoiceId: string): Promise<void> {
+  await tx
+    .update(paymentClaims)
+    .set({ status: "rejected", decidedAt: new Date() })
+    .where(and(eq(paymentClaims.invoiceId, invoiceId), eq(paymentClaims.status, "pending")));
+}
+
 /** Pending claims on one invoice (public page: the "I've paid" button closes at the limit). */
 export async function countInvoicePendingClaims(invoiceId: string): Promise<number> {
   const [row] = await db

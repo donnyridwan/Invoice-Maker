@@ -356,4 +356,40 @@ describe("payment claims", () => {
       expect(await statusOf(u.id, inv.id)).toBe("paid");
     });
   });
+
+  describe("voiding an invoice with pending claims", () => {
+    it("rejects every pending claim in the same transaction and leaves decided ones alone", async () => {
+      const u = await setupUser();
+      const inv = await sentInvoice(u.id);
+      const token = inv.publicToken;
+      const first = await createPaymentClaim(token, claimInput({ payerName: "Budi" }), null);
+      await rejectClaim(u.id, first.id);
+      await createPaymentClaim(token, claimInput({ payerName: "Siti" }), null);
+      await createPaymentClaim(token, claimInput({ payerName: "Joko" }), null);
+      expect(await statusOf(u.id, inv.id)).toBe("payment_claimed");
+
+      await voidInvoice(u.id, inv.id);
+
+      expect(await statusOf(u.id, inv.id)).toBe("void");
+      const claims = await listClaims(u.id, inv.id);
+      expect(claims).toHaveLength(3);
+      expect(claims.every((c) => c.status === "rejected")).toBe(true);
+      expect(claims.filter((c) => c.decidedAt === null)).toHaveLength(0);
+      expect(await countPendingClaims(u.id)).toBe(0);
+      expect((await eventsOf(inv.id)).filter((e) => e.type === "voided")).toHaveLength(1);
+    });
+
+    it("does not touch the claims of another invoice", async () => {
+      const u = await setupUser();
+      const a = await sentInvoice(u.id);
+      const b = await sentInvoice(u.id);
+      await createPaymentClaim(a.publicToken, claimInput(), null);
+      await createPaymentClaim(b.publicToken, claimInput(), null);
+
+      await voidInvoice(u.id, a.id);
+
+      expect((await listClaims(u.id, b.id)).map((c) => c.status)).toEqual(["pending"]);
+      expect(await statusOf(u.id, b.id)).toBe("payment_claimed");
+    });
+  });
 });

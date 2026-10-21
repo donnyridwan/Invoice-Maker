@@ -1,5 +1,6 @@
 import { cache } from "react";
 import type { Metadata } from "next";
+import { headers } from "next/headers";
 import { notFound } from "next/navigation";
 import { NextIntlClientProvider } from "next-intl";
 import { getPublicInvoice } from "@/features/invoices/queries";
@@ -29,7 +30,9 @@ export default async function PublicInvoicePage({ params }: PageProps<"/i/[token
   const invoice = await loadInvoice(token);
   if (!invoice) notFound();
 
-  await recordPublicView(token, (await getOptionalUser())?.id ?? null);
+  // Link-preview bots (WhatsApp, Slack, ...) open the link too; they must not count as a view.
+  const userAgent = (await headers()).get("user-agent");
+  await recordPublicView(token, (await getOptionalUser())?.id ?? null, userAgent);
   const pendingClaims = await countInvoicePendingClaims(invoice.id);
   const language = resolveLocale(invoice.language);
 

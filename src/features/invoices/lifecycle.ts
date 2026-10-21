@@ -4,9 +4,10 @@ import { db } from "@/db/client";
 import { invoiceItems, invoices } from "@/db/schema";
 import { isIsoDate, startOfJakartaDay } from "@/lib/dates";
 import { ValidationError } from "@/lib/errors";
+import { isLinkPreviewBot } from "@/lib/link-preview-bots";
 import { optionalText } from "@/lib/zod-helpers";
 import { parseInput } from "@/lib/validate";
-import { settlePendingClaims } from "@/features/payment-claims/queries";
+import { rejectPendingClaims, settlePendingClaims } from "@/features/payment-claims/queries";
 import { logEvent, type InvoiceEventType } from "./events";
 import { findOwned, type Invoice, type InvoiceWithItems, type Tx } from "./queries";
 
@@ -129,24 +130,34 @@ export async function unmarkPaid(userId: string, id: string): Promise<Invoice> {
   return transition(userId, id, ["paid"], "sent", { paidAt: null, paidNote: null }, { type: "unmarked_paid" });
 }
 
-/** draft / sent / payment_claimed → void. A paid invoice has to be unmarked first. */
+/**
+ * draft / sent / payment_claimed → void. A paid invoice has to be unmarked first. Claims still
+ * pending are rejected in the same transaction: the invoice no longer takes payments.
+ */
 export async function voidInvoice(userId: string, id: string): Promise<Invoice> {
-  return transition(
-    userId,
-    id,
-    ["draft", "sent", "payment_claimed"],
-    "void",
-    { voidedAt: new Date() },
-    { type: "voided" },
-  );
+  return db.transaction(async (tx) => {
+    const current = await findOwned(tx, userId, id, true);
+    if (current.status !== "draft" && current.status !== "sent" && current.status !== "payment_claimed") {
+      throw invalidTransition();
+    }
+    const updated = await applyTransition(tx, current, "void", { voidedAt: new Date() }, { type: "voided" });
+    await rejectPendingClaims(tx, current.id);
+    return updated;
+  });
 }
 
 /**
  * Called when the public page is opened. The first view by someone other than the owner stamps
  * `firstViewedAt` and logs `viewed`; the conditional UPDATE makes that happen exactly once even
- * for concurrent visits. Anything else (draft, void, unknown token, the owner) is a no-op.
+ * for concurrent visits. Anything else (draft, void, unknown token, the owner, a link-preview bot
+ * recognised by its `userAgent`) is a no-op.
  */
-export async function recordPublicView(token: string, viewerUserId: string | null): Promise<void> {
+export async function recordPublicView(
+  token: string,
+  viewerUserId: string | null,
+  userAgent?: string | null,
+): Promise<void> {
+  if (isLinkPreviewBot(userAgent)) return;
   await db.transaction(async (tx) => {
     const [first] = await tx
       .update(invoices)
