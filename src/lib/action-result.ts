@@ -32,3 +32,16 @@ export function toActionError(e: unknown): ActionResult<never> {
   console.error(e);
   return { ok: false, error: "unknown" };
 }
+
+/**
+ * Runs a server action and always settles with an `ActionResult`: a rejected call (network
+ * failure, request body over the server-action size limit, ...) becomes `{ ok: false, error: "unknown" }`.
+ */
+export async function settleAction<T>(run: () => Promise<ActionResult<T>>): Promise<ActionResult<T>> {
+  try {
+    return await run();
+  } catch (e) {
+    console.error(e);
+    return { ok: false, error: "unknown" };
+  }
+}

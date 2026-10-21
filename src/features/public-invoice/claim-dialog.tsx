@@ -19,6 +19,8 @@ import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { submitPaymentClaimAction } from "@/features/payment-claims/actions";
+import { checkProofFile } from "@/features/payment-claims/proof-file";
+import { translateValidation } from "@/lib/validation-message";
 import { useServerForm } from "@/lib/use-server-form";
 
 type Props = {
@@ -43,10 +45,14 @@ export function ClaimDialog({ token, business, defaultAmount, today, maxDate, li
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(false);
+  const tAll = useTranslations();
+  // Problem with the chosen proof file, found in the browser before anything is uploaded.
+  const [fileError, setFileError] = useState<string | null>(null);
   const form = useServerForm<FormData>((formData) => submitPaymentClaimAction(token, formData));
 
   function onOpenChange(next: boolean) {
     setOpen(next);
+    if (!next) setFileError(null);
     if (!next && done) {
       setDone(false);
       router.refresh();
@@ -55,7 +61,12 @@ export function ClaimDialog({ token, business, defaultAmount, today, maxDate, li
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (await form.submit(new FormData(event.currentTarget))) setDone(true);
+    const data = new FormData(event.currentTarget);
+    const proof = data.get("proof");
+    const problem = proof instanceof File && proof.size > 0 ? checkProofFile(proof) : null;
+    setFileError(problem);
+    if (problem) return;
+    if (await form.submit(data)) setDone(true);
   }
 
   const formLevelError = form.errorFor("_form") ?? form.formError;
@@ -114,13 +125,14 @@ export function ClaimDialog({ token, business, defaultAmount, today, maxDate, li
             <FormField
               label={t("claim.proof")}
               htmlFor="claim-proof"
-              error={form.errorFor("file")}
+              error={fileError ? translateValidation(tAll, fileError) : form.errorFor("file")}
               hint={t("claim.proofHint")}
             >
               <input
                 id="claim-proof"
                 name="proof"
                 type="file"
+                onChange={() => setFileError(null)}
                 accept="image/jpeg,image/png,application/pdf"
                 className="block w-full text-sm text-muted file:mr-3 file:h-9 file:rounded-md file:border file:border-border file:bg-white file:px-3 file:text-sm file:font-medium file:text-fg hover:file:bg-subtle"
               />

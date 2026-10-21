@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { useTranslations } from "next-intl";
-import type { ActionResult } from "@/lib/action-result";
+import { settleAction, type ActionResult } from "@/lib/action-result";
 import { translateValidation } from "@/lib/validation-message";
 
 /**
@@ -19,8 +19,8 @@ export function useServerForm<T>(action: (values: T) => Promise<ActionResult<unk
     setPending(true);
     setFormError(null);
     setFieldErrors({});
-    const result = await action(values);
-    setPending(false);
+    // A thrown action (network error, body over the size limit) must not leave the form stuck.
+    const result = await settleAction(() => action(values)).finally(() => setPending(false));
     if (result.ok) return true;
     setFieldErrors(result.fieldErrors ?? {});
     setFormError(result.fieldErrors ? null : t(`errors.${result.error}`));

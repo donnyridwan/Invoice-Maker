@@ -115,6 +115,35 @@ test.describe("public invoice page", () => {
     await client.context.close();
   });
 
+  test("rejects an oversized proof in the browser and lets the client fix it", async ({ page, browser, baseURL }) => {
+    const token = await markSentViaDb(await createInvoiceDraft(page));
+    const client = await newClient(browser, baseURL);
+    const view = client.page;
+    await view.goto(`/i/${token}`);
+
+    await view.getByRole("button", { name: "Saya sudah bayar" }).click();
+    const dialog = view.getByRole("dialog");
+    await dialog.getByLabel("Nama pembayar").fill("Budi");
+    // 6.5 MB: above both the 5 MB proof limit and the 6 MB server-action body limit.
+    const big = Buffer.alloc(6.5 * 1024 * 1024);
+    PNG_1X1.copy(big);
+    await dialog.getByLabel("Bukti transfer").setInputFiles({ name: "besar.png", mimeType: "image/png", buffer: big });
+    await dialog.getByRole("button", { name: "Kirim" }).click();
+    await expect(dialog.getByText("Ukuran file terlalu besar")).toBeVisible();
+    await expect(dialog.getByRole("button", { name: "Kirim" })).toBeEnabled();
+    await expect(dialog.getByText("Terima kasih")).toHaveCount(0);
+
+    await dialog.getByLabel("Bukti transfer").setInputFiles({ name: "catatan.txt", mimeType: "text/plain", buffer: Buffer.from("hi") });
+    await dialog.getByRole("button", { name: "Kirim" }).click();
+    await expect(dialog.getByText("Format file tidak didukung")).toBeVisible();
+
+    await dialog.getByLabel("Bukti transfer").setInputFiles({ name: "bukti.png", mimeType: "image/png", buffer: PNG_1X1 });
+    await dialog.getByRole("button", { name: "Kirim" }).click();
+    await expect(dialog.getByText("Terima kasih")).toBeVisible();
+
+    await client.context.close();
+  });
+
   test("renders in the language of the invoice", async ({ page, browser, baseURL }) => {
     const token = await markSentViaDb(await createInvoiceDraft(page, { english: true }));
     const client = await newClient(browser, baseURL);
