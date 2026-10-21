@@ -27,7 +27,7 @@ import type { BusinessSnapshot } from "../snapshots";
 import type { DisplayStatus } from "../display-status";
 import type { Invoice } from "../queries";
 import { AmountHero } from "./amount-hero";
-import { AppearanceSection } from "./appearance-section";
+import { AppearanceBar } from "./appearance-section";
 import { ClientSection } from "./client-section";
 import { DetailsSection } from "./details-section";
 import { SendMenu } from "../send-menu";
@@ -229,7 +229,6 @@ export function InvoiceEditor({
             <TotalsSection {...section} evaluation={evaluation} locale={locale} />
             <PaymentSection {...section} accounts={accounts} />
             <NotesSection {...section} />
-            <AppearanceSection {...section} doc={doc} />
           </fieldset>
           {recurringSchedule ? (
             <div className="mt-4">
@@ -252,6 +251,7 @@ export function InvoiceEditor({
             tab !== "preview" && "hidden",
           )}
         >
+          <AppearanceBar state={state} update={update} disabled={locked} />
           <PreviewPane doc={doc} />
         </div>
       </div>
