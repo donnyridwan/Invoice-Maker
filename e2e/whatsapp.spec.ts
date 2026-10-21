@@ -34,9 +34,10 @@ test.describe("share via WhatsApp", () => {
     await openSendMenu(page);
     await page.getByRole("menuitem", { name: "WhatsApp" }).click();
     const popup = await popupPromise;
+    // The window opens blank on click and is pointed at wa.me once the server action resolves.
+    await expect.poll(() => urls.length).toBe(1);
     await popup.close();
 
-    await expect.poll(() => urls.length).toBe(1);
     expect(urls[0].startsWith("https://wa.me/6281234567890?text=")).toBe(true);
     const text = new URL(urls[0]).searchParams.get("text") ?? "";
     expect(text).toMatch(/^Halo Acme Inc, berikut invoice INV-.+ dari Donny sebesar Rp\s?1\.500\.000, jatuh tempo .+\. Lihat & bayar di sini: http\S*\/i\/[\w-]{20,}$/);
@@ -52,8 +53,9 @@ test.describe("share via WhatsApp", () => {
     await openSendMenu(page);
     await expect(page.getByRole("menuitem", { name: "Tandai terkirim" })).toHaveCount(0);
     await page.getByRole("menuitem", { name: "WhatsApp" }).click();
-    await (await again).close();
+    const secondPopup = await again;
     await expect.poll(() => urls.length).toBe(2);
+    await secondPopup.close();
     await page.reload();
     await expect(page.getByRole("region", { name: "Aktivitas" })).toContainText("Dibagikan lewat WhatsApp");
   });
@@ -67,9 +69,10 @@ test.describe("share via WhatsApp", () => {
     const popupPromise = context.waitForEvent("page");
     await openSendMenu(page);
     await page.getByRole("menuitem", { name: "WhatsApp" }).click();
-    await (await popupPromise).close();
-
+    const popup = await popupPromise;
     await expect.poll(() => urls.length).toBe(1);
+    await popup.close();
+
     expect(urls[0].startsWith("https://wa.me/?text=")).toBe(true);
   });
 });

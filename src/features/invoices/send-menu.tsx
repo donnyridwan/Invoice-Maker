@@ -38,12 +38,13 @@ export function SendMenu({
   const [emailOpen, setEmailOpen] = useState(false);
   const invoiceId = invoice.id;
 
-  async function run(work: () => Promise<void>) {
+  async function run(work: () => Promise<void>, onFail?: () => void) {
     setBusy(true);
     try {
       await flush?.();
       await work();
     } catch {
+      onFail?.();
       toast.error(tAll("errors.unknown"));
     }
     setBusy(false);
@@ -66,17 +67,30 @@ export function SendMenu({
       router.refresh();
     });
 
-  const whatsApp = () =>
-    run(async () => {
-      const result = await shareWhatsAppAction(invoiceId);
-      if (!result.ok) {
-        toast.error(actionErrorMessage(tAll, result));
-        return;
-      }
-      // noopener: wa.me must not get a handle on this window.
-      window.open(result.data.url, "_blank", "noopener");
-      router.refresh();
-    });
+  // The window is opened synchronously in the click handler (popup blockers only allow that) and
+  // pointed at wa.me once the server action has produced the link; it is closed when that fails.
+  const whatsApp = () => {
+    const popup = window.open("about:blank", "_blank");
+    return run(
+      async () => {
+        const result = await shareWhatsAppAction(invoiceId);
+        if (!result.ok) {
+          popup?.close();
+          toast.error(actionErrorMessage(tAll, result));
+          return;
+        }
+        if (popup) {
+          // noopener semantics: wa.me must not get a handle on this window.
+          popup.opener = null;
+          popup.location.href = result.data.url;
+        } else {
+          window.open(result.data.url, "_blank", "noopener");
+        }
+        router.refresh();
+      },
+      () => popup?.close(),
+    );
+  };
 
   const markSent = () =>
     run(async () => {
