@@ -3,12 +3,21 @@ import { getAppUrl } from "@/lib/app-url";
 import { LOCALE_COOKIE, resolveLocale, type Locale } from "@/i18n/config";
 import { renderVerifyEmail } from "./verify-email";
 
+/** `decodeURIComponent` that returns the raw text for a malformed escape instead of throwing. */
+function safeDecode(value: string): string {
+  try {
+    return decodeURIComponent(value);
+  } catch {
+    return value;
+  }
+}
+
 /** The UI language of the request that asked for the email (the locale cookie), default id. */
 export function localeFromRequest(request?: Request): Locale {
   const cookie = request?.headers.get("cookie") ?? "";
   for (const part of cookie.split(";")) {
     const [name, ...rest] = part.trim().split("=");
-    if (name === LOCALE_COOKIE) return resolveLocale(decodeURIComponent(rest.join("=")));
+    if (name === LOCALE_COOKIE) return resolveLocale(safeDecode(rest.join("=")));
   }
   return resolveLocale(undefined);
 }

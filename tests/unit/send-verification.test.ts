@@ -18,6 +18,17 @@ describe("localeFromRequest", () => {
     expect(localeFromRequest(withCookie())).toBe("id");
     expect(localeFromRequest(undefined)).toBe("id");
   });
+
+  it("falls back to id for a malformed cookie value instead of throwing", () => {
+    expect(() => localeFromRequest(withCookie("NEXT_LOCALE=%E0%A4%A"))).not.toThrow();
+    expect(localeFromRequest(withCookie("NEXT_LOCALE=%E0%A4%A"))).toBe("id");
+    expect(localeFromRequest(withCookie("NEXT_LOCALE=%"))).toBe("id");
+    expect(localeFromRequest(withCookie("x=%zz; NEXT_LOCALE=en"))).toBe("en");
+  });
+
+  it("decodes an encoded value", () => {
+    expect(localeFromRequest(withCookie("NEXT_LOCALE=%65n"))).toBe("en");
+  });
 });
 
 describe("renderVerifyEmail", () => {
