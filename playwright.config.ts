@@ -54,6 +54,8 @@ export default defineConfig({
       CRON_SECRET: process.env.CRON_SECRET,
       // Emails are written to var/outbox/*.json instead of being sent (see readOutbox in e2e/helpers.ts).
       EMAIL_TRANSPORT: "file",
+      // The e2e server is a production build, where the file transport is refused unless allowed explicitly.
+      ALLOW_FILE_EMAIL_TRANSPORT: "true",
       ...(chromiumPath ? { CHROMIUM_PATH: chromiumPath } : {}),
     },
   },
