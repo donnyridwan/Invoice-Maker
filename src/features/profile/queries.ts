@@ -75,6 +75,21 @@ export async function updateInvoiceDefaults(userId: string, input: unknown): Pro
   return row;
 }
 
+/** Sets (or clears, with null) the logo URL; returns the previous one so the caller can delete that file. */
+export async function setLogoUrl(userId: string, logoUrl: string | null): Promise<string | null> {
+  return db.transaction(async (tx) => {
+    const [current] = await tx
+      .select({ logoUrl: businessProfiles.logoUrl })
+      .from(businessProfiles)
+      .where(eq(businessProfiles.userId, userId))
+      .for("update")
+      .limit(1);
+    if (!current) throw new NotFoundError(NOT_FOUND);
+    await tx.update(businessProfiles).set({ logoUrl }).where(eq(businessProfiles.userId, userId));
+    return current.logoUrl;
+  });
+}
+
 /** Stamps the completion time once; later calls keep the first timestamp. */
 export async function completeOnboarding(userId: string): Promise<void> {
   const rows = await db

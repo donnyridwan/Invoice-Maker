@@ -7,6 +7,7 @@ import {
   ensureProfile,
   getChecklist,
   getProfile,
+  setLogoUrl,
   updateInvoiceDefaults,
   updateProfile,
 } from "@/features/profile/queries";
@@ -148,7 +149,19 @@ describe("business profile", () => {
     await expect(updateInvoiceDefaults(b.id, defaultsInput())).rejects.toBeInstanceOf(NotFoundError);
     await expect(completeOnboarding(b.id)).rejects.toBeInstanceOf(NotFoundError);
     await expect(getChecklist(b.id)).rejects.toBeInstanceOf(NotFoundError);
+    await expect(setLogoUrl(b.id, "/uploads/logo/x.png")).rejects.toBeInstanceOf(NotFoundError);
 
     expect(await getProfile(a.id)).toMatchObject({ businessName: "A", onboardingCompletedAt: null });
+  });
+
+  it("sets and clears the logo URL, returning the previous one", async () => {
+    const u = await createTestUser();
+    await ensureProfile(u.id, { businessName: "A", email: u.email });
+
+    expect(await setLogoUrl(u.id, "/uploads/logo/one.png")).toBeNull();
+    expect((await getProfile(u.id)).logoUrl).toBe("/uploads/logo/one.png");
+    expect(await setLogoUrl(u.id, "/uploads/logo/two.png")).toBe("/uploads/logo/one.png");
+    expect(await setLogoUrl(u.id, null)).toBe("/uploads/logo/two.png");
+    expect((await getProfile(u.id)).logoUrl).toBeNull();
   });
 });

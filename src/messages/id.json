@@ -247,7 +247,15 @@
     "accountDescription": "Keamanan akun dan rekening pembayaran.",
     "changePassword": "Ganti password",
     "currentPassword": "Password saat ini",
-    "newPassword": "Password baru"
+    "newPassword": "Password baru",
+    "logo": "Logo",
+    "logoUpload": "Unggah logo",
+    "logoChange": "Ganti",
+    "logoRemove": "Hapus",
+    "logoHint": "JPG, PNG, atau WebP, maks. 2 MB",
+    "logoDescription": "Tampil di invoice Anda.",
+    "logoAlt": "Logo bisnis",
+    "logoRemoved": "Logo dihapus."
   },
   "paymentAccounts": {
     "title": "Rekening Pembayaran",
@@ -355,7 +363,13 @@
     "duplicateNumber": "Nomor invoice sudah dipakai",
     "invoiceLocked": "Invoice ini sudah terkunci",
     "onlyDraftDeletable": "Hanya draft yang bisa dihapus",
-    "invalidDate": "Tanggal tidak valid"
+    "invalidDate": "Tanggal tidak valid",
+    "fileType": "Format file tidak didukung",
+    "fileTooLarge": "Ukuran file terlalu besar",
+    "invalidTransition": "Aksi ini tidak bisa dilakukan pada status invoice saat ini",
+    "clientRequired": "Pilih klien terlebih dahulu",
+    "itemsRequired": "Tambahkan minimal satu item",
+    "totalZero": "Total invoice harus lebih dari 0"
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",

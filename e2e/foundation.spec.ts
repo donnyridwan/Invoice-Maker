@@ -315,3 +315,43 @@ test.describe("catalog", () => {
     await expect(page.getByText("Belum ada item yang diarsipkan")).toBeVisible();
   });
 });
+
+// 1x1 transparent PNG.
+const PNG_1X1 = Buffer.from(
+  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
+  "base64",
+);
+
+test.describe("logo", () => {
+  test("uploads a logo, shows it and removes it again", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/settings");
+
+    const card = page.getByRole("region", { name: "Logo" });
+    await expect(card.getByText("JPG, PNG, atau WebP, maks. 2 MB")).toBeVisible();
+    await expect(card.getByRole("img")).toHaveCount(0);
+
+    await card.locator("input[type=file]").setInputFiles({ name: "logo.png", mimeType: "image/png", buffer: PNG_1X1 });
+    const logo = card.getByRole("img", { name: "Logo bisnis" });
+    await expect(logo).toBeVisible();
+    await expect(logo).toHaveAttribute("src", /^\/uploads\/logo\/[0-9a-f-]{36}\.png$/);
+    await expect.poll(() => logo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
+    await expect(card.getByRole("button", { name: "Ganti" })).toBeVisible();
+
+    await card.getByRole("button", { name: "Hapus" }).click();
+    await expect(card.getByRole("img")).toHaveCount(0);
+    await expect(card.getByRole("button", { name: "Unggah logo" })).toBeVisible();
+  });
+
+  test("rejects a file that is not a real image", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/settings");
+
+    const card = page.getByRole("region", { name: "Logo" });
+    await card
+      .locator("input[type=file]")
+      .setInputFiles({ name: "evil.png", mimeType: "image/png", buffer: Buffer.from("<html><script>1</script></html>") });
+    await expect(card.getByRole("alert")).toHaveText("Format file tidak didukung");
+    await expect(card.getByRole("img")).toHaveCount(0);
+  });
+});

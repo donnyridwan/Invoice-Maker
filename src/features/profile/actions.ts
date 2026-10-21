@@ -5,12 +5,15 @@ import { createDraftInvoice } from "@/features/invoices/queries";
 import { createPaymentAccount } from "@/features/payment-accounts/queries";
 import { paymentAccountSchema } from "@/features/payment-accounts/schema";
 import { toActionError, type ActionResult } from "@/lib/action-result";
+import { ValidationError } from "@/lib/errors";
 import { requireUser } from "@/lib/session";
+import { getStorage, uploadFile } from "@/lib/storage";
 import { parseInput } from "@/lib/validate";
 import {
   completeOnboarding,
   getProfile,
   profileToInput,
+  setLogoUrl,
   updateInvoiceDefaults,
   updateProfile,
 } from "./queries";
@@ -113,6 +116,50 @@ export async function skipOnboardingAction(): Promise<ActionResult<OnboardingRes
     await completeOnboarding(user.id);
     refresh();
     return { ok: true, data: await onboardingRedirect(user.id, firstTime) };
+  } catch (e) {
+    return toActionError(e);
+  }
+}
+
+export type LogoResult = { logoUrl: string | null };
+
+/** Best-effort removal of a stored file; a leftover file must never fail the user's action. */
+async function discardFile(url: string | null) {
+  if (!url) return;
+  try {
+    await getStorage().delete(url);
+  } catch (e) {
+    console.error(e);
+  }
+}
+
+export async function uploadLogoAction(formData: FormData): Promise<ActionResult<LogoResult>> {
+  const user = await requireUser();
+  try {
+    const file = formData.get("file");
+    if (!(file instanceof File) || file.size === 0) throw new ValidationError({ file: ["required"] });
+    const { url } = await uploadFile("logo", file);
+    let previous: string | null;
+    try {
+      previous = await setLogoUrl(user.id, url);
+    } catch (e) {
+      await discardFile(url);
+      throw e;
+    }
+    await discardFile(previous);
+    refresh();
+    return { ok: true, data: { logoUrl: url } };
+  } catch (e) {
+    return toActionError(e);
+  }
+}
+
+export async function removeLogoAction(): Promise<ActionResult<LogoResult>> {
+  const user = await requireUser();
+  try {
+    await discardFile(await setLogoUrl(user.id, null));
+    refresh();
+    return { ok: true, data: { logoUrl: null } };
   } catch (e) {
     return toActionError(e);
   }

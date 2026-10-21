@@ -247,7 +247,15 @@
     "accountDescription": "Account security and payment accounts.",
     "changePassword": "Change password",
     "currentPassword": "Current password",
-    "newPassword": "New password"
+    "newPassword": "New password",
+    "logo": "Logo",
+    "logoUpload": "Upload logo",
+    "logoChange": "Change",
+    "logoRemove": "Remove",
+    "logoHint": "JPG, PNG, or WebP, max. 2 MB",
+    "logoDescription": "Shown on your invoices.",
+    "logoAlt": "Business logo",
+    "logoRemoved": "Logo removed."
   },
   "paymentAccounts": {
     "title": "Payment accounts",
@@ -355,7 +363,13 @@
     "duplicateNumber": "This invoice number is already in use",
     "invoiceLocked": "This invoice is locked",
     "onlyDraftDeletable": "Only drafts can be deleted",
-    "invalidDate": "Invalid date"
+    "invalidDate": "Invalid date",
+    "fileType": "Unsupported file format",
+    "fileTooLarge": "File is too large",
+    "invalidTransition": "This action is not possible for the current invoice status",
+    "clientRequired": "Select a client first",
+    "itemsRequired": "Add at least one item",
+    "totalZero": "Invoice total must be greater than 0"
   },
   "errors": {
     "validation": "Please check your input.",
