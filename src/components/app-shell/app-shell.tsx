@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, type ReactNode } from "react";
+import { usePathname } from "next/navigation";
 import * as DialogPrimitive from "@radix-ui/react-dialog";
 import { Menu } from "lucide-react";
 import { useTranslations } from "next-intl";
@@ -12,7 +13,18 @@ import { UserMenu } from "./user-menu";
 
 export function AppShell({ user, children }: { user: SessionUser; children: ReactNode }) {
   const t = useTranslations();
+  const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
+
+  // Onboarding is a focused step: no navigation until the user has moved past it.
+  if (pathname.startsWith("/onboarding")) {
+    return (
+      <main className="min-h-screen bg-subtle px-4 py-12">
+        <p className="mb-6 text-center text-xl font-semibold tracking-tight text-fg">{t("common.appName")}</p>
+        {children}
+      </main>
+    );
+  }
 
   return (
     <div className="min-h-screen bg-white">

@@ -88,3 +88,69 @@ test.describe("shell", () => {
     ).toBeVisible();
   });
 });
+
+test.describe("onboarding", () => {
+  test("saves the business name, then completes the checklist from settings", async ({ page }) => {
+    await registerUser(page, { onboarding: "stay" });
+    await expect(page).toHaveURL(/\/onboarding$/);
+    await expect(page.getByRole("link", { name: "Klien" })).toHaveCount(0);
+
+    await page.getByLabel("Nama bisnis").fill("Studio Donny");
+    await page.getByRole("button", { name: "Lanjut" }).click();
+    await expect(page).toHaveURL(/\/dashboard$/);
+
+    const profileItem = page.getByRole("listitem").filter({ hasText: "Lengkapi profil bisnis" });
+    await expect(profileItem).toHaveAttribute("data-done", "false");
+
+    await page.goto("/settings");
+    await expect(page.getByLabel("Nama bisnis")).toHaveValue("Studio Donny");
+    const profileCard = page.getByRole("region", { name: "Profil bisnis" });
+    await profileCard.getByLabel("Alamat").fill("Jl. Sudirman No. 1, Jakarta");
+    await profileCard.getByRole("button", { name: "Simpan" }).click();
+    await expect(page.getByText("Tersimpan")).toBeVisible();
+
+    await page.goto("/dashboard");
+    await expect(profileItem).toHaveAttribute("data-done", "true");
+    await expect(page.getByRole("listitem").filter({ hasText: "Tambah rekening pembayaran" })).toHaveAttribute(
+      "data-done",
+      "false",
+    );
+  });
+
+  test("creates a first bank account during onboarding", async ({ page }) => {
+    await registerUser(page, { onboarding: "stay" });
+
+    await page.getByRole("button", { name: "Tambah rekening" }).click();
+    await page.getByLabel("Nama bank").fill("BCA");
+    await page.getByLabel("Nama pemilik rekening").fill("Donny");
+    await page.getByLabel("Nomor rekening").fill("1234567890");
+    await page.getByRole("button", { name: "Lanjut" }).click();
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.getByRole("listitem").filter({ hasText: "Tambah rekening pembayaran" })).toHaveAttribute(
+      "data-done",
+      "true",
+    );
+
+    await page.goto("/settings/payment-accounts");
+    await expect(page.getByRole("listitem").filter({ hasText: "BCA" })).toContainText("Default");
+  });
+
+  test("lets a new user skip onboarding and reopen it later", async ({ page }) => {
+    await registerUser(page, { onboarding: "stay" });
+    await page.getByRole("button", { name: "Lewati" }).click();
+    await expect(page).toHaveURL(/\/dashboard$/);
+
+    await page.goto("/onboarding");
+    await expect(page).toHaveURL(/\/onboarding$/);
+    await expect(page.getByLabel("Nama bisnis")).toBeVisible();
+
+    await page.goto("/settings");
+    await expect(page).toHaveURL(/\/settings$/);
+  });
+
+  test("keeps users with unfinished onboarding on /onboarding", async ({ page }) => {
+    await registerUser(page, { onboarding: "stay" });
+    await page.goto("/settings");
+    await expect(page).toHaveURL(/\/onboarding$/);
+  });
+});

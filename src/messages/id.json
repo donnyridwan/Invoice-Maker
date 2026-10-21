@@ -46,20 +46,32 @@
     "signInDescription": "Gunakan email dan password yang Anda daftarkan.",
     "signUpTitle": "Buat akun baru",
     "signUpDescription": "Mulai membuat invoice profesional dalam hitungan menit.",
-    "emailTaken": "Email ini sudah terdaftar."
+    "emailTaken": "Email ini sudah terdaftar.",
+    "wrongCurrentPassword": "Password saat ini salah"
   },
   "onboarding": {
     "title": "Selamat datang di Invoice Maker",
     "description": "Lengkapi profil bisnis Anda untuk mulai membuat invoice.",
     "businessName": "Nama bisnis",
-    "continue": "Lanjutkan"
+    "continue": "Lanjut",
+    "skip": "Lewati",
+    "addPaymentAccount": "Tambah rekening",
+    "paymentAccountHint": "Rekening ini akan tampil di invoice agar klien tahu ke mana harus membayar. Bisa diubah nanti."
   },
   "dashboard": {
     "title": "Dasbor",
     "description": "Ringkasan invoice dan pembayaran Anda.",
     "emptyTitle": "Belum ada invoice",
     "emptyDescription": "Buat invoice pertama Anda untuk mulai menagih klien.",
-    "greeting": "Halo, {name}"
+    "greeting": "Halo, {name}",
+    "checklist": {
+      "title": "Mulai menggunakan Invoice Maker",
+      "progress": "{done} dari {total} langkah selesai",
+      "profile": "Lengkapi profil bisnis",
+      "paymentAccount": "Tambah rekening pembayaran",
+      "done": "Selesai",
+      "todo": "Belum selesai"
+    }
   },
   "settings": {
     "title": "Pengaturan",
@@ -78,7 +90,27 @@
     "invoicePrefix": "Awalan nomor invoice",
     "defaultNotes": "Catatan default",
     "uiLanguage": "Bahasa tampilan",
-    "saved": "Pengaturan disimpan."
+    "saved": "Pengaturan disimpan.",
+    "businessProfileDescription": "Informasi ini tampil di setiap invoice Anda.",
+    "baseCurrencyHint": "Mata uang untuk laporan dan ringkasan.",
+    "defaultCurrencyHint": "Dipakai untuk invoice baru.",
+    "invoiceDefaults": "Default invoice",
+    "invoiceDefaultsDescription": "Nilai awal untuk setiap invoice baru.",
+    "defaultTemplate": "Template default",
+    "templates": {
+      "minimal": "Minimal",
+      "classic": "Klasik",
+      "modern": "Modern"
+    },
+    "languages": {
+      "id": "Bahasa Indonesia",
+      "en": "English"
+    },
+    "account": "Akun",
+    "accountDescription": "Keamanan akun dan rekening pembayaran.",
+    "changePassword": "Ganti password",
+    "currentPassword": "Password saat ini",
+    "newPassword": "Password baru"
   },
   "paymentAccounts": {
     "title": "Rekening Pembayaran",
@@ -151,7 +183,10 @@
     "notFound": "Data tidak ditemukan.",
     "passwordMin": "Password minimal 8 karakter",
     "invalidSwift": "Kode SWIFT harus 8–11 huruf atau angka.",
-    "accountNumberOrIban": "Isi nomor rekening atau IBAN."
+    "accountNumberOrIban": "Isi nomor rekening atau IBAN.",
+    "invalidPrefix": "Hanya huruf, angka, dan / . _ -",
+    "invalidColor": "Gunakan format #RRGGBB.",
+    "invalidValue": "Pilihan tidak valid."
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",

@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -13,7 +12,6 @@ import { safeNextPath } from "./safe-next";
 
 export function LoginForm({ next }: { next?: string }) {
   const t = useTranslations();
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -40,8 +38,8 @@ export function LoginForm({ next }: { next?: string }) {
       );
       return;
     }
-    router.replace(safeNextPath(next));
-    router.refresh();
+    // Full page load so the server re-evaluates the session (and any onboarding redirect).
+    window.location.href = safeNextPath(next);
   }
 
   return (

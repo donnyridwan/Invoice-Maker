@@ -1,19 +1,11 @@
 import { z } from "zod";
-import { isCurrencyCode, type CurrencyCode } from "@/lib/currencies";
-
-// Messages are keys of the `validation` namespace (see translateValidation).
-
-const emptyToUndefined = (value: unknown) =>
-  typeof value === "string" && value.trim() === "" ? undefined : value;
-
-const requiredText = (max: number) =>
-  z.string("required").trim().min(1, "required").max(max, `tooLong:${max}`);
-
-const optionalText = (max: number) =>
-  z.preprocess(emptyToUndefined, z.string().trim().max(max, `tooLong:${max}`).optional());
-
-const requiredEmail = z.string("required").trim().min(1, "required").pipe(z.email("invalidEmail"));
-const optionalEmail = z.preprocess(emptyToUndefined, z.string().trim().pipe(z.email("invalidEmail")).optional());
+import {
+  optionalCurrencyCode,
+  optionalEmail,
+  optionalText,
+  requiredEmail,
+  requiredText,
+} from "@/lib/zod-helpers";
 
 const swiftCode = z
   .string("required")
@@ -24,13 +16,7 @@ const swiftCode = z
 
 const shared = {
   label: optionalText(100),
-  currency: z.preprocess(
-    emptyToUndefined,
-    z
-      .string()
-      .refine((value): value is CurrencyCode => isCurrencyCode(value), "invalidCurrency")
-      .optional(),
-  ),
+  currency: optionalCurrencyCode,
   isDefault: z.boolean().default(false),
 };
 

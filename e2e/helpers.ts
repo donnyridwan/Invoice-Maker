@@ -10,6 +10,11 @@ export type RegisterOptions = {
   name?: string;
   email?: string;
   password?: string;
+  /**
+   * New accounts are sent to /onboarding. "skip" (default) clicks "Lewati" so the test can carry
+   * on in the app; "stay" leaves the user on /onboarding.
+   */
+  onboarding?: "skip" | "stay";
 };
 
 /** Registers a new user through the UI and waits until the session is established. */
@@ -25,7 +30,12 @@ export async function registerUser(
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Daftar" }).click();
-  await expect(page).not.toHaveURL(/\/register/);
+  await expect(page).toHaveURL(/\/onboarding/);
+
+  if ((opts.onboarding ?? "skip") === "skip") {
+    await page.getByRole("button", { name: "Lewati" }).click();
+    await expect(page).toHaveURL(/\/dashboard/);
+  }
 
   return { email, password };
 }

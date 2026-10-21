@@ -2,7 +2,6 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -15,7 +14,6 @@ const MIN_PASSWORD_LENGTH = 8;
 
 export function RegisterForm() {
   const t = useTranslations();
-  const router = useRouter();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
 
@@ -54,8 +52,10 @@ export function RegisterForm() {
       );
       return;
     }
-    router.replace("/dashboard");
-    router.refresh();
+    // Full page load: the server decides where a new account lands (onboarding), and a
+    // client-side navigation that ends in a layout redirect can loop in the Next router.
+    // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+    window.location.href = "/dashboard";
   }
 
   return (

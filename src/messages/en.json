@@ -46,20 +46,32 @@
     "signInDescription": "Use the email and password you registered with.",
     "signUpTitle": "Create an account",
     "signUpDescription": "Start creating professional invoices in minutes.",
-    "emailTaken": "This email is already registered."
+    "emailTaken": "This email is already registered.",
+    "wrongCurrentPassword": "Current password is incorrect"
   },
   "onboarding": {
     "title": "Welcome to Invoice Maker",
     "description": "Complete your business profile to start creating invoices.",
     "businessName": "Business name",
-    "continue": "Continue"
+    "continue": "Continue",
+    "skip": "Skip",
+    "addPaymentAccount": "Add a payment account",
+    "paymentAccountHint": "This account appears on your invoices so clients know where to pay. You can change it later."
   },
   "dashboard": {
     "title": "Dashboard",
     "description": "An overview of your invoices and payments.",
     "emptyTitle": "No invoices yet",
     "emptyDescription": "Create your first invoice to start billing your clients.",
-    "greeting": "Hello, {name}"
+    "greeting": "Hello, {name}",
+    "checklist": {
+      "title": "Get started with Invoice Maker",
+      "progress": "{done} of {total} steps done",
+      "profile": "Complete your business profile",
+      "paymentAccount": "Add a payment account",
+      "done": "Done",
+      "todo": "Not done"
+    }
   },
   "settings": {
     "title": "Settings",
@@ -78,7 +90,27 @@
     "invoicePrefix": "Invoice number prefix",
     "defaultNotes": "Default notes",
     "uiLanguage": "Display language",
-    "saved": "Settings saved."
+    "saved": "Settings saved.",
+    "businessProfileDescription": "This information appears on every invoice.",
+    "baseCurrencyHint": "Currency for reports and summaries.",
+    "defaultCurrencyHint": "Used for new invoices.",
+    "invoiceDefaults": "Invoice defaults",
+    "invoiceDefaultsDescription": "Starting values for every new invoice.",
+    "defaultTemplate": "Default template",
+    "templates": {
+      "minimal": "Minimal",
+      "classic": "Classic",
+      "modern": "Modern"
+    },
+    "languages": {
+      "id": "Bahasa Indonesia",
+      "en": "English"
+    },
+    "account": "Account",
+    "accountDescription": "Account security and payment accounts.",
+    "changePassword": "Change password",
+    "currentPassword": "Current password",
+    "newPassword": "New password"
   },
   "paymentAccounts": {
     "title": "Payment accounts",
@@ -151,7 +183,10 @@
     "notFound": "Not found.",
     "passwordMin": "Password must be at least 8 characters",
     "invalidSwift": "SWIFT code must be 8–11 letters or digits.",
-    "accountNumberOrIban": "Enter an account number or IBAN."
+    "accountNumberOrIban": "Enter an account number or IBAN.",
+    "invalidPrefix": "Letters, digits and / . _ - only",
+    "invalidColor": "Use the #RRGGBB format.",
+    "invalidValue": "Invalid choice."
   },
   "errors": {
     "validation": "Please check your input.",
