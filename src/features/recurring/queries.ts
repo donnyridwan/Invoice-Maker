@@ -1,6 +1,6 @@
-import { and, asc, desc, eq } from "drizzle-orm";
+import { and, asc, count, desc, eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { invoices, recurringSchedules } from "@/db/schema";
+import { clients, invoices, recurringSchedules } from "@/db/schema";
 import { findOwned, isUniqueViolation, type Tx } from "@/features/invoices/queries";
 import { todayInJakarta } from "@/lib/dates";
 import { NotFoundError, ValidationError } from "@/lib/errors";
@@ -174,4 +174,34 @@ export async function listSchedules(userId: string): Promise<ScheduleRow[]> {
     currency: row.currency,
     totalMinor: row.totalMinor,
   }));
+}
+
+/**
+ * What the schedule dialog needs to know about an invoice: its schedule (if any) and the address
+ * automatic emails would go to (the client's current email, else the one frozen on the invoice).
+ */
+export async function getScheduleContext(
+  userId: string,
+  invoiceId: string,
+): Promise<{ schedule: Schedule | null; clientEmail: string | null }> {
+  const invoice = await findOwned(db, userId, invoiceId);
+  const [schedule] = await db
+    .select()
+    .from(recurringSchedules)
+    .where(and(eq(recurringSchedules.sourceInvoiceId, invoice.id), eq(recurringSchedules.userId, userId)))
+    .limit(1);
+  const [client] = invoice.clientId
+    ? await db
+        .select({ email: clients.email })
+        .from(clients)
+        .where(and(eq(clients.id, invoice.clientId), eq(clients.userId, userId)))
+        .limit(1)
+    : [];
+  return { schedule: schedule ?? null, clientEmail: (client ? client.email : invoice.clientSnapshot?.email) || null };
+}
+
+/** How many schedules the user has (the count on the "Berulang" tab). */
+export async function countSchedules(userId: string): Promise<number> {
+  const [row] = await db.select({ n: count() }).from(recurringSchedules).where(eq(recurringSchedules.userId, userId));
+  return row.n;
 }

@@ -109,9 +109,9 @@ export async function publicTokenViaDb(invoiceId: string): Promise<string> {
   }
 }
 
-/** A new user with a default BCA payment account and a client "Acme Inc". */
-export async function setupOwner(page: Page): Promise<void> {
-  await registerUser(page);
+/** A new user with a default BCA payment account and a client "Acme Inc"; returns the account's email. */
+export async function setupOwner(page: Page): Promise<{ email: string }> {
+  const { email } = await registerUser(page);
 
   await page.goto("/settings/payment-accounts");
   await page.getByRole("button", { name: "Tambah rekening" }).first().click();
@@ -127,6 +127,7 @@ export async function setupOwner(page: Page): Promise<void> {
   await page.getByLabel("Nama", { exact: true }).fill("Acme Inc");
   await page.getByRole("button", { name: "Simpan" }).click();
   await expect(page).toHaveURL(/\/clients$/);
+  return { email };
 }
 
 /** Creates a draft of Rp 1.500.000 for "Acme Inc" through the editor, waits for autosave and returns its id. */
@@ -239,6 +240,20 @@ export async function verifyEmailViaDb(email: string): Promise<void> {
   try {
     const rows = await sql`UPDATE "user" SET email_verified = true WHERE email = ${email} RETURNING id`;
     if (rows.length !== 1) throw new Error(`User ${email} not found in the e2e database`);
+  } finally {
+    await sql.end();
+  }
+}
+
+/** Gives every client of the account `ownerEmail` an email address (the client form has its own test). */
+export async function setClientEmailViaDb(ownerEmail: string, clientEmail: string): Promise<void> {
+  const sql = postgres(e2eDatabaseUrl(), { max: 1, onnotice: () => {} });
+  try {
+    const rows = await sql`
+      UPDATE clients SET email = ${clientEmail}
+      WHERE user_id = (SELECT id FROM "user" WHERE email = ${ownerEmail})
+      RETURNING id`;
+    if (rows.length === 0) throw new Error(`No clients for ${ownerEmail} in the e2e database`);
   } finally {
     await sql.end();
   }

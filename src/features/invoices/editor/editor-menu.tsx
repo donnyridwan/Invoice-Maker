@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Copy, Loader2, MoreHorizontal, Trash2 } from "lucide-react";
+import { Copy, Loader2, MoreHorizontal, Repeat, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -14,23 +14,28 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import { RecurringDialog } from "@/features/recurring/recurring-dialog";
 import { deleteDraftInvoiceAction, duplicateInvoiceAction } from "../actions";
 import type { Invoice } from "../queries";
 
 /**
- * The ⋯ menu of the editor header: duplicate (any status) and delete (drafts only, after a
- * confirmation). Both end in a full page navigation, so the editor never autosaves a deleted draft.
+ * The ⋯ menu of the editor header: duplicate (any status), make the invoice recurring (or manage
+ * its schedule) and delete (drafts only, after a confirmation). Duplicate and delete end in a full
+ * page navigation, so the editor never autosaves a deleted draft.
  */
 export function EditorMenu({
   invoiceId,
   number,
   status,
+  hasSchedule,
   flush,
   cancel,
 }: {
   invoiceId: string;
   number: string;
   status: Invoice["status"];
+  /** Whether the invoice already repeats: the entry then manages the schedule instead of creating one. */
+  hasSchedule: boolean;
   /** Writes pending edits (so a duplicate has them). */
   flush: () => Promise<void>;
   /** Drops pending edits (so a deleted draft is not written again); called once the delete succeeded. */
@@ -40,6 +45,8 @@ export function EditorMenu({
   const tAll = useTranslations();
   const [busy, setBusy] = useState<"duplicate" | "delete" | null>(null);
   const [confirmOpen, setConfirmOpen] = useState(false);
+  const [recurringOpen, setRecurringOpen] = useState(false);
+  const tRecurring = useTranslations("recurring");
 
   async function duplicate() {
     setBusy("duplicate");
@@ -92,6 +99,12 @@ export function EditorMenu({
             <Copy className="size-4 text-muted" />
             {t("duplicate")}
           </DropdownMenuItem>
+          {status !== "void" ? (
+            <DropdownMenuItem onSelect={() => setRecurringOpen(true)}>
+              <Repeat className="size-4 text-muted" />
+              {hasSchedule ? tRecurring("editSchedule") : tRecurring("makeRecurring")}
+            </DropdownMenuItem>
+          ) : null}
           {status === "draft" ? (
             <DropdownMenuItem onSelect={() => setConfirmOpen(true)} className="text-danger">
               <Trash2 className="size-4" />
@@ -100,6 +113,14 @@ export function EditorMenu({
           ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
+
+      <RecurringDialog
+        invoiceId={invoiceId}
+        number={number}
+        open={recurringOpen}
+        onOpenChange={setRecurringOpen}
+        flush={flush}
+      />
 
       <Dialog open={confirmOpen} onOpenChange={(open) => (busy === "delete" ? undefined : setConfirmOpen(open))}>
         <DialogContent>

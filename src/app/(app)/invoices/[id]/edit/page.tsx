@@ -11,6 +11,8 @@ import {
   clientSnapshotFrom,
   paymentAccountSnapshotFrom,
 } from "@/features/invoices/snapshots";
+import { getScheduleForInvoice } from "@/features/recurring/queries";
+import { toScheduleView } from "@/features/recurring/schedule-summary";
 import { listPaymentAccounts } from "@/features/payment-accounts/queries";
 import { summarizePaymentAccount } from "@/features/payment-accounts/summary";
 import { getProfile } from "@/features/profile/queries";
@@ -46,11 +48,12 @@ export default async function EditInvoicePage({ params }: PageProps<"/invoices/[
   // Paid and void invoices are locked: their page is the detail view.
   if (invoice.status === "paid" || invoice.status === "void") redirect(`/invoices/${invoice.id}`);
 
-  const [profile, activeClients, allAccounts, catalogItems] = await Promise.all([
+  const [profile, activeClients, allAccounts, catalogItems, schedule] = await Promise.all([
     getProfile(user.id),
     listClients(user.id),
     listPaymentAccounts(user.id, { includeArchived: true }),
     listCatalogItems(user.id),
+    getScheduleForInvoice(user.id, invoice.id),
   ]);
 
   // The invoice's own client stays selectable even after it was archived.
@@ -95,6 +98,7 @@ export default async function EditInvoicePage({ params }: PageProps<"/invoices/[
       accounts={accounts}
       catalog={catalog}
       emailEnabled={isEmailEnabled()}
+      recurringSchedule={schedule ? toScheduleView(schedule) : null}
     />
   );
 }

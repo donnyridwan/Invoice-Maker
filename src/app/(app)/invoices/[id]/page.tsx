@@ -9,6 +9,8 @@ import { DetailPanel } from "@/features/invoices/detail/detail-panel";
 import { documentSourceFromInvoice } from "@/features/invoices/document-source";
 import { listEvents } from "@/features/invoices/events";
 import { getInvoice } from "@/features/invoices/queries";
+import { getScheduleForInvoice } from "@/features/recurring/queries";
+import { toScheduleView } from "@/features/recurring/schedule-summary";
 import { listClaims } from "@/features/payment-claims/queries";
 import { isEmailEnabled } from "@/lib/email";
 import { isCurrencyCode } from "@/lib/currencies";
@@ -25,13 +27,16 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
   const { id } = await params;
   const t = await getTranslations("invoices.detail");
 
-  const loaded = await Promise.all([getInvoice(user.id, id), listEvents(user.id, id), listClaims(user.id, id)]).catch(
-    (error) => {
-      if (error instanceof NotFoundError) notFound();
-      throw error;
-    },
-  );
-  const [invoice, events, claims] = loaded;
+  const loaded = await Promise.all([
+    getInvoice(user.id, id),
+    listEvents(user.id, id),
+    listClaims(user.id, id),
+    getScheduleForInvoice(user.id, id),
+  ]).catch((error) => {
+    if (error instanceof NotFoundError) notFound();
+    throw error;
+  });
+  const [invoice, events, claims, schedule] = loaded;
   // A draft has no status to manage yet: it is edited.
   if (invoice.status === "draft") redirect(`/invoices/${invoice.id}/edit`);
 
@@ -77,6 +82,7 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
             }))}
             payerNames={payerNames}
             emailEnabled={isEmailEnabled()}
+            schedule={schedule ? toScheduleView(schedule) : null}
           />
         </aside>
       </div>

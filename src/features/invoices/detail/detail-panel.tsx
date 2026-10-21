@@ -1,5 +1,7 @@
 import { useLocale, useTranslations } from "next-intl";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { ScheduleCard } from "@/features/recurring/schedule-card";
+import type { ScheduleView } from "@/features/recurring/schedule-summary";
 import { ClaimList, type ClaimListItem } from "@/features/payment-claims/claim-list";
 import { resolveLocale } from "@/i18n/config";
 import type { CurrencyCode } from "@/lib/currencies";
@@ -21,10 +23,11 @@ type Props = {
   pendingClaims: ClaimListItem[];
   payerNames: Record<string, string>;
   emailEnabled: boolean;
+  schedule: ScheduleView | null;
 };
 
 /** The 360px right rail of the detail page: status, actions, pending claims and the activity. */
-export function DetailPanel({ invoice, currency, today, now, events, pendingClaims, payerNames, emailEnabled }: Props) {
+export function DetailPanel({ invoice, currency, today, now, events, pendingClaims, payerNames, emailEnabled, schedule }: Props) {
   const t = useTranslations("invoices.detail");
   const locale = resolveLocale(useLocale());
   const status = displayStatus(invoice, today);
@@ -89,6 +92,10 @@ export function DetailPanel({ invoice, currency, today, now, events, pendingClai
           emailEnabled={emailEnabled}
         />
       </Card>
+
+      {schedule || invoice.status !== "void" ? (
+        <ScheduleCard invoiceId={invoice.id} number={invoice.number} schedule={schedule} />
+      ) : null}
 
       {pendingClaims.length > 0 ? (
         <Card role="region" aria-labelledby="claims-title">

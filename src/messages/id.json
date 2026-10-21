@@ -348,11 +348,114 @@
       "draft": "Draft",
       "unpaid": "Belum lunas",
       "paid": "Lunas",
-      "void": "Void"
+      "void": "Void",
+      "recurring": "Berulang"
     },
     "emptyTabTitle": "Tidak ada invoice di sini",
     "emptyTabDescription": "Belum ada invoice dengan status ini.",
     "needsConfirmation": "Perlu konfirmasi"
+  },
+  "recurring": {
+    "makeRecurring": "Jadikan berulang",
+    "editSchedule": "Atur jadwal berulang",
+    "unit": {
+      "weekly": "minggu",
+      "monthly": "bulan",
+      "yearly": "tahun"
+    },
+    "every": "Setiap {unit}",
+    "rule": {
+      "weekly": "Invoice dibuat setiap {unit} pada hari {weekday}",
+      "monthly": "Invoice dibuat setiap {unit} pada tanggal {day}",
+      "yearly": "Invoice dibuat setiap {unit} pada {date}"
+    },
+    "sentence": "{rule}, mulai {start}{end}.",
+    "end": {
+      "after": "Berakhir setelah {count} kali",
+      "on": "Berakhir pada {date}"
+    },
+    "clamp": "Di bulan yang lebih pendek, invoice dibuat pada hari terakhir bulan itu.",
+    "status": {
+      "active": "Aktif",
+      "paused": "Dijeda",
+      "finished": "Selesai"
+    },
+    "dialog": {
+      "title": "Jadikan berulang",
+      "editTitle": "Atur jadwal berulang",
+      "description": "Invoice baru dibuat otomatis dari invoice {number}.",
+      "loadFailed": "Gagal memuat jadwal. Tutup dan coba lagi.",
+      "frequency": "Frekuensi",
+      "frequencies": {
+        "weekly": "Mingguan",
+        "monthly": "Bulanan",
+        "yearly": "Tahunan"
+      },
+      "every": "Setiap",
+      "nextRunOn": "Invoice berikutnya",
+      "ends": "Berakhir",
+      "endNever": "Tidak pernah",
+      "endAfter": "Setelah",
+      "endCount": "Jumlah invoice",
+      "endTimes": "kali",
+      "endOn": "Pada tanggal",
+      "endDate": "Tanggal berakhir",
+      "delivery": "Pengiriman",
+      "deliveryDraft": "Buat draft & beri tahu saya",
+      "deliveryDraftHint": "Invoice dibuat sebagai draft untuk Anda tinjau dan kirim sendiri.",
+      "deliveryEmail": "Kirim email otomatis",
+      "deliveryEmailHint": "Invoice langsung dikirim ke klien bersama PDF-nya.",
+      "autoDisabled": {
+        "emailOff": "Pengiriman email belum dikonfigurasi.",
+        "notVerified": "Verifikasi email kamu di Pengaturan terlebih dahulu.",
+        "noClientEmail": "Klien belum punya alamat email."
+      }
+    },
+    "card": {
+      "title": "Invoice berulang",
+      "empty": "Ulangi invoice ini secara otomatis pada jadwal yang Anda tentukan.",
+      "next": "Berikutnya: {date}",
+      "done": "Sudah dibuat {count} kali",
+      "delivery": {
+        "draft": "Dibuat sebagai draft",
+        "auto_email": "Dikirim otomatis lewat email"
+      },
+      "pause": "Jeda",
+      "resume": "Lanjutkan",
+      "edit": "Ubah",
+      "stop": "Hentikan"
+    },
+    "stop": {
+      "title": "Hentikan jadwal berulang?",
+      "description": "Tidak ada invoice baru yang dibuat dari {number}. Invoice yang sudah dibuat tetap ada.",
+      "confirm": "Hentikan"
+    },
+    "toast": {
+      "saved": "Jadwal berulang disimpan",
+      "paused": "Jadwal dijeda",
+      "resumed": "Jadwal dilanjutkan",
+      "stopped": "Jadwal dihentikan"
+    },
+    "lastError": {
+      "sourceUnavailable": "Invoice sumber dihapus atau di-void, jadi jadwal dihentikan.",
+      "runFailed": "Invoice terakhir gagal dibuat. Akan dicoba lagi pada jadwal berikutnya.",
+      "emailNotVerified": "Draft dibuat, tetapi tidak terkirim karena email kamu belum diverifikasi.",
+      "emailDisabled": "Draft dibuat, tetapi pengiriman email belum dikonfigurasi.",
+      "clientEmailMissing": "Draft dibuat, tetapi tidak terkirim karena klien tidak punya email.",
+      "emailFailed": "Draft dibuat, tetapi emailnya gagal terkirim.",
+      "other": "Draft dibuat, tetapi tidak bisa dikirim otomatis. Periksa invoicenya."
+    },
+    "list": {
+      "colSource": "Invoice sumber",
+      "colClient": "Klien",
+      "colAmount": "Jumlah",
+      "colFrequency": "Frekuensi",
+      "colNext": "Berikutnya",
+      "colStatus": "Status",
+      "sourceGone": "Invoice sumber dihapus",
+      "emptyTitle": "Belum ada invoice berulang",
+      "emptyDescription": "Buka sebuah invoice, lalu pilih ⋯ > Jadikan berulang."
+    }
   },
   "settings": {
     "title": "Pengaturan",

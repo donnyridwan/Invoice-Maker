@@ -30,6 +30,8 @@ import { ClientSection } from "./client-section";
 import { DetailsSection } from "./details-section";
 import { SendMenu } from "../send-menu";
 import { EditorHeader } from "./editor-header";
+import { ScheduleCard } from "@/features/recurring/schedule-card";
+import type { ScheduleView } from "@/features/recurring/schedule-summary";
 import { EditorMenu } from "./editor-menu";
 import type { EditorSectionProps } from "./editor-section";
 import { ItemsSection } from "./items-section";
@@ -55,6 +57,7 @@ export function InvoiceEditor({
   accounts,
   catalog,
   emailEnabled,
+  recurringSchedule,
 }: {
   invoiceId: string;
   status: Invoice["status"];
@@ -66,6 +69,8 @@ export function InvoiceEditor({
   accounts: AccountOption[];
   catalog: CatalogOption[];
   emailEnabled: boolean;
+  /** The recurring schedule that repeats this invoice, if any. */
+  recurringSchedule: ScheduleView | null;
 }) {
   const t = useTranslations("invoices.editor");
   const tAll = useTranslations();
@@ -170,6 +175,7 @@ export function InvoiceEditor({
             invoiceId={invoiceId}
             number={state.number}
             status={status}
+            hasSchedule={recurringSchedule !== null}
             flush={autosave.flush}
             cancel={autosave.cancel}
           />
@@ -225,6 +231,16 @@ export function InvoiceEditor({
             <NotesSection {...section} />
             <AppearanceSection {...section} doc={doc} />
           </fieldset>
+          {recurringSchedule ? (
+            <div className="mt-4">
+              <ScheduleCard
+                invoiceId={invoiceId}
+                number={state.number}
+                schedule={recurringSchedule}
+                flush={autosave.flush}
+              />
+            </div>
+          ) : null}
         </div>
 
         <div

@@ -21,6 +21,8 @@ const chromiumPath = process.env.CHROMIUM_PATH;
 
 // The server signs print URLs with this; specs read it from process.env to forge expired ones.
 process.env.PRINT_SECRET ??= "e2e-print-secret-e2e-print-secret";
+// The cron routes authorize with this; specs read it from process.env to call them.
+process.env.CRON_SECRET ??= "e2e-cron-secret-e2e-cron-secret";
 
 export default defineConfig({
   testDir: "./e2e",
@@ -49,6 +51,7 @@ export default defineConfig({
       // PDF rendering: the server opens its own signed print page with headless Chromium.
       APP_URL: BASE_URL,
       PRINT_SECRET: process.env.PRINT_SECRET,
+      CRON_SECRET: process.env.CRON_SECRET,
       // Emails are written to var/outbox/*.json instead of being sent (see readOutbox in e2e/helpers.ts).
       EMAIL_TRANSPORT: "file",
       ...(chromiumPath ? { CHROMIUM_PATH: chromiumPath } : {}),

@@ -7,6 +7,7 @@ import { InvoiceTable } from "@/features/invoices/invoice-table";
 import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { countInvoicesByTab, INVOICE_TABS, listInvoices, type InvoiceTab } from "@/features/invoices/queries";
 import { InvoiceTabs } from "@/features/invoices/invoice-tabs";
+import { countSchedules } from "@/features/recurring/queries";
 import { todayInJakarta } from "@/lib/dates";
 import { firstParam } from "@/lib/search-params";
 import { requireUser } from "@/lib/session";
@@ -20,16 +21,17 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/invoice
   const rawTab = firstParam(params.tab);
   const tab: InvoiceTab = INVOICE_TABS.find((candidate) => candidate === rawTab) ?? "all";
 
-  const [invoices, counts] = await Promise.all([
+  const [invoices, counts, recurringCount] = await Promise.all([
     listInvoices(user.id, { search: q, tab }),
     countInvoicesByTab(user.id),
+    countSchedules(user.id),
   ]);
 
   return (
     <>
       <PageHeader title={t("title")} description={t("description")} actions={<NewInvoiceButton />} />
 
-      <InvoiceTabs active={tab} counts={counts} q={q} />
+      <InvoiceTabs active={tab} counts={counts} q={q} recurringCount={recurringCount} />
 
       <form action="/invoices" method="get" role="search" className="relative mb-4 w-full sm:w-72">
         {tab !== "all" ? <input type="hidden" name="tab" value={tab} /> : null}

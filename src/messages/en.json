@@ -348,11 +348,114 @@
       "draft": "Draft",
       "unpaid": "Unpaid",
       "paid": "Paid",
-      "void": "Void"
+      "void": "Void",
+      "recurring": "Recurring"
     },
     "emptyTabTitle": "No invoices here",
     "emptyTabDescription": "There are no invoices with this status yet.",
     "needsConfirmation": "Needs confirmation"
+  },
+  "recurring": {
+    "makeRecurring": "Make recurring",
+    "editSchedule": "Manage recurring schedule",
+    "unit": {
+      "weekly": "{interval, plural, =1 {week} other {weeks}}",
+      "monthly": "{interval, plural, =1 {month} other {months}}",
+      "yearly": "{interval, plural, =1 {year} other {years}}"
+    },
+    "every": "Every {unit}",
+    "rule": {
+      "weekly": "Invoices are created every {unit} on {weekday}",
+      "monthly": "Invoices are created every {unit} on day {day}",
+      "yearly": "Invoices are created every {unit} on {date}"
+    },
+    "sentence": "{rule}, starting {start}{end}.",
+    "end": {
+      "after": "Ends after {count, plural, =1 {1 invoice} other {# invoices}}",
+      "on": "Ends on {date}"
+    },
+    "clamp": "In shorter months the invoice is created on the last day of the month.",
+    "status": {
+      "active": "Active",
+      "paused": "Paused",
+      "finished": "Finished"
+    },
+    "dialog": {
+      "title": "Make recurring",
+      "editTitle": "Manage recurring schedule",
+      "description": "New invoices are created automatically from invoice {number}.",
+      "loadFailed": "The schedule could not be loaded. Close this and try again.",
+      "frequency": "Frequency",
+      "frequencies": {
+        "weekly": "Weekly",
+        "monthly": "Monthly",
+        "yearly": "Yearly"
+      },
+      "every": "Every",
+      "nextRunOn": "Next invoice",
+      "ends": "Ends",
+      "endNever": "Never",
+      "endAfter": "After",
+      "endCount": "Number of invoices",
+      "endTimes": "invoices",
+      "endOn": "On date",
+      "endDate": "End date",
+      "delivery": "Delivery",
+      "deliveryDraft": "Create a draft and notify me",
+      "deliveryDraftHint": "The invoice is created as a draft for you to review and send yourself.",
+      "deliveryEmail": "Email automatically",
+      "deliveryEmailHint": "The invoice is sent to the client right away, with its PDF.",
+      "autoDisabled": {
+        "emailOff": "Email delivery is not configured.",
+        "notVerified": "Verify your email in Settings first.",
+        "noClientEmail": "The client has no email address."
+      }
+    },
+    "card": {
+      "title": "Recurring invoice",
+      "empty": "Repeat this invoice automatically on a schedule you choose.",
+      "next": "Next: {date}",
+      "done": "{count, plural, =0 {Nothing created yet} =1 {Created 1 time} other {Created # times}}",
+      "delivery": {
+        "draft": "Created as a draft",
+        "auto_email": "Emailed automatically"
+      },
+      "pause": "Pause",
+      "resume": "Resume",
+      "edit": "Edit",
+      "stop": "Stop"
+    },
+    "stop": {
+      "title": "Stop the recurring schedule?",
+      "description": "No new invoices will be created from {number}. Invoices already created stay.",
+      "confirm": "Stop"
+    },
+    "toast": {
+      "saved": "Recurring schedule saved",
+      "paused": "Schedule paused",
+      "resumed": "Schedule resumed",
+      "stopped": "Schedule stopped"
+    },
+    "lastError": {
+      "sourceUnavailable": "The source invoice was deleted or voided, so the schedule was stopped.",
+      "runFailed": "The last invoice could not be created. It will be retried on the next run.",
+      "emailNotVerified": "A draft was created but not sent because your email is not verified.",
+      "emailDisabled": "A draft was created but email delivery is not configured.",
+      "clientEmailMissing": "A draft was created but not sent because the client has no email.",
+      "emailFailed": "A draft was created but the email could not be sent.",
+      "other": "A draft was created but could not be sent automatically. Check the invoice."
+    },
+    "list": {
+      "colSource": "Source invoice",
+      "colClient": "Client",
+      "colAmount": "Amount",
+      "colFrequency": "Frequency",
+      "colNext": "Next",
+      "colStatus": "Status",
+      "sourceGone": "Source invoice deleted",
+      "emptyTitle": "No recurring invoices yet",
+      "emptyDescription": "Open an invoice, then choose ⋯ > Make recurring."
+    }
   },
   "settings": {
     "title": "Settings",
