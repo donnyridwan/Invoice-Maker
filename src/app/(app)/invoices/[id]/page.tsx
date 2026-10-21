@@ -50,7 +50,7 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
         <Link
           href="/invoices"
           aria-label={t("back")}
-          className="-ml-1.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-subtle text-fg hover:bg-border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           <ArrowLeft className="size-4" />
         </Link>
@@ -58,8 +58,8 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
       </div>
 
       <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
-        <section aria-label={t("documentLabel")} className="min-w-0 rounded-lg bg-subtle p-3 sm:p-5 xl:flex-1">
-          <div className="mx-auto max-w-[794px] overflow-hidden rounded-sm bg-white shadow-[0_1px_3px_rgba(26,31,54,0.12),0_0_0_1px_rgba(26,31,54,0.04)]">
+        <section aria-label={t("documentLabel")} className="min-w-0 rounded-panel bg-subtle p-3 sm:p-6 xl:flex-1">
+          <div className="mx-auto max-w-[794px] overflow-hidden rounded-md bg-white shadow-[0_2px_8px_rgba(14,14,14,0.08),0_0_0_1px_rgba(14,14,14,0.04)]">
             <ScaledDocument>
               <InvoiceDocumentView doc={buildInvoiceDocument(documentSourceFromInvoice(invoice))} />
             </ScaledDocument>

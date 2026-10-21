@@ -9,7 +9,7 @@ export default async function AuthLayout({ children }: LayoutProps<"/">) {
         <LocaleSwitcher />
       </div>
       <div className="w-full max-w-[400px]">
-        <p className="mb-6 text-center text-xl font-semibold tracking-tight text-fg">{t("appName")}</p>
+        <p data-slot="wordmark" className="mb-6 text-center text-2xl font-semibold tracking-tight text-fg">{t("appName")}</p>
         {children}
       </div>
     </main>

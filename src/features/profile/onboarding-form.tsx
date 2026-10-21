@@ -69,7 +69,7 @@ export function OnboardingForm({
         <CurrencySelect id="baseCurrency" name="baseCurrency" value={currency} onValueChange={setCurrency} />
       </FormField>
 
-      <div className="rounded-md border border-border">
+      <div className="rounded-card border border-border">
         <button
           type="button"
           aria-expanded={bankOpen}

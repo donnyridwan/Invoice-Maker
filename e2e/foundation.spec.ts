@@ -88,7 +88,7 @@ test.describe("shell", () => {
     const px = (selector: string, property: string) =>
       page.locator(selector).first().evaluate((el, prop) => parseFloat(getComputedStyle(el)[prop as never]), property);
     expect(await px("body", "fontSize")).toBe(14);
-    expect(await px("h1", "fontSize")).toBe(24);
+    expect(await px("h1", "fontSize")).toBe(30);
     expect(await px("aside", "width")).toBe(240);
 
     await page.getByRole("link", { name: "Klien baru" }).first().click();

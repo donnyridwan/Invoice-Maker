@@ -134,7 +134,7 @@ export function ClaimDialog({ token, business, defaultAmount, today, maxDate, li
                 type="file"
                 onChange={() => setFileError(null)}
                 accept="image/jpeg,image/png,application/pdf"
-                className="block w-full text-sm text-muted file:mr-3 file:h-9 file:rounded-md file:border file:border-border file:bg-white file:px-3 file:text-sm file:font-medium file:text-fg hover:file:bg-subtle"
+                className="block w-full text-sm text-muted file:mr-3 file:h-10 file:rounded-full file:border file:border-border file:bg-white file:px-3 file:text-sm file:font-medium file:text-fg hover:file:bg-subtle"
               />
             </FormField>
             {formLevelError ? (

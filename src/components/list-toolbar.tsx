@@ -36,7 +36,7 @@ export function ListToolbar({
 
   return (
     <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <nav aria-label={tabsLabel} className="flex gap-1 rounded-md border border-border bg-white p-0.5">
+      <nav aria-label={tabsLabel} className="flex gap-1 rounded-button bg-subtle p-1">
         {(["active", "archived"] as const).map((tab) => {
           const current = (tab === "archived") === archived;
           return (
@@ -45,8 +45,8 @@ export function ListToolbar({
               href={tabHref(tab)}
               aria-current={current ? "page" : undefined}
               className={cn(
-                "rounded px-3 py-1 text-sm font-medium",
-                current ? "bg-subtle text-fg" : "text-muted hover:text-fg",
+                "rounded-button px-4 py-1.5 text-sm font-semibold",
+                current ? "bg-white text-fg shadow-sm" : "text-muted hover:text-fg",
               )}
             >
               {tab === "active" ? activeLabel : archivedLabel}

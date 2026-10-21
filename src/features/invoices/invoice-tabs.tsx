@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { INVOICE_TABS, type InvoiceTab } from "./queries";
 
 const TAB_LINK_CLASS =
-  "-mb-px inline-flex items-center gap-1.5 whitespace-nowrap border-b-2 px-3 py-2 text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-[-2px] focus-visible:outline-accent";
+  "inline-flex h-9 items-center gap-1.5 whitespace-nowrap rounded-button border px-4 text-sm font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 
 /**
  * Status tabs of the invoice list, each with its count; the search term is kept when switching.
@@ -24,7 +24,7 @@ export function InvoiceTabs({
   const t = useTranslations("invoices.tabs");
 
   return (
-    <nav aria-label={t("label")} className="mb-4 flex gap-1 overflow-x-auto border-b border-border">
+    <nav aria-label={t("label")} className="mb-4 flex gap-1.5 overflow-x-auto pb-1">
       {INVOICE_TABS.map((tab) => {
         const params = new URLSearchParams();
         if (tab !== "all") params.set("tab", tab);
@@ -36,10 +36,10 @@ export function InvoiceTabs({
             key={tab}
             href={query ? `/invoices?${query}` : "/invoices"}
             aria-current={current ? "page" : undefined}
-            className={cn(TAB_LINK_CLASS, current ? "border-accent text-fg" : "border-transparent text-muted hover:text-fg")}
+            className={cn(TAB_LINK_CLASS, current ? "border-accent bg-accent text-white" : "border-border bg-white text-fg hover:bg-subtle")}
           >
             {t(tab)}
-            <span className="rounded-full bg-badge-neutral-bg px-1.5 text-xs tabular-nums text-badge-neutral-fg">
+            <span className="rounded-full bg-current/10 px-1.5 text-xs tabular-nums">
               {counts[tab]}
             </span>
           </Link>
@@ -48,10 +48,10 @@ export function InvoiceTabs({
       <Link
         href="/invoices/recurring"
         aria-current={active === "recurring" ? "page" : undefined}
-        className={cn(TAB_LINK_CLASS, active === "recurring" ? "border-accent text-fg" : "border-transparent text-muted hover:text-fg")}
+        className={cn(TAB_LINK_CLASS, active === "recurring" ? "border-accent bg-accent text-white" : "border-border bg-white text-fg hover:bg-subtle")}
       >
         {t("recurring")}
-        <span className="rounded-full bg-badge-neutral-bg px-1.5 text-xs tabular-nums text-badge-neutral-fg">
+        <span className="rounded-full bg-current/10 px-1.5 text-xs tabular-nums">
           {recurringCount}
         </span>
       </Link>

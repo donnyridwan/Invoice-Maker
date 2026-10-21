@@ -110,7 +110,7 @@ export function ItemRow({
       aria-label={t("itemN", { n })}
       className={cn(
         "relative flex flex-col gap-2 bg-white py-3 first:pt-0 last:pb-0",
-        isDragging && "z-20 rounded-md shadow-md ring-1 ring-border",
+        isDragging && "z-20 rounded-card shadow-md ring-1 ring-border",
       )}
     >
       <div className="flex items-start gap-1">
@@ -120,7 +120,7 @@ export function ItemRow({
           {...attributes}
           {...listeners}
           aria-label={t("dragHandle", { n })}
-          className="inline-flex size-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:cursor-grabbing disabled:cursor-default"
+          className="inline-flex size-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-full text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:cursor-grabbing disabled:cursor-default"
         >
           <GripVertical className="size-4" />
         </button>

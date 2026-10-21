@@ -49,7 +49,7 @@ export function DetailPanel({ invoice, currency, today, now, events, pendingClai
       <Card role="region" aria-label={t("status.label")} className="p-5">
         <StatusBadge status={status} />
         <p className="mt-3 text-xs text-muted">{t("status.total")}</p>
-        <p className="text-3xl font-semibold tabular-nums tracking-tight text-fg">
+        <p className="text-3xl font-black tabular-nums tracking-tight text-fg">
           {formatMoney(invoice.totalMinor, currency, locale)}
         </p>
         {open ? (

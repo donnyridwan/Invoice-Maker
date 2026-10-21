@@ -38,14 +38,14 @@ export function SummaryCards({ summary }: { summary: DashboardSummary }) {
         <Link
           key={key}
           href={href}
-          className="block rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="block rounded-card focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          <Card className="h-full p-5 transition-colors hover:bg-subtle/60">
+          <Card className="h-full border-transparent bg-subtle p-6 transition-colors hover:bg-border/60">
             <p className="text-sm text-muted">{t(key)}</p>
             <p
               title={card.converted && card.rateDate ? t("convertedAt", { date: formatDocDate(card.rateDate, locale) }) : undefined}
               className={cn(
-                "mt-1 text-2xl font-semibold tabular-nums tracking-tight",
+                "mt-1 text-3xl font-black tabular-nums tracking-tight",
                 alert && card.totalBaseMinor > 0 ? "text-danger" : "text-fg",
               )}
             >

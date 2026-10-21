@@ -60,7 +60,7 @@ export function AccountCard() {
       <CardContent className="flex flex-col gap-6">
         <Link
           href="/settings/payment-accounts"
-          className="flex items-center justify-between rounded-md border border-border px-4 py-3 text-sm font-medium text-fg hover:bg-subtle"
+          className="flex items-center justify-between rounded-card border border-border px-4 py-3 text-sm font-medium text-fg hover:bg-subtle"
         >
           {t("nav.paymentAccounts")}
           <ChevronRight className="size-4 text-muted" />

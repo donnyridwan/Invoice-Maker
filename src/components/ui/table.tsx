@@ -3,7 +3,7 @@ import { cn } from "@/lib/utils";
 
 function Table({ className, ...props }: React.ComponentProps<"table">) {
   return (
-    <div data-slot="table-container" className="w-full overflow-x-auto rounded-md border border-border">
+    <div data-slot="table-container" className="w-full overflow-x-auto rounded-card border border-border">
       <table
         data-slot="table"
         className={cn("w-full caption-bottom border-collapse text-sm tabular-nums", className)}

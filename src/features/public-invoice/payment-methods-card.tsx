@@ -25,7 +25,7 @@ export function PaymentMethodsCard({ methods, business }: { methods: PaymentMeth
   }
 
   return (
-    <Card role="region" aria-labelledby="payment-methods-title" className="rounded-lg p-5 shadow-sm sm:p-6">
+    <Card role="region" aria-labelledby="payment-methods-title" className="p-5 sm:p-7">
       <h2 id="payment-methods-title" className="text-base font-semibold text-fg">
         {t("title")}
       </h2>
@@ -34,7 +34,7 @@ export function PaymentMethodsCard({ methods, business }: { methods: PaymentMeth
       ) : (
         <ul className="mt-4 flex flex-col gap-4">
           {methods.map((method, index) => (
-            <li key={index} className="rounded-md border border-border">
+            <li key={index} className="rounded-card bg-subtle">
               {method.title ? (
                 <p className="border-b border-border bg-subtle px-4 py-2 text-sm font-medium text-fg">{method.title}</p>
               ) : null}

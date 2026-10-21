@@ -34,7 +34,7 @@ export default async function DashboardPage() {
         {summary.pendingClaims > 0 ? (
           <div
             role="status"
-            className="flex flex-wrap items-center gap-3 rounded-md border border-badge-warning-fg/20 bg-badge-warning-bg px-4 py-3 text-sm text-badge-warning-fg"
+            className="flex flex-wrap items-center gap-3 rounded-card bg-badge-warning-bg px-5 py-4 text-sm text-badge-warning-fg"
           >
             <Clock className="size-4 shrink-0" aria-hidden />
             <span className="font-medium">{t("claimsBanner", { count: summary.pendingClaims })}</span>
@@ -47,7 +47,7 @@ export default async function DashboardPage() {
           <div
             role="status"
             data-testid="recurring-drafts-banner"
-            className="flex flex-wrap items-center gap-3 rounded-md border border-badge-info-fg/20 bg-badge-info-bg px-4 py-3 text-sm text-badge-info-fg"
+            className="flex flex-wrap items-center gap-3 rounded-card bg-badge-info-bg px-5 py-4 text-sm text-badge-info-fg"
           >
             <Repeat className="size-4 shrink-0" aria-hidden />
             <span className="font-medium">{t("recurringBanner", { count: summary.recurringDrafts })}</span>

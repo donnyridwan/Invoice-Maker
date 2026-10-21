@@ -146,7 +146,7 @@ export function InvoiceEditor({
   const formError = errors._form ? translateValidation(tAll, errors._form) : null;
 
   return (
-    <div data-theme="wise">
+    <div>
       <EditorHeader
         number={state.number}
         status={displayStatus}
@@ -212,9 +212,9 @@ export function InvoiceEditor({
           className={cn("min-w-0 xl:block xl:flex-[0_1_520px]", tab !== "form" && "hidden")}
         >
           <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
-            {locked ? <p className="rounded-md bg-subtle px-3 py-2 text-sm text-muted">{t("locked")}</p> : null}
+            {locked ? <p className="rounded-card bg-subtle px-4 py-3 text-sm text-muted">{t("locked")}</p> : null}
             {formError ? (
-              <p role="alert" className="rounded-md bg-badge-danger-bg px-3 py-2 text-sm text-badge-danger-fg">
+              <p role="alert" className="rounded-card bg-badge-danger-bg px-4 py-3 text-sm text-badge-danger-fg">
                 {formError}
               </p>
             ) : null}

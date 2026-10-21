@@ -135,7 +135,7 @@ function ClientCombobox({
           aria-label={t("label")}
           // Keep the input focused while an option is pressed, so it does not blur and close first.
           onMouseDown={(event) => event.preventDefault()}
-          className="absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-border bg-white p-1 text-sm shadow-md"
+          className="absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-card border border-border bg-white p-1.5 text-sm shadow-md"
         >
           {visible.length === 0 ? (
             <li className="px-2 py-2 text-muted">{options.length === 0 ? t("none") : t("noResults")}</li>
@@ -149,7 +149,7 @@ function ClientCombobox({
                 onClick={() => choose(option)}
                 onMouseMove={() => setActive(index)}
                 className={cn(
-                  "flex cursor-pointer items-center gap-2 rounded-sm px-2 py-1.5",
+                  "flex cursor-pointer items-center gap-2 rounded-input px-2.5 py-2",
                   index === activeIndex && "bg-subtle",
                 )}
               >
@@ -173,7 +173,7 @@ function ClientCombobox({
             onClick={create}
             onMouseMove={() => setActive(lastIndex)}
             className={cn(
-              "mt-1 cursor-pointer rounded-sm border-t border-border px-2 py-1.5 font-medium text-accent",
+              "mt-1 cursor-pointer rounded-input border-t border-border px-2.5 py-2 font-medium text-accent",
               activeIndex === lastIndex && "bg-subtle",
             )}
           >

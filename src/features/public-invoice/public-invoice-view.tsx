@@ -42,7 +42,7 @@ export function PublicInvoiceView({ invoice, language, pendingClaims, token }: P
   if (invoice.status === "void") {
     return (
       <PublicShell footer={t("footer")} language={language}>
-        <Card className="flex flex-col gap-2 rounded-lg p-6 text-center shadow-sm">
+        <Card className="flex flex-col gap-2 p-7 text-center">
           <h1 className="text-xl font-semibold tracking-tight text-fg">{t("void.title")}</h1>
           <p className="text-sm text-muted">{t("void.description", { business, number: invoice.number })}</p>
         </Card>
@@ -126,7 +126,7 @@ export function PublicInvoiceView({ invoice, language, pendingClaims, token }: P
           </>
         }
       />
-      <Card role="region" className="rounded-lg p-3 shadow-sm sm:p-5" aria-label={t("documentLabel", { number: invoice.number })}>
+      <Card role="region" className="rounded-panel bg-subtle p-3 sm:p-6" aria-label={t("documentLabel", { number: invoice.number })}>
         <ScaledDocument>
           <InvoiceDocumentView doc={buildInvoiceDocument(documentSourceFromInvoice(invoice))} />
         </ScaledDocument>

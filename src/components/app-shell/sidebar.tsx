@@ -25,7 +25,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-14 items-center px-5">
-        <Link href="/dashboard" onClick={onNavigate} data-slot="wordmark" className="text-base font-semibold tracking-tight text-fg">
+        <Link href="/dashboard" onClick={onNavigate} data-slot="wordmark" className="text-lg font-semibold tracking-tight text-fg">
           {t("common.appName")}
         </Link>
       </div>

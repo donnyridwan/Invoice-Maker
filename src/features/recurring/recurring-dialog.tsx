@@ -261,7 +261,7 @@ function RecurringBody({
               role="radiogroup"
               aria-labelledby="recurring-frequency-label"
               onKeyDown={onFrequencyKeyDown}
-              className="inline-flex w-full rounded-md border border-border bg-white p-0.5"
+              className="inline-flex w-full rounded-button bg-subtle p-1"
             >
               {RECURRING_FREQUENCIES.map((frequency) => {
                 const selected = values.frequency === frequency;
@@ -275,8 +275,8 @@ function RecurringBody({
                     data-value={frequency}
                     onClick={() => change({ frequency })}
                     className={cn(
-                      "h-8 flex-1 rounded text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-                      selected ? "bg-subtle text-fg" : "text-muted hover:text-fg",
+                      "h-8 flex-1 rounded-button text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                      selected ? "bg-white text-fg shadow-sm" : "text-muted hover:text-fg",
                     )}
                   >
                     {t(`dialog.frequencies.${frequency}`)}
@@ -416,7 +416,7 @@ function RecurringBody({
           </fieldset>
 
           {summary ? (
-            <div className="rounded-md bg-subtle px-3 py-2 text-sm text-fg" aria-live="polite">
+            <div className="rounded-card bg-subtle px-4 py-3 text-sm text-fg" aria-live="polite">
               <p>{summary}</p>
               {clamped ? <p className="mt-1 text-xs text-muted">{t("clamp")}</p> : null}
             </div>

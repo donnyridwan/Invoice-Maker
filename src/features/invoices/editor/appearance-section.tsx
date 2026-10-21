@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { EditorSection, type EditorSectionProps } from "./editor-section";
 
 /** Accent colours offered as one-click presets. */
-export const ACCENT_PRESETS = ["#5850EC", "#0A2540", "#00A67E", "#E25950", "#F5A623", "#1A1F36"] as const;
+export const ACCENT_PRESETS = ["#111111", "#4A4A4A", "#8A8A8A", "#0A2540", "#00A67E", "#E25950"] as const;
 
 const HEX_RE = /^#?[0-9A-Fa-f]{6}$/;
 
@@ -47,7 +47,7 @@ export const TemplateCard = memo(function TemplateCard({
       onClick={() => onSelect(template)}
       onKeyDown={(event) => onKeyDown(event, index)}
       className={cn(
-        "flex min-w-0 flex-col gap-1.5 rounded-md border bg-white p-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+        "flex min-w-0 flex-col gap-1.5 rounded-card border bg-white p-2.5 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
         selected ? "border-accent ring-1 ring-accent" : "border-border hover:border-muted/60",
       )}
     >
@@ -55,7 +55,7 @@ export const TemplateCard = memo(function TemplateCard({
       <span
         aria-hidden
         inert
-        className="pointer-events-none block aspect-[210/297] w-full select-none overflow-hidden rounded-sm border border-border bg-white"
+        className="pointer-events-none block aspect-[210/297] w-full select-none overflow-hidden rounded-input border border-border bg-white"
       >
         <ScaledDocument>
           <InvoiceDocumentView doc={templateDoc} />
@@ -129,7 +129,7 @@ export function AppearanceSection({ state, update, doc }: EditorSectionProps & {
               setDraft(null);
               update({ accentColor: event.target.value });
             }}
-            className="size-9 shrink-0 cursor-pointer rounded-md border border-border bg-white p-1"
+            className="size-11 shrink-0 cursor-pointer rounded-full border border-border bg-white p-1"
           />
           <input
             id="invoice-accent-hex"
@@ -142,7 +142,7 @@ export function AppearanceSection({ state, update, doc }: EditorSectionProps & {
             onChange={(event) => onHexChange(event.target.value)}
             onBlur={() => setDraft(null)}
             className={cn(
-              "h-9 w-28 rounded-md border bg-white px-3 font-mono text-sm uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+              "h-11 w-28 rounded-input border bg-white px-3 font-mono text-sm uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
               hexInvalid ? "border-danger" : "border-border",
             )}
           />

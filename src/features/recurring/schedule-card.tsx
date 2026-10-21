@@ -119,7 +119,7 @@ export function ScheduleCard({
         <li>{t(`card.delivery.${schedule.delivery}`)}</li>
       </ul>
       {error ? (
-        <p role="alert" className="mt-3 rounded-md bg-badge-danger-bg px-3 py-2 text-sm text-badge-danger-fg">
+        <p role="alert" className="mt-3 rounded-card bg-badge-danger-bg px-4 py-3 text-sm text-badge-danger-fg">
           {error}
         </p>
       ) : null}

@@ -38,7 +38,7 @@ export function UserMenu({ user }: { user: Pick<SessionUser, "name" | "email"> }
     <DropdownMenu>
       <DropdownMenuTrigger
         aria-label={t("nav.userMenu")}
-        className="flex w-full items-center gap-2.5 rounded-md px-2 py-1.5 text-left hover:bg-subtle focus-visible:outline-2 focus-visible:outline-accent"
+        className="flex w-full items-center gap-2.5 rounded-card px-2 py-1.5 text-left hover:bg-subtle focus-visible:outline-2 focus-visible:outline-accent"
       >
         <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-accent/10 text-sm font-semibold text-accent">
           {(user.name.trim()[0] ?? user.email[0] ?? "?").toUpperCase()}

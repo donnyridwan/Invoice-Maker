@@ -59,7 +59,7 @@ export function PaymentSection({
             const checked = selected.has(id);
             return (
               <li key={id}>
-                <label className="flex cursor-pointer items-start gap-3 rounded-md border border-border p-3 text-sm has-[:checked]:border-accent/60 has-[:checked]:bg-accent/5 has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+                <label className="flex cursor-pointer items-start gap-3 rounded-card border border-border p-4 text-sm has-[:checked]:border-accent has-[:checked]:bg-subtle has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
                   <input
                     type="checkbox"
                     checked={checked}

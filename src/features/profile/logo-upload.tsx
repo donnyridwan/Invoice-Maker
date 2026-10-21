@@ -45,7 +45,7 @@ export function LogoUpload({ logoUrl }: { logoUrl: string | null }) {
       </CardHeader>
       <CardContent>
         <div className="flex items-center gap-4">
-          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-md border border-border bg-subtle">
+          <div className="flex size-16 shrink-0 items-center justify-center overflow-hidden rounded-card border border-border bg-subtle">
             {logoUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={logoUrl} alt={t("settings.logoAlt")} className="size-full object-contain" />

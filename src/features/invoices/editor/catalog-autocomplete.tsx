@@ -97,7 +97,7 @@ export function CatalogAutocomplete({
           aria-label={t("catalogSuggestions")}
           // Keep the input focused while an option is pressed, so it does not blur and close first.
           onMouseDown={(event) => event.preventDefault()}
-          className="absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-md border border-border bg-white p-1 text-sm shadow-md"
+          className="absolute z-30 mt-1 max-h-64 w-full overflow-y-auto rounded-card border border-border bg-white p-1.5 text-sm shadow-md"
         >
           {suggestions.map((option, index) => (
             <li
@@ -107,7 +107,7 @@ export function CatalogAutocomplete({
               aria-selected={index === activeIndex}
               onClick={() => pick(option)}
               onMouseMove={() => setActive(index)}
-              className={cn("cursor-pointer rounded-sm px-2 py-1.5", index === activeIndex && "bg-subtle")}
+              className={cn("cursor-pointer rounded-input px-2.5 py-2", index === activeIndex && "bg-subtle")}
             >
               <span className="block truncate font-medium text-fg">{option.name}</span>
               {option.description || option.unit ? (

@@ -1,13 +1,13 @@
 import type { ReactNode } from "react";
 import { Body, Container, Head, Html, Preview, Section, Text } from "@react-email/components";
 
-// Colours follow the app (spec §2a): accent #5850EC, border #E3E8EE, text #1A1F36, muted #697386.
+// Colours follow the app's monochrome theme.
 export const EMAIL_COLORS = {
-  accent: "#5850EC",
-  border: "#E3E8EE",
-  text: "#1A1F36",
-  muted: "#697386",
-  subtle: "#F6F8FA",
+  accent: "#111111",
+  border: "#E4E4E2",
+  text: "#0E0E0E",
+  muted: "#5F5F5C",
+  subtle: "#F2F2F0",
 } as const;
 
 export const EMAIL_FONT =
@@ -22,8 +22,8 @@ export const buttonStyle = {
   fontWeight: 600,
   lineHeight: "20px",
   textDecoration: "none",
-  padding: "10px 20px",
-  borderRadius: "6px",
+  padding: "12px 24px",
+  borderRadius: "9999px",
 } as const;
 
 /**
@@ -53,7 +53,7 @@ export function EmailLayout({
             maxWidth: "480px",
             backgroundColor: "#FFFFFF",
             border: `1px solid ${EMAIL_COLORS.border}`,
-            borderRadius: "8px",
+            borderRadius: "20px",
             padding: "32px",
           }}
         >

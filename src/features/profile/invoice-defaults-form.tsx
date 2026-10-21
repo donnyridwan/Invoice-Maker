@@ -88,9 +88,9 @@ export function InvoiceDefaultsForm({ profile }: { profile: BusinessProfile }) {
               <input
                 type="color"
                 aria-label={t("settings.accentColor")}
-                value={/^#[0-9A-Fa-f]{6}$/.test(values.accentColor) ? values.accentColor : "#5850EC"}
+                value={/^#[0-9A-Fa-f]{6}$/.test(values.accentColor) ? values.accentColor : "#111111"}
                 onChange={(e) => set("accentColor")(e.target.value.toUpperCase())}
-                className="size-9 shrink-0 cursor-pointer rounded-md border border-border bg-white p-1"
+                className="size-11 shrink-0 cursor-pointer rounded-full border border-border bg-white p-1"
               />
               <Input id="accentColor" value={values.accentColor} onChange={(e) => set("accentColor")(e.target.value)} aria-invalid={invalid("accentColor")} className="max-w-40 font-mono" />
             </div>

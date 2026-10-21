@@ -24,7 +24,7 @@ export async function Checklist({ state }: { state: ChecklistState }) {
         <CardDescription>{t("progress", { done: doneCount, total: items.length })}</CardDescription>
       </CardHeader>
       <CardContent>
-        <ul className="divide-y divide-border rounded-md border border-border">
+        <ul className="divide-y divide-border rounded-card border border-border">
           {items.map((item) => (
             <li key={item.key} data-done={item.done}>
               <Link href={item.href} className="flex items-center gap-3 px-4 py-3 text-sm hover:bg-subtle">

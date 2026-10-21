@@ -55,22 +55,26 @@ laporan lanjutan, aplikasi mobile native, custom domain, paket berbayar.
 
 ## 2a. Gaya Visual
 
-Bersih seperti dashboard Stripe dan aplikasi pembayaran modern
-([Stripe home](https://mobbin.com/screens/e8ddbdc5-bc89-454f-9ebb-846905b83df4),
-[Stripe detail](https://mobbin.com/screens/e8f9d27d-7f88-472c-a70e-811faf24228a)):
+Monokrom dengan karakter Wise
+([Wise home](https://mobbin.com/screens/ede78e65-ca02-449f-96c0-f36420fe9281),
+[Wise send](https://mobbin.com/screens/ebc6f8fd-a5eb-44be-b881-1f023bc32f88)):
 
-- Latar konten putih, sidebar putih dengan garis batas tipis, tanpa bayangan berat.
-- Font Inter, ukuran dasar 14px, judul halaman 24–28px semibold, angka
-  memakai `tabular-nums`.
-- Satu warna aksen indigo (`#5850EC`) untuk tombol utama, link, dan item
-  navigasi aktif. Warna lain hanya untuk status.
-- Border `#E3E8EE`, teks utama `#1A1F36`, teks sekunder `#697386`,
-  radius 6px.
-- Badge status pastel: hijau (Lunas), biru (Terkirim/Dilihat), kuning
-  (Menunggu konfirmasi), merah (Jatuh tempo), abu (Draft/Void).
-- Tabel padat dengan baris setinggi ±44px dan hover abu sangat muda.
-  Empty state memakai kotak bergaris putus-putus.
-- Template dokumen invoice ikut bersih dan minimal. Template default:
+- Hitam–putih–abu: tinta `#0E0E0E`/`#111111`, teks sekunder `#5F5F5C`, kanvas
+  `#F2F2F0`, border `#E4E4E2`. Merah (`#C4271C`) hanya untuk error, aksi hapus,
+  dan status Jatuh tempo.
+- Tombol berbentuk pil: utama hitam dengan teks putih, sekunder bergaris.
+  Input setinggi 44px dengan radius 10px.
+- Kartu dan panel membulat (20–24px), sebagian di atas kanvas abu tanpa
+  border. Tab dan filter berupa pil; pil aktif berwarna hitam.
+- Font Inter, ukuran dasar 14px, judul halaman 30px extrabold, angka nominal
+  utama (total tagihan, kartu ringkasan) black weight `tabular-nums`. Wordmark
+  "Invoice Maker" black weight.
+- Badge status monokrom: Lunas hitam-isi, Terkirim/Dilihat dan Menunggu
+  konfirmasi abu, Draft/Void abu muda, Jatuh tempo merah muda.
+- Tabel padat dengan baris setinggi ±44px dalam kartu membulat. Empty state
+  memakai kotak bergaris putus-putus.
+- Template dokumen invoice tetap bersih dan minimal; warna aksen default
+  dokumen `#111111` (pengguna bisa memilih warna lain). Template default:
   **Minimal**.
 
 ## 3. Arsitektur
