@@ -9,6 +9,7 @@ import { NotFoundError } from "@/lib/errors";
 import { runUserAction } from "@/lib/run-user-action";
 import { requireUser } from "@/lib/session";
 import { markPaid, markSent, unmarkPaid, voidInvoice } from "./lifecycle";
+import { shareWhatsApp } from "./share-whatsapp";
 import { getInvoiceEmailDefaults, sendInvoiceEmail, type SendInvoiceEmailInput } from "./send-email";
 import { createDraftInvoice, deleteDraftInvoice, duplicateInvoice, saveInvoiceDraft } from "./queries";
 import type { InvoiceDraftInput } from "./schema";
@@ -97,6 +98,14 @@ export async function copyLinkAction(id: string): Promise<ActionResult<{ url: st
     const invoice = await markSent(userId, id, "link");
     return { url: `${base}/i/${invoice.publicToken}` };
   });
+}
+
+/**
+ * "WhatsApp": sends a draft (it must be sendable) or logs the share, and returns the wa.me link
+ * (client's number, prefilled message with the public link) for the browser to open.
+ */
+export async function shareWhatsAppAction(id: string): Promise<ActionResult<{ url: string }>> {
+  return runLifecycle((userId) => shareWhatsApp(userId, id));
 }
 
 export async function markPaidAction(

@@ -257,7 +257,8 @@
         "void": "Void",
         "viewPublic": "View client page",
         "downloadPdf": "Download PDF",
-        "sendEmail": "Send by email"
+        "sendEmail": "Send by email",
+        "whatsapp": "WhatsApp"
       },
       "toast": {
         "linkCopied": "Link copied",
@@ -606,6 +607,9 @@
     "defaultInvoice": {
       "subject": "Invoice {number} from {businessName}",
       "message": "Hi {clientName},\n\nPlease find invoice {number} for {total}, due {dueDate}.\n\nThank you,\n{businessName}"
+    },
+    "whatsapp": {
+      "message": "Hi {clientName}, here is invoice {number} from {businessName} for {total}, due {dueDate}. View and pay here: {url}"
     },
     "invoice": {
       "preview": "Invoice {number} for {total} from {businessName}",

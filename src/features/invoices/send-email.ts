@@ -64,7 +64,7 @@ function formError(code: string): ValidationError {
 }
 
 /** Facts about an invoice that the email text is built from, in the invoice's language. */
-function emailFacts(inv: InvoiceWithItems) {
+export function emailFacts(inv: InvoiceWithItems) {
   const language = resolveLocale(inv.language);
   const currency = isCurrencyCode(inv.currency) ? inv.currency : "IDR";
   return {

@@ -28,7 +28,7 @@ import type { Invoice } from "../queries";
 import { AppearanceSection } from "./appearance-section";
 import { ClientSection } from "./client-section";
 import { DetailsSection } from "./details-section";
-import { ShareMenu } from "../detail/share-menu";
+import { SendMenu } from "../send-menu";
 import { EditorHeader } from "./editor-header";
 import { EditorMenu } from "./editor-menu";
 import type { EditorSectionProps } from "./editor-section";
@@ -165,7 +165,7 @@ export function InvoiceEditor({
               <Download className="size-4" aria-hidden />
               <span className="hidden sm:inline">{t("downloadPdf")}</span>
             </a>
-            {locked ? null : <ShareMenu invoiceId={invoiceId} flush={autosave.flush} emailEnabled={emailEnabled} />}
+            {locked ? null : <SendMenu invoice={{ id: invoiceId, status }} flush={autosave.flush} emailEnabled={emailEnabled} />}
             <EditorMenu
             invoiceId={invoiceId}
             number={state.number}

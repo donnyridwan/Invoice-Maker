@@ -2,27 +2,30 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-import { CheckCheck, ChevronDown, Link2, Loader2, Mail, Send } from "lucide-react";
+import { CheckCheck, ChevronDown, Link2, Loader2, Mail, MessageCircle, Send } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button, type ButtonProps } from "@/components/ui/button";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { actionErrorMessage } from "@/lib/validation-message";
-import { copyLinkAction, markSentAction } from "../actions";
-import { SendEmailDialog } from "../send-email-dialog";
+import { copyLinkAction, markSentAction, shareWhatsAppAction } from "./actions";
+import type { Invoice } from "./queries";
+import { SendEmailDialog } from "./send-email-dialog";
 
 /**
- * "Kirim" with its dropdown: email the invoice (only offered when email delivery is configured),
- * copy the public link (which also sends a draft) or mark the invoice as sent by hand. `flush` writes pending editor changes first, so the send requirements are
+ * "Kirim", the one send menu of the editor and the detail page: email the invoice (only offered
+ * when email delivery is configured; the dialog asks to verify the account first when needed),
+ * share it on WhatsApp, copy the public link, or mark it as sent by hand (drafts only). Each of
+ * them sends a draft. `flush` writes pending editor changes first, so the send requirements are
  * checked against what the user sees. The page is refreshed afterwards to show the new status.
  */
-export function ShareMenu({
-  invoiceId,
+export function SendMenu({
+  invoice,
   flush,
   emailEnabled = false,
   variant = "primary",
 }: {
-  invoiceId: string;
+  invoice: Pick<Invoice, "id" | "status">;
   flush?: () => Promise<void>;
   /** Whether the server has an email transport; without one the email option is not shown. */
   emailEnabled?: boolean;
@@ -33,6 +36,7 @@ export function ShareMenu({
   const router = useRouter();
   const [busy, setBusy] = useState(false);
   const [emailOpen, setEmailOpen] = useState(false);
+  const invoiceId = invoice.id;
 
   async function run(work: () => Promise<void>) {
     setBusy(true);
@@ -59,6 +63,18 @@ export function ShareMenu({
         // No clipboard access (insecure origin, denied permission): show the link to copy by hand.
         toast.message(t("toast.copyFailed", { url: result.data.url }));
       }
+      router.refresh();
+    });
+
+  const whatsApp = () =>
+    run(async () => {
+      const result = await shareWhatsAppAction(invoiceId);
+      if (!result.ok) {
+        toast.error(actionErrorMessage(tAll, result));
+        return;
+      }
+      // noopener: wa.me must not get a handle on this window.
+      window.open(result.data.url, "_blank", "noopener");
       router.refresh();
     });
 
@@ -90,14 +106,20 @@ export function ShareMenu({
               {t("actions.sendEmail")}
             </DropdownMenuItem>
           ) : null}
+          <DropdownMenuItem onSelect={() => void whatsApp()}>
+            <MessageCircle className="size-4 text-muted" />
+            {t("actions.whatsapp")}
+          </DropdownMenuItem>
           <DropdownMenuItem onSelect={() => void copyLink()}>
             <Link2 className="size-4 text-muted" />
             {t("actions.copyLink")}
           </DropdownMenuItem>
-          <DropdownMenuItem onSelect={() => void markSent()}>
-            <CheckCheck className="size-4 text-muted" />
-            {t("actions.markSent")}
-          </DropdownMenuItem>
+          {invoice.status === "draft" ? (
+            <DropdownMenuItem onSelect={() => void markSent()}>
+              <CheckCheck className="size-4 text-muted" />
+              {t("actions.markSent")}
+            </DropdownMenuItem>
+          ) : null}
         </DropdownMenuContent>
       </DropdownMenu>
       {emailEnabled ? (

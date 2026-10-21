@@ -18,8 +18,8 @@ import {
 import { actionErrorMessage } from "@/lib/validation-message";
 import { duplicateInvoiceAction, unmarkPaidAction, voidInvoiceAction } from "../actions";
 import type { Invoice } from "../queries";
+import { SendMenu } from "../send-menu";
 import { MarkPaidDialog } from "./mark-paid-dialog";
-import { ShareMenu } from "./share-menu";
 
 type Busy = "duplicate" | "unmark" | "void" | null;
 
@@ -102,7 +102,7 @@ export function ActionsBar({
       {open ? (
         <>
           <MarkPaidDialog invoiceId={invoiceId} number={number} today={today} />
-          <ShareMenu invoiceId={invoiceId} variant="secondary" emailEnabled={emailEnabled} />
+          <SendMenu invoice={{ id: invoiceId, status }} variant="secondary" emailEnabled={emailEnabled} />
           <Button asChild variant="secondary" size="sm">
             <Link href={`/invoices/${invoiceId}/edit`}>
               <Pencil className="size-4" />

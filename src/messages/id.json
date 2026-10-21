@@ -257,7 +257,8 @@
         "void": "Void",
         "viewPublic": "Lihat halaman klien",
         "downloadPdf": "Unduh PDF",
-        "sendEmail": "Kirim lewat email"
+        "sendEmail": "Kirim lewat email",
+        "whatsapp": "WhatsApp"
       },
       "toast": {
         "linkCopied": "Link disalin",
@@ -606,6 +607,9 @@
     "defaultInvoice": {
       "subject": "Invoice {number} dari {businessName}",
       "message": "Halo {clientName},\n\nBerikut invoice {number} sebesar {total}, jatuh tempo {dueDate}.\n\nTerima kasih,\n{businessName}"
+    },
+    "whatsapp": {
+      "message": "Halo {clientName}, berikut invoice {number} dari {businessName} sebesar {total}, jatuh tempo {dueDate}. Lihat & bayar di sini: {url}"
     },
     "invoice": {
       "preview": "Invoice {number} sebesar {total} dari {businessName}",
