@@ -7,7 +7,8 @@ const A4_WIDTH_PX = (210 / 25.4) * 96;
 
 /**
  * Fits an A4 page into its container: measures the container width and shrinks the page with
- * `transform: scale()`, keeping the container exactly as tall as the scaled page.
+ * `transform: scale()`, keeping the container exactly as tall as the scaled page. A zero-width
+ * container is ignored (never scales to 0); the page stays hidden until the width is known.
  */
 export function ScaledDocument({ children }: { children: ReactNode }) {
   const outerRef = useRef<HTMLDivElement>(null);
@@ -20,6 +21,9 @@ export function ScaledDocument({ children }: { children: ReactNode }) {
     if (!outer || !page) return;
 
     const measure = () => {
+      // A container with no width (hidden tab, not laid out yet) says nothing about the scale:
+      // keep the last fit, or stay hidden, until a real measurement arrives.
+      if (outer.clientWidth <= 0) return;
       const scale = Math.min(1, outer.clientWidth / A4_WIDTH_PX);
       setFit({ scale, height: page.offsetHeight * scale });
     };

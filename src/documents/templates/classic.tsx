@@ -20,7 +20,7 @@ export function ClassicTemplate({ doc }: TemplateProps) {
       </header>
 
       <div className="mt-[8mm] border-y-[0.3mm] border-fg py-[2.5mm] text-center">
-        <h1 className="font-doc-serif text-[13pt] tracking-[0.4em] uppercase">{L.invoice}</h1>
+        <p className="font-doc-serif text-[13pt] tracking-[0.4em] uppercase">{L.invoice}</p>
       </div>
 
       <section className="mt-[9mm] grid grid-cols-2 gap-[10mm]">

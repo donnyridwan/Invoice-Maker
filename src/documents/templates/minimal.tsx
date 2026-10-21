@@ -16,9 +16,9 @@ export function MinimalTemplate({ doc }: TemplateProps) {
           )}
         </div>
         <div className="text-right">
-          <h1 className="text-[28pt] leading-none font-semibold tracking-tight" style={accent}>
+          <p className="text-[28pt] leading-none font-semibold tracking-tight" style={accent}>
             {L.invoice}
-          </h1>
+          </p>
           <p className="mt-[2.5mm] text-[9pt] text-muted tabular-nums">{doc.number}</p>
         </div>
       </header>

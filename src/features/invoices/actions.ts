@@ -34,8 +34,9 @@ export async function saveInvoiceDraftAction(
 ): Promise<ActionResult<{ savedAt: string }>> {
   const user = await requireUser();
   try {
+    // No revalidatePath: autosave must not re-render the edit page on every save, and the (dynamic)
+    // invoice list reads fresh data on each visit.
     const { savedAt } = await saveInvoiceDraft(user.id, id, input);
-    revalidatePath(PATH);
     return { ok: true, data: { savedAt } };
   } catch (e) {
     return toActionError(e);
