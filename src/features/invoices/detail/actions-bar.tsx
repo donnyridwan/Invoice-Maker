@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Copy, ExternalLink, Loader2, Pencil, Undo2, Ban } from "lucide-react";
+import { Copy, Download, ExternalLink, Loader2, Pencil, Undo2, Ban } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -118,6 +118,12 @@ export function ActionsBar({
       <Button variant="secondary" size="sm" disabled={working} onClick={() => void duplicate()}>
         {busy === "duplicate" ? <Loader2 className="size-4 animate-spin" /> : <Copy className="size-4" />}
         {t("actions.duplicate")}
+      </Button>
+      <Button asChild variant="secondary" size="sm">
+        <a href={`/api/invoices/${invoiceId}/pdf`} download>
+          <Download className="size-4" />
+          {t("actions.downloadPdf")}
+        </a>
       </Button>
       {status !== "void" ? (
         <Button asChild variant="secondary" size="sm">

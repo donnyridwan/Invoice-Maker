@@ -172,6 +172,22 @@ export async function getPublicInvoice(token: string): Promise<InvoiceWithItems 
   return { ...invoice, items };
 }
 
+/**
+ * An invoice by id with no owner filter, for the print page only. Safe because that page checks a
+ * short-lived signature first; never call it with an id taken from a user without that check.
+ */
+export async function getInvoiceForPrint(id: string): Promise<InvoiceWithItems | null> {
+  if (!UUID_RE.test(id)) return null;
+  const [invoice] = await db.select().from(invoices).where(eq(invoices.id, id)).limit(1);
+  if (!invoice) return null;
+  const items = await db
+    .select()
+    .from(invoiceItems)
+    .where(eq(invoiceItems.invoiceId, invoice.id))
+    .orderBy(asc(invoiceItems.position));
+  return { ...invoice, items };
+}
+
 export async function saveInvoiceDraft(
   userId: string,
   id: string,

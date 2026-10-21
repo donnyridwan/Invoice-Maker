@@ -224,7 +224,8 @@
         "deleteDescription": "Draft {number} akan dihapus permanen dan tidak bisa dikembalikan.",
         "confirmDelete": "Hapus"
       },
-      "view": "Lihat"
+      "view": "Lihat",
+      "downloadPdf": "Unduh PDF"
     },
     "detail": {
       "back": "Kembali ke daftar invoice",
@@ -254,7 +255,8 @@
         "unmarkPaid": "Batalkan lunas",
         "duplicate": "Duplikat",
         "void": "Void",
-        "viewPublic": "Lihat halaman klien"
+        "viewPublic": "Lihat halaman klien",
+        "downloadPdf": "Unduh PDF"
       },
       "toast": {
         "linkCopied": "Link disalin",

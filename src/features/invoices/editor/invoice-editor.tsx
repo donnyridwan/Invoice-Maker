@@ -2,6 +2,7 @@
 
 import { useDeferredValue, useMemo, useRef, useState } from "react";
 import Link from "next/link";
+import { Download } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { buildInvoiceDocument } from "@/documents/build-document";
 import { resolveLocale } from "@/i18n/config";
@@ -138,6 +139,15 @@ export function InvoiceEditor({
                 {t("view")}
               </Link>
             ) : null}
+            <a
+              href={`/api/invoices/${invoiceId}/pdf`}
+              download
+              aria-label={t("downloadPdf")}
+              className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+            >
+              <Download className="size-4" aria-hidden />
+              <span className="hidden sm:inline">{t("downloadPdf")}</span>
+            </a>
             {locked ? null : <ShareMenu invoiceId={invoiceId} flush={autosave.flush} />}
             <EditorMenu
             invoiceId={invoiceId}

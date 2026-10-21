@@ -19,6 +19,9 @@ if (!/e2e|test/i.test(dbName) || dbName === "invoice_test") {
 
 const chromiumPath = process.env.CHROMIUM_PATH;
 
+// The server signs print URLs with this; specs read it from process.env to forge expired ones.
+process.env.PRINT_SECRET ??= "e2e-print-secret-e2e-print-secret";
+
 export default defineConfig({
   testDir: "./e2e",
   fullyParallel: false,
@@ -43,6 +46,10 @@ export default defineConfig({
       BETTER_AUTH_SECRET: "e2e-secret-e2e-secret-e2e-secret-0123456789",
       BETTER_AUTH_URL: BASE_URL,
       AUTH_RATE_LIMIT_DISABLED: "true",
+      // PDF rendering: the server opens its own signed print page with headless Chromium.
+      APP_URL: BASE_URL,
+      PRINT_SECRET: process.env.PRINT_SECRET,
+      ...(chromiumPath ? { CHROMIUM_PATH: chromiumPath } : {}),
     },
   },
 });

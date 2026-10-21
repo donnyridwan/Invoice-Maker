@@ -42,12 +42,8 @@
   }
 }
 
-/* Invoice documents are A4 pages whose colors must survive printing to PDF. */
-@page {
-  size: A4;
-  margin: 0;
-}
-
+/* Invoice documents are A4 pages whose colors must survive printing to PDF (the @page rule lives on
+   the print route, so printing any other page keeps the browser's defaults). */
 .invoice-page {
   print-color-adjust: exact;
   -webkit-print-color-adjust: exact;

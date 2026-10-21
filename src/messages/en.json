@@ -224,7 +224,8 @@
         "deleteDescription": "Draft {number} will be permanently deleted and cannot be restored.",
         "confirmDelete": "Delete"
       },
-      "view": "View"
+      "view": "View",
+      "downloadPdf": "Download PDF"
     },
     "detail": {
       "back": "Back to invoices",
@@ -254,7 +255,8 @@
         "unmarkPaid": "Undo paid",
         "duplicate": "Duplicate",
         "void": "Void",
-        "viewPublic": "View client page"
+        "viewPublic": "View client page",
+        "downloadPdf": "Download PDF"
       },
       "toast": {
         "linkCopied": "Link copied",

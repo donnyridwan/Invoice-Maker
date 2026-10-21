@@ -16,7 +16,7 @@ describe("protected routes", () => {
   });
 
   it("leave public pages alone and do not match on a shared prefix", () => {
-    for (const path of ["/", "/login", "/register", "/api/auth/get-session", "/clientsx", "/i/abc"]) {
+    for (const path of ["/", "/login", "/register", "/api/auth/get-session", "/clientsx", "/i/abc", "/i/abc/pdf", "/print/abc"]) {
       expect(isProtectedPath(path), path).toBe(false);
     }
   });
