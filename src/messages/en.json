@@ -530,7 +530,11 @@
     "emailDisabled": "Email delivery is not configured",
     "rateLimited": "You have reached today's email limit (50 per 24 hours). Please try again later.",
     "emailFailed": "The email could not be sent. Please try again later.",
-    "tooManyRecipients": "Maximum {max} addresses."
+    "tooManyRecipients": "Maximum {max} addresses.",
+    "dateInPast": "The date cannot be before today",
+    "endNotAfterStart": "The end date must be after the next invoice date",
+    "scheduleExists": "This invoice already has a recurring schedule",
+    "scheduleFinished": "This schedule has finished. Edit it to continue."
   },
   "errors": {
     "validation": "Please check your input.",

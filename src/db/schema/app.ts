@@ -14,6 +14,7 @@ import {
   timestamp,
   uniqueIndex,
   uuid,
+  type AnyPgColumn,
 } from "drizzle-orm/pg-core";
 import type {
   BusinessSnapshot,
@@ -47,6 +48,10 @@ export const invoiceStatus = pgEnum("invoice_status", [
 ]);
 
 export const claimStatus = pgEnum("claim_status", ["pending", "accepted", "rejected"]);
+
+export const recurringFrequency = pgEnum("recurring_frequency", ["weekly", "monthly", "yearly"]);
+export const recurringEnd = pgEnum("recurring_end", ["never", "after_count", "on_date"]);
+export const recurringDelivery = pgEnum("recurring_delivery", ["draft", "auto_email"]);
 
 export const businessProfiles = pgTable("business_profiles", {
   userId: text("user_id")
@@ -174,10 +179,16 @@ export const invoices = pgTable(
     // exchange rates used). NULL when no rate was known; 1 when `currency` is the base currency.
     fxRateToBase: numeric("fx_rate_to_base", { precision: 20, scale: 10, mode: "string" }),
     fxRateDate: date("fx_rate_date", { mode: "string" }),
+    // The recurring schedule that generated this invoice (NULL for every other invoice).
+    recurringScheduleId: uuid("recurring_schedule_id").references((): AnyPgColumn => recurringSchedules.id, {
+      onDelete: "set null",
+    }),
     ...timestamps,
   },
   (t) => [
     uniqueIndex("invoices_user_id_number_idx").on(t.userId, t.number),
+    // One invoice per schedule and run date: what makes a repeated cron run harmless.
+    uniqueIndex("invoices_recurring_schedule_id_issue_date_idx").on(t.recurringScheduleId, t.issueDate),
     index("invoices_user_id_status_idx").on(t.userId, t.status),
     index("invoices_user_id_issue_date_idx").on(t.userId, t.issueDate),
   ],
@@ -192,6 +203,40 @@ export const exchangeRates = pgTable(
     perEur: numeric("per_eur", { precision: 20, scale: 10, mode: "string" }).notNull(),
   },
   (t) => [primaryKey({ columns: [t.date, t.currency] })],
+);
+
+/**
+ * A rule that creates a copy of `sourceInvoiceId` on every run date. `anchorDay` is the day of the
+ * month the first run fell on (monthly and yearly runs clamp it to short months).
+ */
+export const recurringSchedules = pgTable(
+  "recurring_schedules",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    sourceInvoiceId: uuid("source_invoice_id").references((): AnyPgColumn => invoices.id, { onDelete: "set null" }),
+    frequency: recurringFrequency("frequency").notNull(),
+    interval: integer("interval").notNull().default(1),
+    anchorDay: integer("anchor_day").notNull(),
+    nextRunOn: date("next_run_on", { mode: "string" }).notNull(),
+    endType: recurringEnd("end_type").notNull().default("never"),
+    endCount: integer("end_count"),
+    endDate: date("end_date", { mode: "string" }),
+    runsDone: integer("runs_done").notNull().default(0),
+    delivery: recurringDelivery("delivery").notNull().default("draft"),
+    active: boolean("active").notNull().default(true),
+    // Why the last run needs attention (a code the UI translates); cleared by the next clean run.
+    lastError: text("last_error"),
+    ...timestamps,
+  },
+  (t) => [
+    index("recurring_schedules_active_next_run_on_idx").on(t.active, t.nextRunOn),
+    index("recurring_schedules_user_id_idx").on(t.userId),
+    // One schedule per source invoice (NULLs, i.e. deleted sources, do not collide).
+    uniqueIndex("recurring_schedules_source_invoice_id_idx").on(t.sourceInvoiceId),
+  ],
 );
 
 export const invoiceItems = pgTable(

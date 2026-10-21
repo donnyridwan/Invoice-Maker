@@ -18,6 +18,7 @@ import {
   businessSnapshotFrom,
   clientSnapshotFrom,
   paymentAccountSnapshotFrom,
+  type BusinessSnapshot,
   type ClientSnapshot,
   type PaymentAccountSnapshot,
 } from "./snapshots";
@@ -32,11 +33,23 @@ const MAX_NUMBER_ATTEMPTS = 50;
 const EDIT_EVENT_WINDOW_MS = 10 * 60 * 1000;
 const LOCKED_STATUSES: ReadonlySet<Invoice["status"]> = new Set(["paid", "void"]);
 
-/** Postgres unique_violation, possibly wrapped by drizzle (`cause`). */
-function isUniqueViolation(e: unknown): boolean {
-  const code = (err: unknown) => (typeof err === "object" && err !== null ? (err as { code?: unknown }).code : undefined);
-  return code(e) === "23505" || code((e as { cause?: unknown } | null)?.cause) === "23505";
+/** The Postgres error behind `e` when it is a unique_violation (drizzle may wrap it in `cause`). */
+function uniqueViolation(e: unknown): { constraint_name?: string } | null {
+  for (const err of [e, (e as { cause?: unknown } | null)?.cause]) {
+    if (typeof err === "object" && err !== null && (err as { code?: unknown }).code === "23505") {
+      return err as { constraint_name?: string };
+    }
+  }
+  return null;
 }
+
+/** Postgres unique_violation, possibly wrapped by drizzle (`cause`). */
+export function isUniqueViolation(e: unknown): boolean {
+  return uniqueViolation(e) !== null;
+}
+
+/** The unique index that makes generating a recurring run twice impossible. */
+export const RECURRING_RUN_INDEX = "invoices_recurring_schedule_id_issue_date_idx";
 
 function newPublicToken(): string {
   return randomBytes(16).toString("base64url");
@@ -113,7 +126,9 @@ async function insertWithNextNumber(
         .where(eq(businessProfiles.userId, userId));
       return created;
     } catch (e) {
-      if (!isUniqueViolation(e)) throw e;
+      // Only a taken number is worth another attempt; a run that was already generated is the caller's to handle.
+      const violation = uniqueViolation(e);
+      if (!violation || violation.constraint_name === RECURRING_RUN_INDEX) throw e;
     }
   }
   throw new ValidationError({ _form: ["duplicateNumber"] });
@@ -312,6 +327,84 @@ export async function saveInvoiceDraft(
   }
 }
 
+/** Frozen client / business / payment-account data a copy starts with. */
+export type InvoiceCopySnapshots = {
+  clientSnapshot: ClientSnapshot | null;
+  businessSnapshot: BusinessSnapshot;
+  paymentAccountsSnapshot: PaymentAccountSnapshot[];
+};
+
+/**
+ * The one way an invoice is cloned: a new draft under the next number, the source's items and
+ * settings, the exchange rate for `issueDate` and `dueDate = issueDate + the source's payment
+ * term`. Runs in the caller's transaction (it locks the profile row, which serialises numbering)
+ * and logs `event` on the copy. `snapshots` decides what the copy freezes: the source's own by
+ * default, or freshly built ones (recurring invoices rebuild them from live data).
+ */
+export async function insertInvoiceCopy(
+  tx: Tx,
+  userId: string,
+  source: Invoice,
+  items: InvoiceItem[],
+  opts: {
+    issueDate: string;
+    snapshots?: (profile: BusinessProfile) => InvoiceCopySnapshots;
+    recurringScheduleId?: string;
+    event: { type: "duplicated" | "recurring_generated"; meta: Record<string, unknown> };
+  },
+): Promise<Invoice> {
+  const profile = await lockProfile(tx, userId);
+  const { issueDate } = opts;
+  const termDays = Math.max(0, daysBetween(source.issueDate, source.dueDate));
+  const fx = await fxForInvoice(source.currency, profile.baseCurrency, issueDate, tx);
+  const snapshots = opts.snapshots?.(profile) ?? {
+    clientSnapshot: source.clientSnapshot,
+    businessSnapshot: source.businessSnapshot,
+    paymentAccountsSnapshot: source.paymentAccountsSnapshot,
+  };
+  const copy = await insertWithNextNumber(tx, userId, profile, issueDate, {
+    status: "draft",
+    clientId: source.clientId,
+    currency: source.currency,
+    fxRateToBase: fx?.rate ?? null,
+    fxRateDate: fx?.date ?? null,
+    language: source.language,
+    template: source.template,
+    accentColor: source.accentColor,
+    dueDate: addDays(issueDate, termDays),
+    ...snapshots,
+    discountType: source.discountType,
+    discountValue: source.discountValue,
+    subtotalMinor: source.subtotalMinor,
+    discountMinor: source.discountMinor,
+    totalMinor: source.totalMinor,
+    notes: source.notes,
+    recurringScheduleId: opts.recurringScheduleId ?? null,
+    sentAt: null,
+    firstViewedAt: null,
+    paidAt: null,
+    paidNote: null,
+    voidedAt: null,
+  });
+
+  if (items.length > 0) {
+    await tx.insert(invoiceItems).values(
+      items.map((item) => ({
+        invoiceId: copy.id,
+        position: item.position,
+        name: item.name,
+        description: item.description,
+        quantityMilli: item.quantityMilli,
+        unit: item.unit,
+        unitPriceMinor: item.unitPriceMinor,
+        amountMinor: item.amountMinor,
+      })),
+    );
+  }
+  await logEvent(tx, copy.id, opts.event.type, opts.event.meta);
+  return copy;
+}
+
 export async function duplicateInvoice(userId: string, id: string): Promise<Invoice> {
   return db.transaction(async (tx) => {
     const source = await findOwned(tx, userId, id);
@@ -320,53 +413,10 @@ export async function duplicateInvoice(userId: string, id: string): Promise<Invo
       .from(invoiceItems)
       .where(eq(invoiceItems.invoiceId, source.id))
       .orderBy(asc(invoiceItems.position));
-
-    const profile = await lockProfile(tx, userId);
-    const issueDate = todayInJakarta();
-    const termDays = Math.max(0, daysBetween(source.issueDate, source.dueDate));
-    const fx = await fxForInvoice(source.currency, profile.baseCurrency, issueDate, tx);
-    const copy = await insertWithNextNumber(tx, userId, profile, issueDate, {
-      status: "draft",
-      clientId: source.clientId,
-      currency: source.currency,
-      fxRateToBase: fx?.rate ?? null,
-      fxRateDate: fx?.date ?? null,
-      language: source.language,
-      template: source.template,
-      accentColor: source.accentColor,
-      dueDate: addDays(issueDate, termDays),
-      clientSnapshot: source.clientSnapshot,
-      businessSnapshot: source.businessSnapshot,
-      paymentAccountsSnapshot: source.paymentAccountsSnapshot,
-      discountType: source.discountType,
-      discountValue: source.discountValue,
-      subtotalMinor: source.subtotalMinor,
-      discountMinor: source.discountMinor,
-      totalMinor: source.totalMinor,
-      notes: source.notes,
-      sentAt: null,
-      firstViewedAt: null,
-      paidAt: null,
-      paidNote: null,
-      voidedAt: null,
+    return insertInvoiceCopy(tx, userId, source, items, {
+      issueDate: todayInJakarta(),
+      event: { type: "duplicated", meta: { sourceInvoiceId: source.id } },
     });
-
-    if (items.length > 0) {
-      await tx.insert(invoiceItems).values(
-        items.map((item) => ({
-          invoiceId: copy.id,
-          position: item.position,
-          name: item.name,
-          description: item.description,
-          quantityMilli: item.quantityMilli,
-          unit: item.unit,
-          unitPriceMinor: item.unitPriceMinor,
-          amountMinor: item.amountMinor,
-        })),
-      );
-    }
-    await logEvent(tx, copy.id, "duplicated", { sourceInvoiceId: source.id });
-    return copy;
   });
 }
 

@@ -530,7 +530,11 @@
     "emailDisabled": "Pengiriman email belum dikonfigurasi",
     "rateLimited": "Batas pengiriman email hari ini sudah tercapai (50 per 24 jam). Coba lagi nanti.",
     "emailFailed": "Email gagal terkirim. Coba lagi nanti.",
-    "tooManyRecipients": "Maksimal {max} alamat."
+    "tooManyRecipients": "Maksimal {max} alamat.",
+    "dateInPast": "Tanggal tidak boleh sebelum hari ini",
+    "endNotAfterStart": "Tanggal berakhir harus setelah tanggal invoice berikutnya",
+    "scheduleExists": "Invoice ini sudah punya jadwal berulang",
+    "scheduleFinished": "Jadwal ini sudah selesai. Ubah jadwalnya untuk melanjutkan."
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",
