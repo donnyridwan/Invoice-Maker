@@ -505,6 +505,7 @@
     "description": "Invoice untuk freelancer Indonesia"
   },
   "public": {
+    "downloadPdf": "Unduh PDF",
     "requestTitle": "{business} meminta pembayaran {total}",
     "paidTitle": "Invoice {number} sudah lunas",
     "unnamedBusiness": "Pengirim invoice",

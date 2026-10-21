@@ -1,4 +1,6 @@
+import { Download } from "lucide-react";
 import { createTranslator } from "next-intl";
+import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { buildInvoiceDocument, paymentAccountLines } from "@/documents/build-document";
 import { DOC_LABELS } from "@/documents/dictionary";
@@ -104,16 +106,24 @@ export function PublicInvoiceView({ invoice, language, pendingClaims, token }: P
         subtitle={subtitle}
         note={status === "awaiting" ? t("awaitingNote", { business }) : null}
         actions={
-          canClaim ? (
-            <ClaimDialog
-              token={token}
-              business={business}
-              defaultAmount={formatMoneyInput(invoice.totalMinor, currency, language)}
-              today={today}
-              maxDate={addDays(today, 1)}
-              limitReached={pendingClaims >= MAX_PENDING_CLAIMS}
-            />
-          ) : null
+          <>
+            {canClaim ? (
+              <ClaimDialog
+                token={token}
+                business={business}
+                defaultAmount={formatMoneyInput(invoice.totalMinor, currency, language)}
+                today={today}
+                maxDate={addDays(today, 1)}
+                limitReached={pendingClaims >= MAX_PENDING_CLAIMS}
+              />
+            ) : null}
+            <Button asChild variant="secondary">
+              <a href={`/i/${token}/pdf`} download>
+                <Download className="size-4" aria-hidden />
+                {t("downloadPdf")}
+              </a>
+            </Button>
+          </>
         }
       />
       <Card role="region" className="rounded-lg p-3 shadow-sm sm:p-5" aria-label={t("documentLabel", { number: invoice.number })}>

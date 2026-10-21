@@ -1,6 +1,6 @@
 import { createHmac } from "node:crypto";
 import { expect, test } from "@playwright/test";
-import { createInvoiceDraft, markSentViaDb, registerUser } from "./helpers";
+import { createInvoiceDraft, markSentViaDb, publicTokenViaDb, registerUser, setStatusViaDb } from "./helpers";
 
 /** Signs `/print/<id>` like the app does (same secret: playwright.config.ts passes it to the server). */
 function signedPrintPath(id: string, expSeconds: number): string {
@@ -85,5 +85,50 @@ test.describe("print page", () => {
     expect(html).toMatch(/<meta name="robots" content="noindex/);
     expect(html).not.toContain(`aria-label="Menu utama"`);
     expect(html).toContain("@page { size: A4; margin: 0 }");
+  });
+});
+
+test.describe("public pdf", () => {
+  test("serves a sent invoice to anyone with the link, and records nothing", async ({ page, request }) => {
+    const id = await createInvoiceDraft(page);
+    const token = await markSentViaDb(id);
+
+    const response = await request.get(`/i/${token}/pdf`);
+    expect(response.status()).toBe(200);
+    expect(response.headers()["content-type"]).toContain("application/pdf");
+    expect(response.headers()["content-disposition"]).toMatch(/filename="INV-[A-Za-z0-9._-]+\.pdf"/);
+    expect((await response.body()).subarray(0, 5).toString("latin1")).toBe("%PDF-");
+
+    // Neither a view nor a status change: the owner's timeline has no "Dilihat klien".
+    await page.goto(`/invoices/${id}`);
+    await expect(page.getByRole("region", { name: "Aktivitas" })).not.toContainText("Dilihat klien");
+    await expect(page.getByRole("region", { name: "Aktivitas" })).toContainText("Invoice dibuat");
+  });
+
+  test("serves a paid invoice too, but a void one, a draft and an unknown token are 404", async ({ page, request }) => {
+    const id = await createInvoiceDraft(page);
+    const token = await publicTokenViaDb(id);
+
+    expect((await request.get(`/i/${token}/pdf`)).status()).toBe(404); // still a draft
+    expect((await request.get("/i/does-not-exist-token/pdf")).status()).toBe(404);
+
+    await setStatusViaDb(id, "paid");
+    expect((await request.get(`/i/${token}/pdf`)).status()).toBe(200);
+
+    await setStatusViaDb(id, "void");
+    expect((await request.get(`/i/${token}/pdf`)).status()).toBe(404);
+  });
+
+  test("shows the Unduh PDF button on the public page", async ({ page, browser, baseURL }) => {
+    const token = await markSentViaDb(await createInvoiceDraft(page));
+    const context = await browser.newContext({ baseURL });
+    const view = await context.newPage();
+    await view.goto(`/i/${token}`);
+
+    const link = view.getByRole("link", { name: "Unduh PDF" });
+    await expect(link).toBeVisible();
+    await expect(link).toHaveAttribute("href", `/i/${token}/pdf`);
+    await expect(link).toHaveAttribute("download", "");
+    await context.close();
   });
 });

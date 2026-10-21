@@ -26,7 +26,7 @@ test.describe("public invoice page", () => {
     await expect(view.locator("meta[name=robots]")).toHaveAttribute("content", /noindex/);
     await expect(view).toHaveTitle(/^Invoice INV-\d{4}-\d{3} — /);
     await expect(view.getByRole("navigation", { name: "Menu utama" })).toHaveCount(0);
-    await expect(view.getByRole("button", { name: /Unduh PDF/ })).toHaveCount(0);
+    await expect(view.getByRole("link", { name: "Unduh PDF" })).toBeVisible();
     await expect(view.getByText("Dibuat dengan Invoice Maker")).toBeVisible();
     await expect(view.getByRole("article")).toContainText("Desain logo");
 
