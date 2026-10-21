@@ -213,7 +213,8 @@
     "invalidPrefix": "Letters, digits and / . _ - only",
     "invalidColor": "Use the #RRGGBB format.",
     "invalidValue": "Invalid choice.",
-    "invalidCountry": "Select a valid country."
+    "invalidCountry": "Select a valid country.",
+    "amountTooLarge": "Amount is too large"
   },
   "errors": {
     "validation": "Please check your input.",

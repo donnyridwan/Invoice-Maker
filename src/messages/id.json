@@ -213,7 +213,8 @@
     "invalidPrefix": "Hanya huruf, angka, dan / . _ -",
     "invalidColor": "Gunakan format #RRGGBB.",
     "invalidValue": "Pilihan tidak valid.",
-    "invalidCountry": "Pilih negara yang valid."
+    "invalidCountry": "Pilih negara yang valid.",
+    "amountTooLarge": "Jumlah terlalu besar"
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",
