@@ -3,6 +3,7 @@ import { and, asc, count, desc, eq, gt, ilike, inArray, ne, or, sql } from "driz
 import { db } from "@/db/client";
 import { businessProfiles, clients, invoiceEvents, invoiceItems, invoices, paymentAccounts } from "@/db/schema";
 import { getClient } from "@/features/clients/queries";
+import { fxForInvoice } from "@/features/fx/queries";
 import { listPaymentAccounts } from "@/features/payment-accounts/queries";
 import type { BusinessProfile } from "@/features/profile/queries";
 import { addDays, daysBetween, todayInJakarta } from "@/lib/dates";
@@ -126,9 +127,13 @@ export async function createDraftInvoice(userId: string, opts: { clientId?: stri
   return db.transaction(async (tx) => {
     const profile = await lockProfile(tx, userId);
     const issueDate = todayInJakarta();
+    const currency = client?.defaultCurrency ?? profile.defaultCurrency;
+    const fx = await fxForInvoice(currency, profile.baseCurrency, issueDate, tx);
     const invoice = await insertWithNextNumber(tx, userId, profile, issueDate, {
       clientId: client?.id ?? null,
-      currency: client?.defaultCurrency ?? profile.defaultCurrency,
+      currency,
+      fxRateToBase: fx?.rate ?? null,
+      fxRateDate: fx?.date ?? null,
       language: client?.defaultLanguage ?? profile.defaultLanguage,
       template: profile.defaultTemplate,
       accentColor: profile.accentColor,
@@ -239,6 +244,9 @@ export async function saveInvoiceDraft(
         .limit(1);
       if (!profile) throw new NotFoundError("Business profile not found");
 
+      // Re-derived on every save: the currency, the issue date or the profile's base may have changed.
+      const fx = await fxForInvoice(data.currency, profile.baseCurrency, data.issueDate, tx);
+
       const savedAt = new Date();
       await tx
         .update(invoices)
@@ -251,6 +259,8 @@ export async function saveInvoiceDraft(
           language: data.language,
           template: data.template,
           accentColor: data.accentColor,
+          fxRateToBase: fx?.rate ?? null,
+          fxRateDate: fx?.date ?? null,
           discountType: data.discountType,
           discountValue: data.discountType === "none" ? 0 : data.discountValue,
           notes: data.notes ?? null,
@@ -314,10 +324,13 @@ export async function duplicateInvoice(userId: string, id: string): Promise<Invo
     const profile = await lockProfile(tx, userId);
     const issueDate = todayInJakarta();
     const termDays = Math.max(0, daysBetween(source.issueDate, source.dueDate));
+    const fx = await fxForInvoice(source.currency, profile.baseCurrency, issueDate, tx);
     const copy = await insertWithNextNumber(tx, userId, profile, issueDate, {
       status: "draft",
       clientId: source.clientId,
       currency: source.currency,
+      fxRateToBase: fx?.rate ?? null,
+      fxRateDate: fx?.date ?? null,
       language: source.language,
       template: source.template,
       accentColor: source.accentColor,

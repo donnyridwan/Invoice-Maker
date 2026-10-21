@@ -6,8 +6,10 @@ import {
   index,
   integer,
   jsonb,
+  numeric,
   pgEnum,
   pgTable,
+  primaryKey,
   text,
   timestamp,
   uniqueIndex,
@@ -168,6 +170,10 @@ export const invoices = pgTable(
     paidAt: timestamp("paid_at", { withTimezone: true }),
     paidNote: text("paid_note"),
     voidedAt: timestamp("voided_at", { withTimezone: true }),
+    // Units of the owner's base currency per unit of `currency`, as of `fxRateDate` (the date of the
+    // exchange rates used). NULL when no rate was known; 1 when `currency` is the base currency.
+    fxRateToBase: numeric("fx_rate_to_base", { precision: 20, scale: 10, mode: "string" }),
+    fxRateDate: date("fx_rate_date", { mode: "string" }),
     ...timestamps,
   },
   (t) => [
@@ -175,6 +181,17 @@ export const invoices = pgTable(
     index("invoices_user_id_status_idx").on(t.userId, t.status),
     index("invoices_user_id_issue_date_idx").on(t.userId, t.issueDate),
   ],
+);
+
+/** Daily exchange rates against EUR (ECB / Frankfurter): `perEur` units of `currency` per 1 EUR. */
+export const exchangeRates = pgTable(
+  "exchange_rates",
+  {
+    date: date("date", { mode: "string" }).notNull(),
+    currency: text("currency").notNull(),
+    perEur: numeric("per_eur", { precision: 20, scale: 10, mode: "string" }).notNull(),
+  },
+  (t) => [primaryKey({ columns: [t.date, t.currency] })],
 );
 
 export const invoiceItems = pgTable(
