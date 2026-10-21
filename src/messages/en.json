@@ -1,0 +1,129 @@
+{
+  "common": {
+    "appName": "Invoice Maker",
+    "language": "Language",
+    "save": "Save",
+    "cancel": "Cancel",
+    "edit": "Edit",
+    "delete": "Delete",
+    "archive": "Archive",
+    "restore": "Restore",
+    "search": "Search",
+    "loading": "Loading…",
+    "back": "Back",
+    "next": "Next",
+    "actions": "Actions",
+    "yes": "Yes",
+    "no": "No",
+    "notFoundTitle": "Page not found",
+    "notFoundDescription": "The page you are looking for does not exist or has been moved.",
+    "genericError": "Something went wrong. Please try again."
+  },
+  "nav": {
+    "dashboard": "Dashboard",
+    "invoices": "Invoices",
+    "clients": "Clients",
+    "catalog": "Catalog",
+    "paymentAccounts": "Payment accounts",
+    "settings": "Settings",
+    "signOut": "Sign out"
+  },
+  "auth": {
+    "signIn": "Sign in",
+    "signUp": "Sign up",
+    "email": "Email",
+    "password": "Password",
+    "name": "Name",
+    "noAccount": "Don't have an account?",
+    "haveAccount": "Already have an account?",
+    "invalidCredentials": "Incorrect email or password."
+  },
+  "onboarding": {
+    "title": "Welcome to Invoice Maker",
+    "description": "Complete your business profile to start creating invoices.",
+    "businessName": "Business name",
+    "continue": "Continue"
+  },
+  "dashboard": {
+    "title": "Dashboard",
+    "description": "An overview of your invoices and payments.",
+    "emptyTitle": "No invoices yet",
+    "emptyDescription": "Create your first invoice to start billing your clients."
+  },
+  "settings": {
+    "title": "Settings",
+    "description": "Manage your business profile and invoice preferences.",
+    "businessProfile": "Business profile",
+    "businessName": "Business name",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "taxId": "Tax ID",
+    "accentColor": "Accent color",
+    "baseCurrency": "Base currency",
+    "defaultCurrency": "Default currency",
+    "defaultLanguage": "Default invoice language",
+    "defaultDueDays": "Default due days",
+    "invoicePrefix": "Invoice number prefix",
+    "defaultNotes": "Default notes",
+    "uiLanguage": "Display language",
+    "saved": "Settings saved."
+  },
+  "paymentAccounts": {
+    "title": "Payment accounts",
+    "description": "Where your clients send payment for invoices.",
+    "new": "New account",
+    "label": "Account name",
+    "type": "Type",
+    "types": {
+      "bank": "Bank",
+      "paypal": "PayPal",
+      "wise": "Wise",
+      "swift": "SWIFT",
+      "other": "Other"
+    },
+    "currency": "Currency",
+    "isDefault": "Make default",
+    "default": "Default",
+    "emptyTitle": "No payment accounts yet",
+    "emptyDescription": "Add an account so your clients know where to pay."
+  },
+  "clients": {
+    "title": "Clients",
+    "description": "The clients you bill.",
+    "new": "New client",
+    "name": "Name",
+    "company": "Company",
+    "email": "Email",
+    "phone": "Phone",
+    "address": "Address",
+    "country": "Country",
+    "defaultCurrency": "Default currency",
+    "defaultLanguage": "Invoice language",
+    "notes": "Notes",
+    "searchPlaceholder": "Search clients",
+    "emptyTitle": "No clients yet",
+    "emptyDescription": "Add your first client to start creating invoices."
+  },
+  "catalog": {
+    "title": "Catalog",
+    "description": "Services and products you bill often.",
+    "new": "New item",
+    "name": "Name",
+    "descriptionLabel": "Description",
+    "unit": "Unit",
+    "unitPrice": "Unit price",
+    "currency": "Currency",
+    "emptyTitle": "Your catalog is empty",
+    "emptyDescription": "Save services you bill often to create invoices faster."
+  },
+  "validation": {
+    "required": "This field is required.",
+    "tooLong": "Maximum {max} characters.",
+    "invalidEmail": "Invalid email address.",
+    "invalidAmount": "Invalid amount.",
+    "invalidCurrency": "Unsupported currency.",
+    "invalidNumber": "Invalid number.",
+    "notFound": "Not found."
+  }
+}

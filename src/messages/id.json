@@ -1,0 +1,129 @@
+{
+  "common": {
+    "appName": "Invoice Maker",
+    "language": "Bahasa",
+    "save": "Simpan",
+    "cancel": "Batal",
+    "edit": "Ubah",
+    "delete": "Hapus",
+    "archive": "Arsipkan",
+    "restore": "Pulihkan",
+    "search": "Cari",
+    "loading": "Memuat…",
+    "back": "Kembali",
+    "next": "Lanjut",
+    "actions": "Aksi",
+    "yes": "Ya",
+    "no": "Tidak",
+    "notFoundTitle": "Halaman tidak ditemukan",
+    "notFoundDescription": "Halaman yang Anda cari tidak ada atau sudah dipindahkan.",
+    "genericError": "Terjadi kesalahan. Silakan coba lagi."
+  },
+  "nav": {
+    "dashboard": "Dasbor",
+    "invoices": "Invoice",
+    "clients": "Klien",
+    "catalog": "Katalog",
+    "paymentAccounts": "Rekening Pembayaran",
+    "settings": "Pengaturan",
+    "signOut": "Keluar"
+  },
+  "auth": {
+    "signIn": "Masuk",
+    "signUp": "Daftar",
+    "email": "Email",
+    "password": "Kata sandi",
+    "name": "Nama",
+    "noAccount": "Belum punya akun?",
+    "haveAccount": "Sudah punya akun?",
+    "invalidCredentials": "Email atau kata sandi salah."
+  },
+  "onboarding": {
+    "title": "Selamat datang di Invoice Maker",
+    "description": "Lengkapi profil bisnis Anda untuk mulai membuat invoice.",
+    "businessName": "Nama bisnis",
+    "continue": "Lanjutkan"
+  },
+  "dashboard": {
+    "title": "Dasbor",
+    "description": "Ringkasan invoice dan pembayaran Anda.",
+    "emptyTitle": "Belum ada invoice",
+    "emptyDescription": "Buat invoice pertama Anda untuk mulai menagih klien."
+  },
+  "settings": {
+    "title": "Pengaturan",
+    "description": "Kelola profil bisnis dan preferensi invoice.",
+    "businessProfile": "Profil bisnis",
+    "businessName": "Nama bisnis",
+    "email": "Email",
+    "phone": "Telepon",
+    "address": "Alamat",
+    "taxId": "NPWP",
+    "accentColor": "Warna aksen",
+    "baseCurrency": "Mata uang dasar",
+    "defaultCurrency": "Mata uang default",
+    "defaultLanguage": "Bahasa invoice default",
+    "defaultDueDays": "Jatuh tempo default (hari)",
+    "invoicePrefix": "Awalan nomor invoice",
+    "defaultNotes": "Catatan default",
+    "uiLanguage": "Bahasa tampilan",
+    "saved": "Pengaturan disimpan."
+  },
+  "paymentAccounts": {
+    "title": "Rekening Pembayaran",
+    "description": "Tempat klien mentransfer pembayaran invoice.",
+    "new": "Rekening baru",
+    "label": "Nama rekening",
+    "type": "Jenis",
+    "types": {
+      "bank": "Bank",
+      "paypal": "PayPal",
+      "wise": "Wise",
+      "swift": "SWIFT",
+      "other": "Lainnya"
+    },
+    "currency": "Mata uang",
+    "isDefault": "Jadikan default",
+    "default": "Default",
+    "emptyTitle": "Belum ada rekening pembayaran",
+    "emptyDescription": "Tambahkan rekening agar klien tahu ke mana harus membayar."
+  },
+  "clients": {
+    "title": "Klien",
+    "description": "Daftar klien yang Anda tagih.",
+    "new": "Klien baru",
+    "name": "Nama",
+    "company": "Perusahaan",
+    "email": "Email",
+    "phone": "Telepon",
+    "address": "Alamat",
+    "country": "Negara",
+    "defaultCurrency": "Mata uang default",
+    "defaultLanguage": "Bahasa invoice",
+    "notes": "Catatan",
+    "searchPlaceholder": "Cari klien",
+    "emptyTitle": "Belum ada klien",
+    "emptyDescription": "Tambahkan klien pertama Anda untuk mulai membuat invoice."
+  },
+  "catalog": {
+    "title": "Katalog",
+    "description": "Layanan dan produk yang sering Anda tagih.",
+    "new": "Item baru",
+    "name": "Nama",
+    "descriptionLabel": "Deskripsi",
+    "unit": "Satuan",
+    "unitPrice": "Harga satuan",
+    "currency": "Mata uang",
+    "emptyTitle": "Katalog masih kosong",
+    "emptyDescription": "Simpan layanan yang sering ditagih agar invoice lebih cepat dibuat."
+  },
+  "validation": {
+    "required": "Wajib diisi.",
+    "tooLong": "Maksimal {max} karakter.",
+    "invalidEmail": "Format email tidak valid.",
+    "invalidAmount": "Jumlah tidak valid.",
+    "invalidCurrency": "Mata uang tidak didukung.",
+    "invalidNumber": "Angka tidak valid.",
+    "notFound": "Data tidak ditemukan."
+  }
+}
