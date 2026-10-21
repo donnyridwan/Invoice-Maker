@@ -49,6 +49,15 @@ test.describe("auth", () => {
     await expect(page).toHaveURL(/\/register$/);
   });
 
+  test("redirects a signed-in user from /login?expired=1 without signing them out", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/login?expired=1");
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Halo, Donny");
+  });
+
   test("rejects a password shorter than 8 characters", async ({ page }) => {
     await page.goto("/register");
     await page.getByLabel("Nama").fill("Donny");

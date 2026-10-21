@@ -15,7 +15,7 @@ Next.js 16 (App Router) · TypeScript (strict) · Tailwind CSS 4 · Drizzle ORM 
 
 ## Local setup
 
-Requires Node.js 20+ and PostgreSQL 16.
+Requires Node.js 22 and PostgreSQL 16.
 
 ```bash
 npm install

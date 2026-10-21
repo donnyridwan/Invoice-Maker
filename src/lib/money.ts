@@ -4,7 +4,7 @@ import { CURRENCY_CODES, currencyDecimals, type CurrencyCode } from "./currencie
 const INTL_LOCALE: Record<Locale, string> = { id: "id-ID", en: "en-US" };
 
 // Currency symbols/codes a user may type in front of an amount (longest first where they overlap).
-const CURRENCY_PREFIX = new RegExp(`^(?:US\\$|JP¥|S\\$|Rp|RM|\\$|€|£|¥|${CURRENCY_CODES.join("|")})`, "i");
+const CURRENCY_PREFIX = new RegExp(`^(?:US\\$|JP¥|S\\$|Rp\\.?|RM|\\$|€|£|¥|${CURRENCY_CODES.join("|")})`, "i");
 
 /** Digit groups of three, e.g. 1.500.000 (first group 1-3 digits, no leading zero). */
 const groupedWith = (separator: string) => new RegExp(`^[1-9]\\d{0,2}(?:\\${separator}\\d{3})+$`);
