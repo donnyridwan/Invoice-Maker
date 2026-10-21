@@ -214,7 +214,12 @@
     "invalidColor": "Gunakan format #RRGGBB.",
     "invalidValue": "Pilihan tidak valid.",
     "invalidCountry": "Pilih negara yang valid.",
-    "amountTooLarge": "Jumlah terlalu besar"
+    "amountTooLarge": "Jumlah terlalu besar",
+    "dueBeforeIssue": "Jatuh tempo tidak boleh sebelum tanggal terbit",
+    "duplicateNumber": "Nomor invoice sudah dipakai",
+    "invoiceLocked": "Invoice ini sudah terkunci",
+    "onlyDraftDeletable": "Hanya draft yang bisa dihapus",
+    "invalidDate": "Tanggal tidak valid"
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",
