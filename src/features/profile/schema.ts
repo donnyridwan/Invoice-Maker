@@ -10,6 +10,9 @@ import {
 export const TEMPLATES = ["minimal", "classic", "modern"] as const;
 export const INVOICE_LANGUAGES = ["id", "en"] as const;
 
+export type Template = (typeof TEMPLATES)[number];
+export type InvoiceLanguage = (typeof INVOICE_LANGUAGES)[number];
+
 export const profileSchema = z.object({
   businessName: requiredText(200),
   email: optionalEmail,
