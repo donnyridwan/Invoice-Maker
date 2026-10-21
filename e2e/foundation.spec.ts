@@ -338,9 +338,29 @@ test.describe("logo", () => {
     await expect.poll(() => logo.evaluate((img: HTMLImageElement) => img.naturalWidth)).toBeGreaterThan(0);
     await expect(card.getByRole("button", { name: "Ganti" })).toBeVisible();
 
+    // Removing only clears the profile field: invoices keep a snapshot of the logo URL, so the
+    // file itself must stay available.
+    const src = (await logo.getAttribute("src"))!;
     await card.getByRole("button", { name: "Hapus" }).click();
     await expect(card.getByRole("img")).toHaveCount(0);
     await expect(card.getByRole("button", { name: "Unggah logo" })).toBeVisible();
+    expect((await page.request.get(src)).status()).toBe(200);
+  });
+
+  test("keeps the previous logo file when the logo is replaced", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/settings");
+
+    const card = page.getByRole("region", { name: "Logo" });
+    const input = card.locator("input[type=file]");
+    await input.setInputFiles({ name: "one.png", mimeType: "image/png", buffer: PNG_1X1 });
+    const logo = card.getByRole("img", { name: "Logo bisnis" });
+    await expect(logo).toBeVisible();
+    const first = (await logo.getAttribute("src"))!;
+
+    await input.setInputFiles({ name: "two.png", mimeType: "image/png", buffer: PNG_1X1 });
+    await expect(logo).not.toHaveAttribute("src", first);
+    expect((await page.request.get(first)).status()).toBe(200);
   });
 
   test("rejects a file that is not a real image", async ({ page }) => {

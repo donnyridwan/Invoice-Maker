@@ -75,7 +75,7 @@ export async function updateInvoiceDefaults(userId: string, input: unknown): Pro
   return row;
 }
 
-/** Sets (or clears, with null) the logo URL; returns the previous one so the caller can delete that file. */
+/** Sets (or clears, with null) the logo URL and returns the previous one. The old file is never deleted: invoice snapshots may still point to it. */
 export async function setLogoUrl(userId: string, logoUrl: string | null): Promise<string | null> {
   return db.transaction(async (tx) => {
     const [current] = await tx

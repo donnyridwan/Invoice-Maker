@@ -123,9 +123,8 @@ export async function skipOnboardingAction(): Promise<ActionResult<OnboardingRes
 
 export type LogoResult = { logoUrl: string | null };
 
-/** Best-effort removal of a stored file; a leftover file must never fail the user's action. */
-async function discardFile(url: string | null) {
-  if (!url) return;
+/** Best-effort removal of a stored file that nothing references; it must never fail the action. */
+async function discardUnreferencedFile(url: string) {
   try {
     await getStorage().delete(url);
   } catch (e) {
@@ -133,20 +132,22 @@ async function discardFile(url: string | null) {
   }
 }
 
+// Replacing or removing the logo never deletes the old file: invoices keep a snapshot of the logo
+// URL (paid / void / unedited sent invoices must keep rendering it), so only the profile changes.
+
 export async function uploadLogoAction(formData: FormData): Promise<ActionResult<LogoResult>> {
   const user = await requireUser();
   try {
     const file = formData.get("file");
     if (!(file instanceof File) || file.size === 0) throw new ValidationError({ file: ["required"] });
     const { url } = await uploadFile("logo", file);
-    let previous: string | null;
     try {
-      previous = await setLogoUrl(user.id, url);
+      await setLogoUrl(user.id, url);
     } catch (e) {
-      await discardFile(url);
+      // The new file was never referenced by anything, so it is safe to drop.
+      await discardUnreferencedFile(url);
       throw e;
     }
-    await discardFile(previous);
     refresh();
     return { ok: true, data: { logoUrl: url } };
   } catch (e) {
@@ -157,7 +158,7 @@ export async function uploadLogoAction(formData: FormData): Promise<ActionResult
 export async function removeLogoAction(): Promise<ActionResult<LogoResult>> {
   const user = await requireUser();
   try {
-    await discardFile(await setLogoUrl(user.id, null));
+    await setLogoUrl(user.id, null);
     refresh();
     return { ok: true, data: { logoUrl: null } };
   } catch (e) {
