@@ -36,10 +36,6 @@
     border-color: var(--color-border);
   }
 
-  html {
-    font-size: 14px;
-  }
-
   body {
     @apply bg-white text-sm text-fg antialiased;
   }

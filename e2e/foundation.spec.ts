@@ -57,6 +57,23 @@ test.describe("shell", () => {
     await expect(sidebar.getByRole("link", { name: "Pengaturan" })).toBeVisible();
   });
 
+  test("keeps the 14px type scale and spec dimensions", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/clients");
+
+    const px = (selector: string, property: string) =>
+      page.locator(selector).first().evaluate((el, prop) => parseFloat(getComputedStyle(el)[prop as never]), property);
+    expect(await px("body", "fontSize")).toBe(14);
+    expect(await px("h1", "fontSize")).toBe(24);
+    expect(await px("aside", "width")).toBe(240);
+
+    await page.getByRole("link", { name: "Klien baru" }).first().click();
+    await page.getByLabel("Nama", { exact: true }).fill("Dimensi");
+    await page.getByRole("button", { name: "Simpan" }).click();
+    await expect(page).toHaveURL(/\/clients$/);
+    expect(await px("tbody tr", "height")).toBe(44);
+  });
+
   test("signs out from the user menu", async ({ page }) => {
     await registerUser(page);
     await page.goto("/dashboard");
