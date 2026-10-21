@@ -283,27 +283,25 @@ test.describe("editor extras", () => {
     await expect(page.getByRole("link", { name: "Beta LLC" })).toBeVisible();
   });
 
-  test("picks a template and an accent colour, and keeps them", async ({ page }) => {
+  test("picks an accent colour, and keeps it", async ({ page }) => {
     await registerUser(page);
     await createInvoiceViaUi(page);
     const preview = page.getByRole("region", { name: "Preview invoice" });
+    const document = preview.locator("[data-template]");
 
-    await expect(page.getByRole("radio", { name: "Minimal" })).toBeChecked();
-    await page.getByRole("radio", { name: "Modern" }).click();
-    await expect(page.getByRole("radio", { name: "Modern" })).toBeChecked();
-    await expect(preview.locator('[data-template="modern"]')).toBeVisible();
-
+    await expect(page.getByRole("radio", { name: "Minimal" })).toHaveCount(0);
     await page.getByRole("button", { name: "#00A67E" }).click();
     await expect(page.getByRole("button", { name: "#00A67E" })).toHaveAttribute("aria-pressed", "true");
-    await expect(preview.locator('[data-template="modern"]')).toHaveAttribute("style", /#00A67E/i);
-    await page.getByRole("button", { name: "#0A2540" }).click();
+    await expect(document).toHaveAttribute("style", /#00A67E/i);
+    await page.getByLabel("Pilih warna").fill("#123456");
+    await expect(document).toHaveAttribute("style", /#123456/i);
     await expect(page.getByRole("button", { name: "#00A67E" })).toHaveAttribute("aria-pressed", "false");
+    await page.getByRole("button", { name: "#0A2540" }).click();
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
 
     await page.reload();
-    await expect(page.getByRole("radio", { name: "Modern" })).toBeChecked();
     await expect(page.getByRole("button", { name: "#0A2540" })).toHaveAttribute("aria-pressed", "true");
-    await expect(preview.locator('[data-template="modern"]')).toHaveAttribute("style", /#0A2540/i);
+    await expect(document).toHaveAttribute("style", /#0A2540/i);
   });
 
   test("reorders items by dragging", async ({ page }) => {

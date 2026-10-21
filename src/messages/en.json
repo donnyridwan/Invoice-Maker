@@ -214,8 +214,8 @@
         "description": "Add a client without leaving this invoice."
       },
       "appearance": {
-        "template": "Template",
         "accent": "Accent color",
+        "picker": "Pick a color",
         "presetLabel": "Preset colors"
       },
       "menu": {
