@@ -380,6 +380,7 @@
     "status": {
       "active": "Active",
       "paused": "Paused",
+      "stopped": "Stopped",
       "finished": "Finished"
     },
     "dialog": {
@@ -445,6 +446,8 @@
       "emailDisabled": "A draft was created but email delivery is not configured.",
       "clientEmailMissing": "A draft was created but not sent because the client has no email.",
       "emailFailed": "A draft was created but the email could not be sent.",
+      "tooManyFailures": "Stopped after 7 failed runs in a row. Check the source invoice, then resume.",
+      "rateLimited": "Draft created, but today's email sending limit was reached. It will be tried again on the next run.",
       "other": "A draft was created but could not be sent automatically. Check the invoice."
     },
     "list": {

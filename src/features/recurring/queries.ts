@@ -86,14 +86,21 @@ export async function createSchedule(userId: string, sourceInvoiceId: string, in
   }
 }
 
-/** Changes the rule of a schedule. The runs done so far are kept; an old error is cleared. */
+/**
+ * Changes the rule of a schedule. The runs done so far are kept; an old error is cleared, except
+ * that its source is gone (editing cannot bring it back).
+ */
 export async function updateSchedule(userId: string, id: string, input: unknown): Promise<Schedule> {
   return db.transaction(async (tx) => {
-    await findOwnedSchedule(tx, userId, id, true);
+    const current = await findOwnedSchedule(tx, userId, id, true);
     const data = parseInput(recurringScheduleSchema, input);
     const [row] = await tx
       .update(recurringSchedules)
-      .set({ ...settingsFrom(data), lastError: null, updatedAt: new Date() })
+      .set({
+        ...settingsFrom(data),
+        lastError: current.lastError === "sourceUnavailable" ? current.lastError : null,
+        updatedAt: new Date(),
+      })
       .where(and(eq(recurringSchedules.id, id), eq(recurringSchedules.userId, userId)))
       .returning();
     return row;
@@ -124,7 +131,7 @@ export async function resumeSchedule(userId: string, id: string): Promise<Schedu
     if (isFinished(schedule, nextRunOn)) throw formError("scheduleFinished");
     const [row] = await tx
       .update(recurringSchedules)
-      .set({ active: true, nextRunOn, lastError: null, updatedAt: new Date() })
+      .set({ active: true, nextRunOn, lastError: null, failedRuns: 0, updatedAt: new Date() })
       .where(and(eq(recurringSchedules.id, id), eq(recurringSchedules.userId, userId)))
       .returning();
     return row;

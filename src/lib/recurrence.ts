@@ -81,14 +81,21 @@ export function dueRunDates(
   return dates;
 }
 
-export type ScheduleStatus = "active" | "paused" | "finished";
+export type ScheduleStatus = "active" | "paused" | "stopped" | "finished";
 
-/** What a schedule looks like to its owner: running, paused by hand (or by an error), or out of runs. */
+/** `lastError` codes of a schedule the system itself deactivated: its source is gone, or its runs kept failing. */
+export const STOPPED_ERRORS = ["sourceUnavailable", "tooManyFailures"] as const;
+
+/**
+ * What a schedule looks like to its owner: running, paused by hand, stopped by the system (see
+ * `STOPPED_ERRORS`, the reason is the `lastError`), or out of runs.
+ */
 export function scheduleStatus(
-  s: RecurrenceEnd & { active: boolean; nextRunOn: string },
+  s: RecurrenceEnd & { active: boolean; nextRunOn: string; lastError?: string | null },
 ): ScheduleStatus {
   if (s.active) return "active";
-  return isFinished(s, s.nextRunOn) ? "finished" : "paused";
+  if (isFinished(s, s.nextRunOn)) return "finished";
+  return (STOPPED_ERRORS as readonly string[]).includes(s.lastError ?? "") ? "stopped" : "paused";
 }
 
 /**

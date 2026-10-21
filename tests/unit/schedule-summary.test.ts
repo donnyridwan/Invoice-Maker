@@ -46,6 +46,19 @@ describe("schedule summary", () => {
 
 describe("scheduleStatus", () => {
   const base = { endType: "never" as const, endCount: null, endDate: null, runsDone: 0, nextRunOn: "2026-11-01" };
+  it("tells a schedule stopped by an error from one paused by hand", () => {
+    expect(scheduleStatus({ ...base, active: false, lastError: "sourceUnavailable" })).toBe("stopped");
+    expect(scheduleStatus({ ...base, active: false, lastError: "tooManyFailures" })).toBe("stopped");
+    expect(scheduleStatus({ ...base, active: false, lastError: "emailFailed" })).toBe("paused");
+    expect(scheduleStatus({ ...base, active: false, lastError: null })).toBe("paused");
+    // Still running: the error is only a note.
+    expect(scheduleStatus({ ...base, active: true, lastError: "runFailed" })).toBe("active");
+    // A finished schedule stays finished.
+    expect(
+      scheduleStatus({ ...base, active: false, endType: "after_count", endCount: 2, runsDone: 2, lastError: "sourceUnavailable" }),
+    ).toBe("finished");
+  });
+
   it("tells active, paused and finished apart", () => {
     expect(scheduleStatus({ ...base, active: true })).toBe("active");
     expect(scheduleStatus({ ...base, active: false })).toBe("paused");

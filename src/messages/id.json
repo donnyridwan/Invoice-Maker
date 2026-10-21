@@ -380,6 +380,7 @@
     "status": {
       "active": "Aktif",
       "paused": "Dijeda",
+      "stopped": "Berhenti",
       "finished": "Selesai"
     },
     "dialog": {
@@ -445,6 +446,8 @@
       "emailDisabled": "Draft dibuat, tetapi pengiriman email belum dikonfigurasi.",
       "clientEmailMissing": "Draft dibuat, tetapi tidak terkirim karena klien tidak punya email.",
       "emailFailed": "Draft dibuat, tetapi emailnya gagal terkirim.",
+      "tooManyFailures": "Jadwal dihentikan setelah 7 kali gagal berturut-turut. Periksa invoice sumbernya, lalu lanjutkan.",
+      "rateLimited": "Draft dibuat, tetapi batas pengiriman email hari ini tercapai. Akan dicoba lagi pada jadwal berikutnya.",
       "other": "Draft dibuat, tetapi tidak bisa dikirim otomatis. Periksa invoicenya."
     },
     "list": {

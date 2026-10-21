@@ -182,6 +182,9 @@ export const invoices = pgTable(
     // The base currency `fxRateToBase` was computed against; the rate is only trusted while the
     // profile's base is still this currency. NULL whenever `fxRateToBase` is NULL.
     fxBaseCurrency: text("fx_base_currency"),
+    // A recurring `auto_email` invoice still waiting to be emailed: set when the run generates it,
+    // cleared once the email is out (or given up on), so an interrupted run never loses a delivery.
+    emailPending: boolean("email_pending").notNull().default(false),
     // The recurring schedule that generated this invoice (NULL for every other invoice).
     recurringScheduleId: uuid("recurring_schedule_id").references((): AnyPgColumn => recurringSchedules.id, {
       onDelete: "set null",
@@ -194,6 +197,8 @@ export const invoices = pgTable(
     uniqueIndex("invoices_recurring_schedule_id_issue_date_idx").on(t.recurringScheduleId, t.issueDate),
     index("invoices_user_id_status_idx").on(t.userId, t.status),
     index("invoices_user_id_issue_date_idx").on(t.userId, t.issueDate),
+    // The recurring run's sweep of auto-emails still to send reads only these few rows.
+    index("invoices_email_pending_idx").on(t.createdAt).where(sql`${t.emailPending}`),
   ],
 );
 
@@ -232,6 +237,8 @@ export const recurringSchedules = pgTable(
     active: boolean("active").notNull().default(true),
     // Why the last run needs attention (a code the UI translates); cleared by the next clean run.
     lastError: text("last_error"),
+    // Consecutive runs that threw; the schedule is deactivated after MAX_FAILED_RUNS (reset by a clean run).
+    failedRuns: integer("failed_runs").notNull().default(0),
     ...timestamps,
   },
   (t) => [

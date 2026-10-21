@@ -18,7 +18,7 @@ import { RecurringDialog } from "./recurring-dialog";
 import { endLabel, ruleText, type RecurringT, type ScheduleView } from "./schedule-summary";
 import type { ActionResult } from "@/lib/action-result";
 
-const STATUS_VARIANT = { active: "success", paused: "warning", finished: "neutral" } as const;
+const STATUS_VARIANT = { active: "success", paused: "warning", stopped: "danger", finished: "neutral" } as const;
 const KNOWN_ERRORS = new Set([
   "sourceUnavailable",
   "runFailed",
@@ -26,6 +26,8 @@ const KNOWN_ERRORS = new Set([
   "emailDisabled",
   "clientEmailMissing",
   "emailFailed",
+  "tooManyFailures",
+  "rateLimited",
 ]);
 
 type Busy = "pause" | "resume" | "stop" | null;
@@ -96,6 +98,8 @@ export function ScheduleCard({
   const end = endLabel(rt, locale, schedule);
   const error = schedule.lastError ? t(`lastError.${KNOWN_ERRORS.has(schedule.lastError) ? schedule.lastError : "other"}`) : null;
   const working = busy !== null;
+  // A schedule whose source is gone can never run again, so there is nothing to resume.
+  const canResume = schedule.lastError !== "sourceUnavailable";
 
   return (
     <Card role="region" aria-labelledby="schedule-title" className="p-5">
@@ -109,7 +113,7 @@ export function ScheduleCard({
         {ruleText(rt, locale, { frequency: schedule.frequency, interval: schedule.interval, date: schedule.nextRunOn })}
       </p>
       <ul className="mt-2 flex flex-col gap-0.5 text-sm text-muted">
-        {status !== "finished" ? <li>{t("card.next", { date: formatDocDate(schedule.nextRunOn, locale) })}</li> : null}
+        {status === "active" || status === "paused" ? <li>{t("card.next", { date: formatDocDate(schedule.nextRunOn, locale) })}</li> : null}
         <li>{t("card.done", { count: schedule.runsDone })}</li>
         {end ? <li>{end}</li> : null}
         <li>{t(`card.delivery.${schedule.delivery}`)}</li>
@@ -130,7 +134,7 @@ export function ScheduleCard({
             {busy === "pause" ? <Loader2 className="size-4 animate-spin" /> : <Pause className="size-4" />}
             {t("card.pause")}
           </Button>
-        ) : (
+        ) : canResume ? (
           <Button
             variant="secondary"
             size="sm"
@@ -140,7 +144,7 @@ export function ScheduleCard({
             {busy === "resume" ? <Loader2 className="size-4 animate-spin" /> : <Play className="size-4" />}
             {t("card.resume")}
           </Button>
-        )}
+        ) : null}
         <Button variant="secondary" size="sm" disabled={working} onClick={() => setDialogOpen(true)}>
           <Pencil className="size-4" />
           {t("card.edit")}

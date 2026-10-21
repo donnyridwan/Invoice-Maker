@@ -9,7 +9,7 @@ import { formatMoney } from "@/lib/money";
 import type { ScheduleRow } from "./queries";
 import { everyLabel, type RecurringT } from "./schedule-summary";
 
-const STATUS_VARIANT = { active: "success", paused: "warning", finished: "neutral" } as const;
+const STATUS_VARIANT = { active: "success", paused: "warning", stopped: "danger", finished: "neutral" } as const;
 
 /** The recurring schedules of the user: source invoice, client, amount, frequency, next run and status. */
 export function ScheduleTable({ schedules }: { schedules: ScheduleRow[] }) {
@@ -54,7 +54,7 @@ export function ScheduleTable({ schedules }: { schedules: ScheduleRow[] }) {
                 {everyLabel(t as unknown as RecurringT, schedule.frequency, schedule.interval)}
               </TableCell>
               <TableCell className="whitespace-nowrap text-muted">
-                {schedule.status === "finished" ? "—" : formatDocDate(schedule.nextRunOn, locale)}
+                {schedule.status === "finished" || schedule.status === "stopped" ? "—" : formatDocDate(schedule.nextRunOn, locale)}
               </TableCell>
               <TableCell>
                 <Badge variant={STATUS_VARIANT[schedule.status]}>{t(`status.${schedule.status}`)}</Badge>

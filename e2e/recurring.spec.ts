@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { clearOutbox, createInvoiceDraft, fillNewInvoice, readOutbox, registerUser, verifyEmailViaDb } from "./helpers";
+import { clearOutbox, createInvoiceDraft, fillNewInvoice, readOutbox, registerUser, setStatusViaDb, verifyEmailViaDb } from "./helpers";
 
 test.beforeAll(async () => {
   await clearOutbox();
@@ -23,7 +23,7 @@ async function runCron(page: Page) {
     headers: { Authorization: `Bearer ${process.env.CRON_SECRET}` },
   });
   expect(response.status()).toBe(200);
-  return (await response.json()) as { processed: number; created: number; failed: number };
+  return (await response.json()) as { processed: number; created: number; failed: number; skipped: number };
 }
 
 async function openRecurringDialog(page: Page, name: "Jadikan berulang" | "Atur jadwal berulang") {
@@ -58,8 +58,8 @@ test.describe("recurring invoices", () => {
 
     // The cron creates the invoice that is due today (next number) and moves the schedule on.
     const result = await runCron(page);
-    expect(result).toEqual({ processed: 1, created: 1, failed: 0 });
-    expect(await runCron(page)).toEqual({ processed: 0, created: 0, failed: 0 });
+    expect(result).toEqual({ processed: 1, created: 1, failed: 0, skipped: 0 });
+    expect(await runCron(page)).toEqual({ processed: 0, created: 0, failed: 0, skipped: 0 });
 
     // The dashboard points at the draft that is ready to be reviewed and sent.
     await page.goto("/dashboard");
@@ -147,6 +147,29 @@ test.describe("recurring invoices", () => {
     await expect(page.getByText("Belum ada invoice berulang")).toBeVisible();
   });
 
+  test("shows a schedule whose source was voided as stopped, with the reason and nothing to resume", async ({ page }) => {
+    const id = await createInvoiceDraft(page);
+    const dialog = await openRecurringDialog(page, "Jadikan berulang");
+    await dialog.getByLabel("Invoice berikutnya").fill(today());
+    await dialog.getByRole("button", { name: "Simpan" }).click();
+    await expect(scheduleCard(page)).toContainText("Aktif");
+
+    await setStatusViaDb(id, "void");
+    const result = await runCron(page);
+    expect(result.failed).toBe(0);
+
+    await page.goto(`/invoices/${id}`);
+    const card = scheduleCard(page);
+    await expect(card).toContainText("Berhenti");
+    await expect(card).not.toContainText("Dijeda");
+    await expect(card).toContainText("Invoice sumber dihapus atau di-void, jadi jadwal dihentikan.");
+    await expect(card.getByRole("button", { name: "Lanjutkan" })).toHaveCount(0);
+    await expect(card.getByRole("button", { name: "Hentikan" })).toBeVisible();
+
+    await page.goto("/invoices/recurring");
+    await expect(page.getByRole("row").filter({ hasText: "Berhenti" })).toHaveCount(1);
+  });
+
   test("offers automatic email only to a verified owner with a client that has an email, and sends it", async ({ page }) => {
     const clientEmail = `billing+${Date.now()}-${Math.random().toString(36).slice(2, 8)}@acme.test`;
     const { email: ownerEmail } = await registerUser(page);
@@ -177,7 +200,7 @@ test.describe("recurring invoices", () => {
     await dialog.getByRole("button", { name: "Simpan" }).click();
     await expect(scheduleCard(page)).toContainText("Dikirim otomatis lewat email");
 
-    expect(await runCron(page)).toEqual({ processed: 1, created: 1, failed: 0 });
+    expect(await runCron(page)).toEqual({ processed: 1, created: 1, failed: 0, skipped: 0 });
     const emails = await readOutbox(clientEmail);
     expect(emails).toHaveLength(1);
     expect(emails[0].subject).toMatch(/^Invoice INV-\d{4}-003 dari Donny$/);
