@@ -2,10 +2,11 @@ import { and, asc, eq, inArray, isNull, ne } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db/client";
 import { invoiceItems, invoices } from "@/db/schema";
-import { isIsoDate } from "@/lib/dates";
+import { isIsoDate, startOfJakartaDay } from "@/lib/dates";
 import { ValidationError } from "@/lib/errors";
 import { optionalText } from "@/lib/zod-helpers";
 import { parseInput } from "@/lib/validate";
+import { settlePendingClaims } from "@/features/payment-claims/queries";
 import { logEvent, type InvoiceEventType } from "./events";
 import { findOwned, type Invoice, type InvoiceWithItems, type Tx } from "./queries";
 
@@ -98,26 +99,29 @@ const markPaidSchema = z.object({
   note: optionalText(2000),
 });
 
-/** The start of a calendar day in Asia/Jakarta (UTC+7, no DST) as an instant. */
-function startOfJakartaDay(date: string): Date {
-  return new Date(`${date}T00:00:00+07:00`);
-}
-
-/** sent / payment_claimed → paid. `paidOn` (YYYY-MM-DD) is stored as that day's 00:00 WIB. */
+/**
+ * sent / payment_claimed → paid. `paidOn` (YYYY-MM-DD) is stored as that day's 00:00 WIB. Claims
+ * still pending are settled with it: the most recent is accepted, any others rejected.
+ */
 export async function markPaid(
   userId: string,
   id: string,
   input: { paidOn: string; note?: string },
 ): Promise<Invoice> {
   const { paidOn, note } = parseInput(markPaidSchema, input);
-  return transition(
-    userId,
-    id,
-    ["sent", "payment_claimed"],
-    "paid",
-    { paidAt: startOfJakartaDay(paidOn), paidNote: note ?? null },
-    { type: "marked_paid", meta: { paidOn } },
-  );
+  return db.transaction(async (tx) => {
+    const current = await findOwned(tx, userId, id, true);
+    if (current.status !== "sent" && current.status !== "payment_claimed") throw invalidTransition();
+    const updated = await applyTransition(
+      tx,
+      current,
+      "paid",
+      { paidAt: startOfJakartaDay(paidOn), paidNote: note ?? null },
+      { type: "marked_paid", meta: { paidOn } },
+    );
+    await settlePendingClaims(tx, current.id);
+    return updated;
+  });
 }
 
 /** paid → sent again, clearing the payment. */

@@ -44,6 +44,8 @@ export const invoiceStatus = pgEnum("invoice_status", [
   "void",
 ]);
 
+export const claimStatus = pgEnum("claim_status", ["pending", "accepted", "rejected"]);
+
 export const businessProfiles = pgTable("business_profiles", {
   userId: text("user_id")
     .primaryKey()
@@ -206,4 +208,25 @@ export const invoiceEvents = pgTable(
     createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
   },
   (t) => [index("invoice_events_invoice_id_created_at_idx").on(t.invoiceId, t.createdAt)],
+);
+
+/** A client's "I've paid" report on an invoice, awaiting the owner's decision. */
+export const paymentClaims = pgTable(
+  "payment_claims",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    invoiceId: uuid("invoice_id")
+      .notNull()
+      .references(() => invoices.id, { onDelete: "cascade" }),
+    payerName: text("payer_name").notNull(),
+    paidOn: date("paid_on", { mode: "string" }).notNull(),
+    amountMinor: bigint("amount_minor", { mode: "number" }).notNull(),
+    note: text("note"),
+    // Stored proof file (see `@/lib/storage`), if the client attached one.
+    proofUrl: text("proof_url"),
+    status: claimStatus("status").notNull().default("pending"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+    decidedAt: timestamp("decided_at", { withTimezone: true }),
+  },
+  (t) => [index("payment_claims_invoice_id_status_idx").on(t.invoiceId, t.status)],
 );

@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { and, asc, desc, eq, gt, ilike, inArray, or, sql } from "drizzle-orm";
+import { and, asc, desc, eq, gt, ilike, inArray, ne, or, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { businessProfiles, clients, invoiceEvents, invoiceItems, invoices, paymentAccounts } from "@/db/schema";
 import { getClient } from "@/features/clients/queries";
@@ -145,6 +145,25 @@ export async function createDraftInvoice(userId: string, opts: { clientId?: stri
 
 export async function getInvoice(userId: string, id: string): Promise<InvoiceWithItems> {
   const invoice = await findOwned(db, userId, id);
+  const items = await db
+    .select()
+    .from(invoiceItems)
+    .where(eq(invoiceItems.invoiceId, invoice.id))
+    .orderBy(asc(invoiceItems.position));
+  return { ...invoice, items };
+}
+
+/**
+ * The invoice behind a public link, for the client page. Drafts and unknown tokens give `null`
+ * (the page is a 404); a void invoice is returned so the page can say it was cancelled.
+ */
+export async function getPublicInvoice(token: string): Promise<InvoiceWithItems | null> {
+  const [invoice] = await db
+    .select()
+    .from(invoices)
+    .where(and(eq(invoices.publicToken, token), ne(invoices.status, "draft")))
+    .limit(1);
+  if (!invoice) return null;
   const items = await db
     .select()
     .from(invoiceItems)

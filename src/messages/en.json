@@ -369,7 +369,9 @@
     "invalidTransition": "This action is not possible for the current invoice status",
     "clientRequired": "Select a client first",
     "itemsRequired": "Add at least one item",
-    "totalZero": "Invoice total must be greater than 0"
+    "totalZero": "Invoice total must be greater than 0",
+    "paidOnFuture": "Payment date cannot be more than tomorrow",
+    "tooManyClaims": "There are already 3 claims awaiting confirmation. Please wait for the invoice owner to confirm."
   },
   "errors": {
     "validation": "Please check your input.",

@@ -369,7 +369,9 @@
     "invalidTransition": "Aksi ini tidak bisa dilakukan pada status invoice saat ini",
     "clientRequired": "Pilih klien terlebih dahulu",
     "itemsRequired": "Tambahkan minimal satu item",
-    "totalZero": "Total invoice harus lebih dari 0"
+    "totalZero": "Total invoice harus lebih dari 0",
+    "paidOnFuture": "Tanggal bayar tidak boleh lebih dari besok",
+    "tooManyClaims": "Sudah ada 3 konfirmasi yang menunggu. Tunggu hingga dikonfirmasi pemilik invoice."
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",

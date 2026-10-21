@@ -1,6 +1,7 @@
 import { TIME_ZONE } from "@/i18n/config";
 
 const DAY_MS = 86_400_000;
+const JAKARTA_OFFSET_MS = 7 * 3_600_000;
 const ISO_DATE_RE = /^(\d{4})-(\d{2})-(\d{2})$/;
 
 const MONTHS = {
@@ -69,6 +70,11 @@ export function todayInJakarta(now: Date = new Date()): string {
     month: "2-digit",
     day: "2-digit",
   }).format(now);
+}
+
+/** The start of a calendar day in Asia/Jakarta (UTC+7, no DST) as an instant. */
+export function startOfJakartaDay(date: string): Date {
+  return new Date(mustParse(date) - JAKARTA_OFFSET_MS);
 }
 
 /** Calendar-date arithmetic, done at UTC midnight so DST/zones never shift the result. */
