@@ -50,6 +50,13 @@
       "when": 1792568584346,
       "tag": "0006_low_sandman",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1792570360963,
+      "tag": "0007_striped_zemo",
+      "breakpoints": true
     }
   ]
 }

@@ -179,6 +179,9 @@ export const invoices = pgTable(
     // exchange rates used). NULL when no rate was known; 1 when `currency` is the base currency.
     fxRateToBase: numeric("fx_rate_to_base", { precision: 20, scale: 10, mode: "string" }),
     fxRateDate: date("fx_rate_date", { mode: "string" }),
+    // The base currency `fxRateToBase` was computed against; the rate is only trusted while the
+    // profile's base is still this currency. NULL whenever `fxRateToBase` is NULL.
+    fxBaseCurrency: text("fx_base_currency"),
     // The recurring schedule that generated this invoice (NULL for every other invoice).
     recurringScheduleId: uuid("recurring_schedule_id").references((): AnyPgColumn => recurringSchedules.id, {
       onDelete: "set null",

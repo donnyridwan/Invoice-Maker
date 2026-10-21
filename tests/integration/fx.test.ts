@@ -129,6 +129,7 @@ describe("fx rate on invoices", () => {
     const saved = await getInvoice(u.id, draft.id);
     expect(Number(saved.fxRateToBase)).toBeCloseTo(15740.74, 2);
     expect(saved.fxRateDate).toBe("2026-10-20");
+    expect(saved.fxBaseCurrency).toBe("IDR");
   });
 
   it("uses the rate of the issue date, not the newest one", async () => {
@@ -149,6 +150,7 @@ describe("fx rate on invoices", () => {
     const saved = await getInvoice(u.id, draft.id);
     expect(saved.fxRateToBase).toBeNull();
     expect(saved.fxRateDate).toBeNull();
+    expect(saved.fxBaseCurrency).toBeNull();
   });
 
   it("is 1 when the invoice is in the base currency, and follows a currency change", async () => {
@@ -171,12 +173,28 @@ describe("fx rate on invoices", () => {
     expect(draft.currency).toBe("USD");
     expect(Number(draft.fxRateToBase)).toBeCloseTo(15740.74, 2);
     expect(draft.fxRateDate).toBe("2026-10-20");
+    expect(draft.fxBaseCurrency).toBe("IDR");
 
     // The copy gets the rate of today, whatever the source stored.
     await testDb.update(invoices).set({ fxRateToBase: null, fxRateDate: null }).where(eq(invoices.id, draft.id));
     const copy = await duplicateInvoice(u.id, draft.id);
     expect(Number(copy.fxRateToBase)).toBeCloseTo(15740.74, 2);
     expect(copy.fxRateDate).toBe("2026-10-20");
+    expect(copy.fxBaseCurrency).toBe("IDR");
+  });
+
+  it("re-stamps the base currency together with the rate when the profile's base changes", async () => {
+    await saveRates("2026-10-20", { EUR: "1", USD: "1.08", IDR: "17000" });
+    const u = await setupUser("IDR");
+    const draft = await createDraftInvoice(u.id);
+    await saveInvoiceDraft(u.id, draft.id, draftInput());
+    expect((await getInvoice(u.id, draft.id)).fxBaseCurrency).toBe("IDR");
+
+    await testDb.update(businessProfiles).set({ baseCurrency: "USD" }).where(eq(businessProfiles.userId, u.id));
+    await saveInvoiceDraft(u.id, draft.id, draftInput());
+    const saved = await getInvoice(u.id, draft.id);
+    expect(saved.fxBaseCurrency).toBe("USD");
+    expect(Number(saved.fxRateToBase)).toBe(1);
   });
 });
 

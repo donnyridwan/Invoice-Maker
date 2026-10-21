@@ -43,17 +43,32 @@ function monthBounds(today: string): { start: Date; end: Date } {
   return { start: startOfJakartaDay(first), end: startOfJakartaDay(next) };
 }
 
-type InvoiceRow = { currency: string; totalMinor: number; fxRateToBase: string | null; fxRateDate: string | null };
+type InvoiceRow = {
+  currency: string;
+  totalMinor: number;
+  issueDate: string;
+  fxRateToBase: string | null;
+  fxRateDate: string | null;
+  fxBaseCurrency: string | null;
+};
+
+type RateTables = { date: string; rates: RateTable };
+
+/** Whether the rate stored on `row` was computed against `baseCurrency` (a base change makes it stale). */
+function hasUsableRate(row: InvoiceRow, baseCurrency: CurrencyCode): boolean {
+  return row.fxRateToBase !== null && row.fxBaseCurrency === baseCurrency;
+}
 
 /**
  * Totals of `rows` in `baseCurrency`. Base-currency invoices are added as they are; others are
- * converted with the rate stored on the invoice, else with `fallback` (the latest rates), and
- * listed under `withoutRate` when neither knows the currency.
+ * converted with the rate stored on the invoice while it was computed against this same base,
+ * else with the rates `tableFor` finds for the invoice's issue date, and listed under
+ * `withoutRate` when neither knows the currency.
  */
 function buildCard(
   rows: InvoiceRow[],
   baseCurrency: CurrencyCode,
-  fallback: { date: string; rates: RateTable } | null,
+  tableFor: (issueDate: string) => RateTables | null,
 ): DashboardCard {
   let totalBaseMinor = 0;
   let converted = false;
@@ -69,11 +84,17 @@ function buildCard(
       continue;
     }
 
-    let rate = row.fxRateToBase;
-    let date = row.fxRateDate;
-    if (rate === null && fallback) {
-      rate = rateBetween(row.currency, baseCurrency, fallback.rates);
-      date = fallback.date;
+    let rate: string | null = null;
+    let date: string | null = null;
+    if (hasUsableRate(row, baseCurrency)) {
+      rate = row.fxRateToBase;
+      date = row.fxRateDate;
+    } else {
+      const table = tableFor(row.issueDate);
+      if (table) {
+        rate = rateBetween(row.currency, baseCurrency, table.rates);
+        date = table.date;
+      }
     }
     if (rate === null) {
       const entry = withoutRate.get(row.currency) ?? { totalMinor: 0, count: 0 };
@@ -118,8 +139,10 @@ export async function getDashboardSummary(userId: string, today: string): Promis
       .select({
         currency: invoices.currency,
         totalMinor: invoices.totalMinor,
+        issueDate: invoices.issueDate,
         fxRateToBase: invoices.fxRateToBase,
         fxRateDate: invoices.fxRateDate,
+        fxBaseCurrency: invoices.fxBaseCurrency,
       })
       .from(invoices)
       .where(and(eq(invoices.userId, userId), ...conditions));
@@ -132,17 +155,22 @@ export async function getDashboardSummary(userId: string, today: string): Promis
     countPendingClaims(userId),
   ]);
 
-  // The latest rates stand in for invoices saved before any rate was known; read only when needed.
+  // Invoices without a usable stored rate (none yet, or computed for another base) are converted with
+  // the rates on or before their issue date (else the latest); each date is read once, and only if needed.
   const base = isCurrencyCode(profile.baseCurrency) ? profile.baseCurrency : "IDR";
-  const needsFallback = [...unpaid, ...overdue, ...paidThisMonth].some(
-    (row) => row.currency !== base && row.fxRateToBase === null,
+  const needsTable = [...unpaid, ...overdue, ...paidThisMonth].filter(
+    (row) => row.currency !== base && !hasUsableRate(row, base),
   );
-  const fallback = needsFallback ? await getRateTableOnOrBefore(today) : null;
+  const tables = new Map<string, RateTables | null>();
+  for (const date of new Set(needsTable.map((row) => row.issueDate))) {
+    tables.set(date, await getRateTableOnOrBefore(date));
+  }
+  const tableFor = (issueDate: string) => tables.get(issueDate) ?? null;
 
   return {
-    unpaid: buildCard(unpaid, base, fallback),
-    overdue: buildCard(overdue, base, fallback),
-    paidThisMonth: buildCard(paidThisMonth, base, fallback),
+    unpaid: buildCard(unpaid, base, tableFor),
+    overdue: buildCard(overdue, base, tableFor),
+    paidThisMonth: buildCard(paidThisMonth, base, tableFor),
     pendingClaims,
   };
 }

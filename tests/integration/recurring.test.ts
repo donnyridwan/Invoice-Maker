@@ -165,6 +165,7 @@ describe("runDueSchedules", () => {
     const [copy] = await generated(schedule.id);
     expect(Number(copy.fxRateToBase)).toBe(1);
     expect(copy.fxRateDate).toBe(today);
+    expect(copy.fxBaseCurrency).toBe("IDR");
   });
 
   it("freezes snapshots rebuilt from live data, not the source's old copies", async () => {

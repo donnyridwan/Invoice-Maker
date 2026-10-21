@@ -18,6 +18,9 @@ type Spec = {
   /** `fxRateToBase` stored on the invoice (units of the base currency per unit of `currency`); none by default. */
   fx?: string;
   fxDate?: string;
+  /** The base currency `fx` was computed against; "IDR" by default (the default profile base). */
+  fxBase?: string;
+  issueDate?: string;
 };
 
 async function setupUser(baseCurrency = "IDR") {
@@ -37,9 +40,11 @@ async function makeInvoice(userId: string, spec: Spec) {
       currency: spec.currency ?? "IDR",
       subtotalMinor: spec.total,
       totalMinor: spec.total,
+      ...(spec.issueDate ? { issueDate: spec.issueDate } : {}),
       dueDate: spec.due ?? "2026-11-01",
       fxRateToBase: spec.fx ?? null,
       fxRateDate: spec.fx ? (spec.fxDate ?? "2026-10-20") : null,
+      fxBaseCurrency: spec.fx ? (spec.fxBase ?? "IDR") : null,
       paidAt: spec.paidAt ? new Date(spec.paidAt) : null,
       sentAt: spec.status === "draft" ? null : new Date("2026-10-01T00:00:00Z"),
     })
@@ -154,12 +159,49 @@ describe("dashboard summary", () => {
 
   it("converts into a two-decimal base currency and ignores the stored rate of base-currency invoices", async () => {
     const u = await setupUser("USD");
-    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 125_000, fx: "99" });
-    await makeInvoice(u.id, { status: "sent", currency: "IDR", total: 1_500_000, fx: "0.0000666667" });
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 125_000, fx: "99", fxBase: "USD" });
+    await makeInvoice(u.id, { status: "sent", currency: "IDR", total: 1_500_000, fx: "0.0000666667", fxBase: "USD" });
 
     const { unpaid } = await getDashboardSummary(u.id, TODAY);
     // 1.500.000 IDR * 0.0000666667 = USD 100.00
     expect(unpaid).toMatchObject({ baseCurrency: "USD", totalBaseMinor: 125_000 + 10_000, converted: true });
+  });
+
+  it("does not inflate totals after the base currency changed: a rate stamped for another base is ignored", async () => {
+    // 1 USD = 15,000 IDR was stored while the base was IDR.
+    await saveRates("2026-10-20", { EUR: "1", USD: "1.08", IDR: "17000" });
+    const u = await setupUser("IDR");
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 10_000, fx: "15000", fxBase: "IDR" });
+    await makeInvoice(u.id, { status: "sent", currency: "IDR", total: 1_000_000, fx: "1", fxBase: "IDR" });
+    expect((await getDashboardSummary(u.id, TODAY)).unpaid.totalBaseMinor).toBe(1_500_000 + 1_000_000);
+
+    // The profile switches to USD: the stored 15,000 must not be read as "USD per USD".
+    await testDb.update(businessProfiles).set({ baseCurrency: "USD" }).where(eq(businessProfiles.userId, u.id));
+    const { unpaid } = await getDashboardSummary(u.id, TODAY);
+    // USD 100.00 stays 10,000 minor; IDR 1.000.000 -> 1,000,000 * 1.08 / 17000 = USD 63.53.
+    expect(unpaid).toMatchObject({ baseCurrency: "USD", totalBaseMinor: 10_000 + 6_353, converted: true, withoutRate: [] });
+    expect(unpaid.rateDate).toBe("2026-10-20");
+  });
+
+  it("converts a stale-base or unstamped invoice with the rates on or before its issue date, else the latest", async () => {
+    await saveRates("2026-10-10", { EUR: "1", USD: "1.00", IDR: "16000" });
+    await saveRates("2026-10-20", { EUR: "1", USD: "1.08", IDR: "17000" });
+    const u = await setupUser("IDR");
+    // Issued 12 Oct: the 10 Oct table applies (16000 IDR per USD), although a rate for another base is stored.
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 100, fx: "3", fxBase: "EUR", issueDate: "2026-10-12" });
+    // Issued before the first known table: the latest table stands in (17000 / 1.08).
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 100, issueDate: "2026-09-01" });
+    const { unpaid } = await getDashboardSummary(u.id, TODAY);
+    expect(unpaid.totalBaseMinor).toBe(16_000 + 15_741);
+    expect(unpaid.rateDate).toBe("2026-10-20");
+  });
+
+  it("puts an invoice stamped for another base in withoutRate when no rate table is known", async () => {
+    const u = await setupUser("USD");
+    await makeInvoice(u.id, { status: "sent", currency: "IDR", total: 1_500_000, fx: "0.0000666667", fxBase: "EUR" });
+    const { unpaid } = await getDashboardSummary(u.id, TODAY);
+    expect(unpaid.totalBaseMinor).toBe(0);
+    expect(unpaid.withoutRate).toEqual([{ currency: "IDR", totalMinor: 1_500_000, count: 1 }]);
   });
 
   it("uses the profile's base currency", async () => {
