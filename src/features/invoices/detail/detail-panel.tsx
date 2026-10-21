@@ -20,10 +20,11 @@ type Props = {
   events: InvoiceEvent[];
   pendingClaims: ClaimListItem[];
   payerNames: Record<string, string>;
+  emailEnabled: boolean;
 };
 
 /** The 360px right rail of the detail page: status, actions, pending claims and the activity. */
-export function DetailPanel({ invoice, currency, today, now, events, pendingClaims, payerNames }: Props) {
+export function DetailPanel({ invoice, currency, today, now, events, pendingClaims, payerNames, emailEnabled }: Props) {
   const t = useTranslations("invoices.detail");
   const locale = resolveLocale(useLocale());
   const status = displayStatus(invoice, today);
@@ -85,6 +86,7 @@ export function DetailPanel({ invoice, currency, today, now, events, pendingClai
           status={invoice.status}
           today={today}
           publicPath={`/i/${invoice.publicToken}`}
+          emailEnabled={emailEnabled}
         />
       </Card>
 

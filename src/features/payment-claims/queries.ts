@@ -2,6 +2,7 @@ import { and, count, desc, eq, ne } from "drizzle-orm";
 import { db } from "@/db/client";
 import { invoices, paymentClaims } from "@/db/schema";
 import { logEvent } from "@/features/invoices/events";
+import { notifyOwnerOfClaim } from "@/features/invoices/notify-claim";
 import { findOwned, type Invoice, type Tx } from "@/features/invoices/queries";
 import { startOfJakartaDay } from "@/lib/dates";
 import { NotFoundError, ValidationError } from "@/lib/errors";
@@ -42,8 +43,9 @@ export async function createPaymentClaim(
   const proofType = proof ? validateUpload("payment-proof", proof) : null;
 
   let storedUrl: string | null = null;
+  let created: PaymentClaim;
   try {
-    return await db.transaction(async (tx) => {
+    created = await db.transaction(async (tx) => {
       const [invoice] = await tx
         .select()
         .from(invoices)
@@ -84,6 +86,9 @@ export async function createPaymentClaim(
     if (storedUrl) await discardProof(storedUrl);
     throw e;
   }
+  // After the commit and best effort: it logs its own errors and never throws.
+  await notifyOwnerOfClaim(created.id);
+  return created;
 }
 
 /** All claims on an invoice of `userId`, newest first. Another user's invoice is NotFound. */

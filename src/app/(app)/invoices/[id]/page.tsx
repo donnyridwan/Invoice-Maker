@@ -10,10 +10,14 @@ import { documentSourceFromInvoice } from "@/features/invoices/document-source";
 import { listEvents } from "@/features/invoices/events";
 import { getInvoice } from "@/features/invoices/queries";
 import { listClaims } from "@/features/payment-claims/queries";
+import { isEmailEnabled } from "@/lib/email";
 import { isCurrencyCode } from "@/lib/currencies";
 import { todayInJakarta } from "@/lib/dates";
 import { NotFoundError } from "@/lib/errors";
 import { requireUser } from "@/lib/session";
+
+// Server actions called from this page (sending by email renders a PDF) may run up to 30 s.
+export const maxDuration = 30;
 
 /** Owner's view of an invoice that has left draft: the document, its status, actions, claims and activity. */
 export default async function InvoiceDetailPage({ params }: PageProps<"/invoices/[id]">) {
@@ -72,6 +76,7 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
               proofUrl: claim.proofUrl,
             }))}
             payerNames={payerNames}
+            emailEnabled={isEmailEnabled()}
           />
         </aside>
       </div>

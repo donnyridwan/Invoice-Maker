@@ -256,7 +256,8 @@
         "duplicate": "Duplicate",
         "void": "Void",
         "viewPublic": "View client page",
-        "downloadPdf": "Download PDF"
+        "downloadPdf": "Download PDF",
+        "sendEmail": "Send by email"
       },
       "toast": {
         "linkCopied": "Link copied",
@@ -266,7 +267,8 @@
         "unmarkedPaid": "Payment undone",
         "voided": "Invoice voided",
         "claimAccepted": "Claim accepted, invoice paid",
-        "claimRejected": "Claim rejected"
+        "claimRejected": "Claim rejected",
+        "emailSent": "Email sent"
       },
       "markPaid": {
         "title": "Mark as paid",
@@ -318,6 +320,23 @@
           "unknown": "Other activity"
         },
         "paidOnDetail": "Payment date {date}"
+      },
+      "sendEmail": {
+        "title": "Send by email",
+        "description": "The client receives a link to the invoice and the PDF as an attachment.",
+        "loading": "Loading…",
+        "loadFailed": "Could not prepare the email. Please try again.",
+        "to": "To",
+        "cc": "CC",
+        "ccHint": "Separate with commas. Maximum 5 addresses.",
+        "subject": "Subject",
+        "message": "Message",
+        "attachmentInfo": "The invoice PDF will be attached.",
+        "send": "Send",
+        "unverifiedTitle": "Verify your email first",
+        "unverifiedDescription": "To send invoices by email, verify {email} first. We will send a verification link there.",
+        "sendVerification": "Send verification link",
+        "verificationSent": "Verification link sent to {email}. Open it, then come back here."
       }
     },
     "tabs": {
@@ -503,7 +522,12 @@
     "itemsRequired": "Add at least one item",
     "totalZero": "Invoice total must be greater than 0",
     "paidOnFuture": "Payment date cannot be more than tomorrow",
-    "tooManyClaims": "There are already 3 claims awaiting confirmation. Please wait for the invoice owner to confirm."
+    "tooManyClaims": "There are already 3 claims awaiting confirmation. Please wait for the invoice owner to confirm.",
+    "emailNotVerified": "Verify your email in Settings before sending invoices by email.",
+    "emailDisabled": "Email delivery is not configured",
+    "rateLimited": "You have reached today's email limit (50 per 24 hours). Please try again later.",
+    "emailFailed": "The email could not be sent. Please try again later.",
+    "tooManyRecipients": "Maximum {max} addresses."
   },
   "errors": {
     "validation": "Please check your input.",
@@ -578,6 +602,27 @@
       "button": "Verify email",
       "linkHint": "Or copy this link into your browser:",
       "expires": "The link is valid for 1 hour. If you did not sign up, you can ignore this email."
+    },
+    "defaultInvoice": {
+      "subject": "Invoice {number} from {businessName}",
+      "message": "Hi {clientName},\n\nPlease find invoice {number} for {total}, due {dueDate}.\n\nThank you,\n{businessName}"
+    },
+    "invoice": {
+      "preview": "Invoice {number} for {total} from {businessName}",
+      "label": "Invoice {number}",
+      "dueOn": "Due {date}",
+      "button": "View invoice",
+      "attachmentNote": "The invoice is attached to this email as a PDF."
+    },
+    "claim": {
+      "subject": "Client confirmed payment of invoice {number}",
+      "preview": "{payer} says they paid invoice {number}.",
+      "title": "A client confirmed a payment",
+      "body": "{payer} says they paid invoice {number}. Check your account, then confirm or reject the payment.",
+      "amount": "Amount",
+      "paidOn": "Paid on",
+      "note": "Note",
+      "button": "Review payment"
     }
   }
 }

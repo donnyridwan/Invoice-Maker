@@ -54,6 +54,7 @@ export function InvoiceEditor({
   clients: initialClients,
   accounts,
   catalog,
+  emailEnabled,
 }: {
   invoiceId: string;
   status: Invoice["status"];
@@ -64,6 +65,7 @@ export function InvoiceEditor({
   clients: ClientOption[];
   accounts: AccountOption[];
   catalog: CatalogOption[];
+  emailEnabled: boolean;
 }) {
   const t = useTranslations("invoices.editor");
   const tAll = useTranslations();
@@ -163,7 +165,7 @@ export function InvoiceEditor({
               <Download className="size-4" aria-hidden />
               <span className="hidden sm:inline">{t("downloadPdf")}</span>
             </a>
-            {locked ? null : <ShareMenu invoiceId={invoiceId} flush={autosave.flush} />}
+            {locked ? null : <ShareMenu invoiceId={invoiceId} flush={autosave.flush} emailEnabled={emailEnabled} />}
             <EditorMenu
             invoiceId={invoiceId}
             number={state.number}

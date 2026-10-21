@@ -15,6 +15,7 @@ import { listPaymentAccounts } from "@/features/payment-accounts/queries";
 import { summarizePaymentAccount } from "@/features/payment-accounts/summary";
 import { getProfile } from "@/features/profile/queries";
 import { resolveLocale } from "@/i18n/config";
+import { isEmailEnabled } from "@/lib/email";
 import { todayInJakarta } from "@/lib/dates";
 import { NotFoundError } from "@/lib/errors";
 import { requireUser } from "@/lib/session";
@@ -28,6 +29,9 @@ function toClientOption(client: Client): ClientOption {
     archived: Boolean(client.archivedAt),
   };
 }
+
+// Server actions called from this page (sending by email renders a PDF) may run up to 30 s.
+export const maxDuration = 30;
 
 export default async function EditInvoicePage({ params }: PageProps<"/invoices/[id]/edit">) {
   const user = await requireUser();
@@ -90,6 +94,7 @@ export default async function EditInvoicePage({ params }: PageProps<"/invoices/[
       clients={clients}
       accounts={accounts}
       catalog={catalog}
+      emailEnabled={isEmailEnabled()}
     />
   );
 }

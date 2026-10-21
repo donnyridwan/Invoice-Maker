@@ -9,6 +9,7 @@ import { NotFoundError } from "@/lib/errors";
 import { runUserAction } from "@/lib/run-user-action";
 import { requireUser } from "@/lib/session";
 import { markPaid, markSent, unmarkPaid, voidInvoice } from "./lifecycle";
+import { getInvoiceEmailDefaults, sendInvoiceEmail, type SendInvoiceEmailInput } from "./send-email";
 import { createDraftInvoice, deleteDraftInvoice, duplicateInvoice, saveInvoiceDraft } from "./queries";
 import type { InvoiceDraftInput } from "./schema";
 
@@ -117,4 +118,39 @@ export async function voidInvoiceAction(id: string): Promise<ActionResult> {
   return runLifecycle(async (userId) => {
     await voidInvoice(userId, id);
   });
+}
+
+/**
+ * "Kirim lewat email": the invoice goes to the client with its PDF attached (draft → sent). The
+ * verified flag comes from the session, and `sendInvoiceEmail` enforces every prerequisite.
+ */
+export async function sendInvoiceEmailAction(id: string, input: SendInvoiceEmailInput): Promise<ActionResult> {
+  const user = await requireUser();
+  try {
+    await sendInvoiceEmail(user, id, input);
+    revalidateInvoicePages();
+    return { ok: true, data: undefined };
+  } catch (e) {
+    return toActionError(e);
+  }
+}
+
+export type EmailDialogData = {
+  to: string;
+  subject: string;
+  message: string;
+  /** The account's email address and whether it is verified (the dialog asks to verify first if not). */
+  accountEmail: string;
+  verified: boolean;
+};
+
+/** Everything the email dialog needs, read fresh when it opens (after the editor flushed its changes). */
+export async function getEmailDialogDataAction(id: string): Promise<ActionResult<EmailDialogData>> {
+  const user = await requireUser();
+  try {
+    const defaults = await getInvoiceEmailDefaults(user.id, id);
+    return { ok: true, data: { ...defaults, accountEmail: user.email, verified: user.emailVerified } };
+  } catch (e) {
+    return toActionError(e);
+  }
 }

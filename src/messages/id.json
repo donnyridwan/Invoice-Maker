@@ -256,7 +256,8 @@
         "duplicate": "Duplikat",
         "void": "Void",
         "viewPublic": "Lihat halaman klien",
-        "downloadPdf": "Unduh PDF"
+        "downloadPdf": "Unduh PDF",
+        "sendEmail": "Kirim lewat email"
       },
       "toast": {
         "linkCopied": "Link disalin",
@@ -266,7 +267,8 @@
         "unmarkedPaid": "Pembayaran dibatalkan",
         "voided": "Invoice di-void",
         "claimAccepted": "Klaim diterima, invoice lunas",
-        "claimRejected": "Klaim ditolak"
+        "claimRejected": "Klaim ditolak",
+        "emailSent": "Email terkirim"
       },
       "markPaid": {
         "title": "Tandai lunas",
@@ -318,6 +320,23 @@
           "unknown": "Aktivitas lain"
         },
         "paidOnDetail": "Tanggal bayar {date}"
+      },
+      "sendEmail": {
+        "title": "Kirim lewat email",
+        "description": "Klien menerima link invoice dan PDF-nya sebagai lampiran.",
+        "loading": "Memuat…",
+        "loadFailed": "Tidak bisa menyiapkan email. Coba lagi.",
+        "to": "Kepada",
+        "cc": "CC",
+        "ccHint": "Pisahkan dengan koma. Maksimal 5 alamat.",
+        "subject": "Subjek",
+        "message": "Pesan",
+        "attachmentInfo": "PDF invoice akan dilampirkan.",
+        "send": "Kirim",
+        "unverifiedTitle": "Verifikasi email kamu dulu",
+        "unverifiedDescription": "Untuk mengirim invoice lewat email, verifikasi dulu alamat {email}. Kami akan mengirim link verifikasi ke sana.",
+        "sendVerification": "Kirim link verifikasi",
+        "verificationSent": "Link verifikasi dikirim ke {email}. Buka link itu, lalu kembali ke sini."
       }
     },
     "tabs": {
@@ -503,7 +522,12 @@
     "itemsRequired": "Tambahkan minimal satu item",
     "totalZero": "Total invoice harus lebih dari 0",
     "paidOnFuture": "Tanggal bayar tidak boleh lebih dari besok",
-    "tooManyClaims": "Sudah ada 3 konfirmasi yang menunggu. Tunggu hingga dikonfirmasi pemilik invoice."
+    "tooManyClaims": "Sudah ada 3 konfirmasi yang menunggu. Tunggu hingga dikonfirmasi pemilik invoice.",
+    "emailNotVerified": "Verifikasi email kamu di Pengaturan sebelum mengirim invoice lewat email.",
+    "emailDisabled": "Pengiriman email belum dikonfigurasi",
+    "rateLimited": "Batas pengiriman email hari ini sudah tercapai (50 per 24 jam). Coba lagi nanti.",
+    "emailFailed": "Email gagal terkirim. Coba lagi nanti.",
+    "tooManyRecipients": "Maksimal {max} alamat."
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",
@@ -578,6 +602,27 @@
       "button": "Verifikasi email",
       "linkHint": "Atau salin link ini ke browser kamu:",
       "expires": "Link berlaku selama 1 jam. Jika kamu tidak merasa mendaftar, abaikan email ini."
+    },
+    "defaultInvoice": {
+      "subject": "Invoice {number} dari {businessName}",
+      "message": "Halo {clientName},\n\nBerikut invoice {number} sebesar {total}, jatuh tempo {dueDate}.\n\nTerima kasih,\n{businessName}"
+    },
+    "invoice": {
+      "preview": "Invoice {number} sebesar {total} dari {businessName}",
+      "label": "Invoice {number}",
+      "dueOn": "Jatuh tempo {date}",
+      "button": "Lihat invoice",
+      "attachmentNote": "Invoice dalam bentuk PDF terlampir di email ini."
+    },
+    "claim": {
+      "subject": "Klien mengonfirmasi pembayaran invoice {number}",
+      "preview": "{payer} mengatakan sudah membayar invoice {number}.",
+      "title": "Klien mengonfirmasi pembayaran",
+      "body": "{payer} mengatakan sudah membayar invoice {number}. Cek rekening kamu, lalu konfirmasi atau tolak pembayarannya.",
+      "amount": "Jumlah",
+      "paidOn": "Tanggal bayar",
+      "note": "Catatan",
+      "button": "Tinjau pembayaran"
     }
   }
 }

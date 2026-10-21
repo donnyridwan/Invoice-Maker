@@ -33,6 +33,7 @@ export function ActionsBar({
   status,
   today,
   publicPath,
+  emailEnabled,
 }: {
   invoiceId: string;
   number: string;
@@ -40,6 +41,7 @@ export function ActionsBar({
   today: string;
   /** `/i/<token>`: the client's page. */
   publicPath: string;
+  emailEnabled: boolean;
 }) {
   const t = useTranslations("invoices.detail");
   const tAll = useTranslations();
@@ -100,7 +102,7 @@ export function ActionsBar({
       {open ? (
         <>
           <MarkPaidDialog invoiceId={invoiceId} number={number} today={today} />
-          <ShareMenu invoiceId={invoiceId} variant="secondary" />
+          <ShareMenu invoiceId={invoiceId} variant="secondary" emailEnabled={emailEnabled} />
           <Button asChild variant="secondary" size="sm">
             <Link href={`/invoices/${invoiceId}/edit`}>
               <Pencil className="size-4" />
