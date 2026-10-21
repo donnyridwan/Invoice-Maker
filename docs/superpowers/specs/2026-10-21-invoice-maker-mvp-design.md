@@ -55,26 +55,27 @@ laporan lanjutan, aplikasi mobile native, custom domain, paket berbayar.
 
 ## 2a. Gaya Visual
 
-Monokrom dengan karakter Wise
+Gaya Wise
 ([Wise home](https://mobbin.com/screens/ede78e65-ca02-449f-96c0-f36420fe9281),
 [Wise send](https://mobbin.com/screens/ebc6f8fd-a5eb-44be-b881-1f023bc32f88)):
 
-- Hitam–putih–abu: tinta `#0E0E0E`/`#111111`, teks sekunder `#5F5F5C`, kanvas
-  `#F2F2F0`, border `#E4E4E2`. Merah (`#C4271C`) hanya untuk error, aksi hapus,
+- Hijau Wise: tinta aksen hijau tua `#163300`, tombol utama hijau lime
+  `#9FE870` dengan teks `#163300`, teks `#0E0F0C`, teks sekunder `#5D605A`,
+  kanvas `#F1F3EE`, border `#E1E5DD`. Merah (`#C4271C`) untuk error, aksi hapus,
   dan status Jatuh tempo.
-- Tombol berbentuk pil: utama hitam dengan teks putih, sekunder bergaris.
-  Input setinggi 44px dengan radius 10px.
-- Kartu dan panel membulat (20–24px), sebagian di atas kanvas abu tanpa
-  border. Tab dan filter berupa pil; pil aktif berwarna hitam.
+- Tombol berbentuk pil: utama lime, sekunder bergaris. Input setinggi 44px
+  dengan radius 10px.
+- Kartu dan panel membulat (20–24px), sebagian di atas kanvas tanpa border.
+  Tab dan filter berupa pil; pil aktif hijau tua.
 - Font Inter, ukuran dasar 14px, judul halaman 30px extrabold, angka nominal
   utama (total tagihan, kartu ringkasan) black weight `tabular-nums`. Wordmark
-  "Invoice Maker" black weight.
-- Badge status monokrom: Lunas hitam-isi, Terkirim/Dilihat dan Menunggu
-  konfirmasi abu, Draft/Void abu muda, Jatuh tempo merah muda.
+  "Invoice Maker" black weight hijau tua.
+- Badge status: Lunas hijau muda, Terkirim/Dilihat biru muda, Menunggu
+  konfirmasi kuning, Draft/Void abu, Jatuh tempo merah muda.
 - Tabel padat dengan baris setinggi ±44px dalam kartu membulat. Empty state
   memakai kotak bergaris putus-putus.
 - Template dokumen invoice tetap bersih dan minimal; warna aksen default
-  dokumen `#111111` (pengguna bisa memilih warna lain). Template default:
+  dokumen `#163300` (pengguna bisa memilih warna lain). Template default:
   **Minimal**.
 
 ## 3. Arsitektur

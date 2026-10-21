@@ -10,7 +10,7 @@ import { cn } from "@/lib/utils";
 import { EditorSection, type EditorSectionProps } from "./editor-section";
 
 /** Accent colours offered as one-click presets. */
-export const ACCENT_PRESETS = ["#111111", "#4A4A4A", "#8A8A8A", "#0A2540", "#00A67E", "#E25950"] as const;
+export const ACCENT_PRESETS = ["#163300", "#00A67E", "#0A2540", "#111111", "#E25950", "#F5A623"] as const;
 
 const HEX_RE = /^#?[0-9A-Fa-f]{6}$/;
 

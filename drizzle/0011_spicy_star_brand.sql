@@ -1,0 +1,1 @@
+ALTER TABLE "business_profiles" ALTER COLUMN "accent_color" SET DEFAULT '#163300';
