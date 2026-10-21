@@ -296,10 +296,8 @@ test.describe("editor extras", () => {
     await page.getByRole("button", { name: "#00A67E" }).click();
     await expect(page.getByRole("button", { name: "#00A67E" })).toHaveAttribute("aria-pressed", "true");
     await expect(preview.locator('[data-template="modern"]')).toHaveAttribute("style", /#00A67E/i);
-    await page.getByLabel("Pilih warna").fill("#123456");
-    await expect(preview.locator('[data-template="modern"]')).toHaveAttribute("style", /#123456/i);
-    await expect(page.getByRole("button", { name: "#00A67E" })).toHaveAttribute("aria-pressed", "false");
     await page.getByRole("button", { name: "#0A2540" }).click();
+    await expect(page.getByRole("button", { name: "#00A67E" })).toHaveAttribute("aria-pressed", "false");
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
 
     await page.reload();

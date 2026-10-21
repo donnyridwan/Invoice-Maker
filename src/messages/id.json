@@ -216,7 +216,6 @@
       "appearance": {
         "template": "Template",
         "accent": "Warna aksen",
-        "picker": "Pilih warna",
         "presetLabel": "Warna siap pakai"
       },
       "menu": {
