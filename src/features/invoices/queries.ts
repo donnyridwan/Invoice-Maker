@@ -11,6 +11,7 @@ import { calcTotals } from "@/lib/invoice-calc";
 import { allocateInvoiceNumber } from "@/lib/numbering";
 import { likePattern } from "@/lib/sql";
 import { parseInput, UUID_RE } from "@/lib/validate";
+import { logEvent } from "./events";
 import { invoiceDraftSchema } from "./schema";
 import {
   businessSnapshotFrom,
@@ -24,7 +25,7 @@ export type Invoice = typeof invoices.$inferSelect;
 export type InvoiceItem = typeof invoiceItems.$inferSelect;
 export type InvoiceWithItems = Invoice & { items: InvoiceItem[] };
 
-type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
+export type Tx = Parameters<Parameters<typeof db.transaction>[0]>[0];
 
 const MAX_NUMBER_ATTEMPTS = 50;
 const EDIT_EVENT_WINDOW_MS = 10 * 60 * 1000;
@@ -44,7 +45,7 @@ function ownedBy(userId: string, id: string) {
   return and(eq(invoices.id, id), eq(invoices.userId, userId));
 }
 
-async function findOwned(tx: Pick<Tx, "select">, userId: string, id: string, lock = false): Promise<Invoice> {
+export async function findOwned(tx: Pick<Tx, "select">, userId: string, id: string, lock = false): Promise<Invoice> {
   if (!UUID_RE.test(id)) throw new NotFoundError("Invoice not found");
   const query = tx.select().from(invoices).where(ownedBy(userId, id)).limit(1);
   const [row] = await (lock ? query.for("update") : query);
@@ -137,7 +138,7 @@ export async function createDraftInvoice(userId: string, opts: { clientId?: stri
       paymentAccountsSnapshot: defaultAccount ? [paymentAccountSnapshotFrom(defaultAccount)] : [],
       notes: profile.defaultNotes,
     });
-    await tx.insert(invoiceEvents).values({ invoiceId: invoice.id, type: "created" });
+    await logEvent(tx, invoice.id, "created");
     return invoice;
   });
 }
@@ -254,7 +255,7 @@ export async function saveInvoiceDraft(
             ),
           )
           .limit(1);
-        if (!recent) await tx.insert(invoiceEvents).values({ invoiceId: id, type: "edited_after_send" });
+        if (!recent) await logEvent(tx, id, "edited_after_send");
       }
 
       return { savedAt: savedAt.toISOString(), totals: summary };
@@ -316,9 +317,7 @@ export async function duplicateInvoice(userId: string, id: string): Promise<Invo
         })),
       );
     }
-    await tx
-      .insert(invoiceEvents)
-      .values({ invoiceId: copy.id, type: "duplicated", meta: { sourceInvoiceId: source.id } });
+    await logEvent(tx, copy.id, "duplicated", { sourceInvoiceId: source.id });
     return copy;
   });
 }
