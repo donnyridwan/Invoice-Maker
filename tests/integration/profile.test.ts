@@ -48,7 +48,7 @@ describe("business profile", () => {
       invoicePrefix: "INV-",
       defaultDueDays: 14,
       baseCurrency: "IDR",
-      accentColor: "#5850EC",
+      accentColor: "#111111",
       onboardingCompletedAt: null,
     });
   });
