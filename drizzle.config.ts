@@ -11,6 +11,6 @@ export default defineConfig({
   out: "./drizzle",
   dbCredentials: {
     // Migrations prefer the direct (non-pooled) connection when one is configured.
-    url: process.env.DATABASE_URL_UNPOOLED ?? process.env.DATABASE_URL ?? "",
+    url: process.env.DATABASE_URL_UNPOOLED || process.env.DATABASE_URL || "",
   },
 });
