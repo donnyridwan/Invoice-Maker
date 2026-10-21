@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, type KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
 import { InvoiceDocumentView } from "@/documents/invoice-document-view";
 import { ScaledDocument } from "@/documents/scaled-document";
@@ -14,20 +14,28 @@ export const ACCENT_PRESETS = ["#5850EC", "#0A2540", "#00A67E", "#E25950", "#F5A
 
 const HEX_RE = /^#?[0-9A-Fa-f]{6}$/;
 
-function TemplateCard({
+/**
+ * One template option. Memoized: the three thumbnails are the costliest part of the form, so a card
+ * re-renders only when its own selection state or the (deferred) document changes, never because
+ * another field was typed into.
+ */
+export const TemplateCard = memo(function TemplateCard({
   template,
+  index,
   doc,
   selected,
   onSelect,
   onKeyDown,
 }: {
   template: Template;
+  index: number;
   doc: InvoiceDocument;
   selected: boolean;
-  onSelect: () => void;
-  onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+  onSelect: (template: Template) => void;
+  onKeyDown: (event: KeyboardEvent<HTMLButtonElement>, index: number) => void;
 }) {
   const t = useTranslations("settings.templates");
+  const templateDoc = useMemo(() => ({ ...doc, template }), [doc, template]);
   return (
     <button
       type="button"
@@ -36,8 +44,8 @@ function TemplateCard({
       aria-label={t(template)}
       tabIndex={selected ? 0 : -1}
       data-template-option={template}
-      onClick={onSelect}
-      onKeyDown={onKeyDown}
+      onClick={() => onSelect(template)}
+      onKeyDown={(event) => onKeyDown(event, index)}
       className={cn(
         "flex min-w-0 flex-col gap-1.5 rounded-md border bg-white p-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
         selected ? "border-accent ring-1 ring-accent" : "border-border hover:border-muted/60",
@@ -46,18 +54,17 @@ function TemplateCard({
       {/* A miniature of the real document in this template: same view, scaled down, not interactive. */}
       <span
         aria-hidden
-        // @ts-expect-error `inert` is a valid attribute; React's types for it vary by version.
-        inert=""
+        inert
         className="pointer-events-none block aspect-[210/297] w-full select-none overflow-hidden rounded-sm border border-border bg-white"
       >
         <ScaledDocument>
-          <InvoiceDocumentView doc={{ ...doc, template }} />
+          <InvoiceDocumentView doc={templateDoc} />
         </ScaledDocument>
       </span>
       <span className={cn("text-center text-xs font-medium", selected ? "text-accent" : "text-fg")}>{t(template)}</span>
     </button>
   );
-}
+});
 
 /** Template picker (three live thumbnails) and accent colour (picker, hex field, presets). */
 export function AppearanceSection({ state, update, doc }: EditorSectionProps & { doc: InvoiceDocument }) {
@@ -74,17 +81,24 @@ export function AppearanceSection({ state, update, doc }: EditorSectionProps & {
     if (HEX_RE.test(text)) update({ accentColor: text.startsWith("#") ? text : `#${text}` });
   }
 
-  function onTemplateKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+  // `update` is a new function on every render of the editor; the cards get stable handlers that
+  // always call the latest one.
+  const updateRef = useRef(update);
+  useEffect(() => {
+    updateRef.current = update;
+  });
+  const selectTemplate = useCallback((template: Template) => updateRef.current({ template }), []);
+  const onTemplateKeyDown = useCallback((event: KeyboardEvent<HTMLButtonElement>, index: number) => {
     const step = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0;
     if (step === 0) return;
     event.preventDefault();
     const next = TEMPLATES[(index + step + TEMPLATES.length) % TEMPLATES.length];
-    update({ template: next });
+    updateRef.current({ template: next });
     // Move focus with the selection (radio group behaviour).
     requestAnimationFrame(() =>
       document.querySelector<HTMLButtonElement>(`[data-template-option="${next}"]`)?.focus(),
     );
-  }
+  }, []);
 
   return (
     <EditorSection title={t("sections.appearance")}>
@@ -93,10 +107,11 @@ export function AppearanceSection({ state, update, doc }: EditorSectionProps & {
           <TemplateCard
             key={template}
             template={template}
+            index={index}
             doc={doc}
             selected={state.template === template}
-            onSelect={() => update({ template })}
-            onKeyDown={(event) => onTemplateKeyDown(event, index)}
+            onSelect={selectTemplate}
+            onKeyDown={onTemplateKeyDown}
           />
         ))}
       </div>

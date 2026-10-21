@@ -33,7 +33,7 @@ export function EditorMenu({
   status: Invoice["status"];
   /** Writes pending edits (so a duplicate has them). */
   flush: () => Promise<void>;
-  /** Drops pending edits (so a deleted draft is not written again). */
+  /** Drops pending edits (so a deleted draft is not written again); called once the delete succeeded. */
   cancel: () => void;
 }) {
   const t = useTranslations("invoices.editor.menu");
@@ -61,10 +61,12 @@ export function EditorMenu({
 
   async function remove() {
     setBusy("delete");
-    cancel();
     try {
       const result = await deleteDraftInvoiceAction(invoiceId);
       if (result.ok) {
+        // Only now drop pending edits (so the deleted draft is not written again); if the delete
+        // fails they stay scheduled and are saved as usual.
+        cancel();
         // Full navigation too: nothing of the deleted draft stays in the client router cache.
         // eslint-disable-next-line @next/next/no-location-assign-relative-destination
         window.location.assign("/invoices");
