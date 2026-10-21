@@ -208,3 +208,12 @@ export async function settlePendingClaims(tx: Tx, invoiceId: string): Promise<vo
       .where(eq(paymentClaims.id, id));
   }
 }
+
+/** Pending claims on one invoice (public page: the "I've paid" button closes at the limit). */
+export async function countInvoicePendingClaims(invoiceId: string): Promise<number> {
+  const [row] = await db
+    .select({ n: count() })
+    .from(paymentClaims)
+    .where(and(eq(paymentClaims.invoiceId, invoiceId), eq(paymentClaims.status, "pending")));
+  return row.n;
+}

@@ -381,5 +381,58 @@
   "meta": {
     "title": "Invoice Maker",
     "description": "Invoicing for Indonesian freelancers"
+  },
+  "public": {
+    "requestTitle": "{business} requested a payment of {total}",
+    "paidTitle": "Invoice {number} is paid",
+    "unnamedBusiness": "The sender",
+    "dueOn": "Due {date}",
+    "dueOnReceipt": "Due on receipt",
+    "dueToday": "today",
+    "dueInDays": "{days, plural, one {in # day} other {in # days}}",
+    "overdueDays": "{days, plural, one {# day overdue} other {# days overdue}}",
+    "paidOn": "Paid on {date}",
+    "status": {
+      "unpaid": "Unpaid",
+      "overdue": "Overdue",
+      "awaiting": "Awaiting confirmation",
+      "paid": "Paid"
+    },
+    "awaitingNote": "Your payment is being confirmed by {business}.",
+    "claimButton": "I've paid",
+    "documentLabel": "Invoice {number}",
+    "void": {
+      "title": "This invoice has been cancelled",
+      "description": "{business} cancelled invoice {number}. Contact {business} if you have any questions."
+    },
+    "methods": {
+      "title": "How to pay",
+      "empty": "Contact {business} for payment instructions.",
+      "copy": "Copy",
+      "copyLabel": "Copy {label}",
+      "copied": "Copied",
+      "copyFailed": "Could not copy"
+    },
+    "claim": {
+      "title": "Confirm your payment",
+      "description": "Let {business} know you have paid. {business} will confirm the payment.",
+      "payerName": "Payer name",
+      "paidOn": "Payment date",
+      "amount": "Amount paid",
+      "note": "Note (optional)",
+      "notePlaceholder": "E.g. transfer from my BCA account",
+      "proof": "Proof of transfer (optional)",
+      "proofHint": "JPG, PNG or PDF, max. 5 MB",
+      "submit": "Submit",
+      "cancel": "Cancel",
+      "thanks": "Thank you — {business} will confirm your payment",
+      "thanksDescription": "There is nothing more you need to do.",
+      "close": "Close"
+    },
+    "footer": "Created with Invoice Maker",
+    "notFound": {
+      "title": "Invoice not found",
+      "description": "This link is not valid or the invoice is no longer available. Ask the sender for a new link."
+    }
   }
 }

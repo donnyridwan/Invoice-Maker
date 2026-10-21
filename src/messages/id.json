@@ -381,5 +381,58 @@
   "meta": {
     "title": "Invoice Maker",
     "description": "Invoice untuk freelancer Indonesia"
+  },
+  "public": {
+    "requestTitle": "{business} meminta pembayaran {total}",
+    "paidTitle": "Invoice {number} sudah lunas",
+    "unnamedBusiness": "Pengirim invoice",
+    "dueOn": "Jatuh tempo {date}",
+    "dueOnReceipt": "Jatuh tempo saat diterima",
+    "dueToday": "hari ini",
+    "dueInDays": "{days} hari lagi",
+    "overdueDays": "terlambat {days} hari",
+    "paidOn": "Dibayar pada {date}",
+    "status": {
+      "unpaid": "Belum dibayar",
+      "overdue": "Jatuh tempo",
+      "awaiting": "Menunggu konfirmasi",
+      "paid": "Lunas"
+    },
+    "awaitingNote": "Pembayaranmu sedang dikonfirmasi oleh {business}.",
+    "claimButton": "Saya sudah bayar",
+    "documentLabel": "Invoice {number}",
+    "void": {
+      "title": "Invoice ini dibatalkan",
+      "description": "{business} membatalkan invoice {number}. Hubungi {business} bila ada pertanyaan."
+    },
+    "methods": {
+      "title": "Cara pembayaran",
+      "empty": "Hubungi {business} untuk cara pembayaran.",
+      "copy": "Salin",
+      "copyLabel": "Salin {label}",
+      "copied": "Disalin",
+      "copyFailed": "Gagal menyalin"
+    },
+    "claim": {
+      "title": "Konfirmasi pembayaran",
+      "description": "Beri tahu {business} bahwa kamu sudah membayar. Pembayaran akan dikonfirmasi oleh {business}.",
+      "payerName": "Nama pembayar",
+      "paidOn": "Tanggal bayar",
+      "amount": "Jumlah dibayar",
+      "note": "Catatan (opsional)",
+      "notePlaceholder": "Contoh: transfer dari rekening BCA",
+      "proof": "Bukti transfer (opsional)",
+      "proofHint": "JPG, PNG, atau PDF, maks. 5 MB",
+      "submit": "Kirim",
+      "cancel": "Batal",
+      "thanks": "Terima kasih — {business} akan mengonfirmasi pembayaranmu",
+      "thanksDescription": "Kamu tidak perlu melakukan apa-apa lagi.",
+      "close": "Tutup"
+    },
+    "footer": "Dibuat dengan Invoice Maker",
+    "notFound": {
+      "title": "Invoice tidak ditemukan",
+      "description": "Tautan ini tidak valid atau invoice sudah tidak tersedia. Hubungi pengirim invoice untuk tautan yang baru."
+    }
   }
 }

@@ -17,14 +17,22 @@ const DETAIL_ORDER: DocLabelKey[] = [
   "instructions",
 ];
 
+/** The filled-in detail lines of a payment account, in print order, labelled in the given language. */
+export function paymentAccountLines(
+  account: PaymentAccountSnapshot,
+  labels: Record<DocLabelKey, string>,
+): { key: DocLabelKey; label: string; value: string }[] {
+  return DETAIL_ORDER.flatMap((key) => {
+    const value = account.details[key];
+    return value ? [{ key, label: labels[key], value }] : [];
+  });
+}
+
 function buildPaymentAccount(
   account: PaymentAccountSnapshot,
   labels: Record<DocLabelKey, string>,
 ): InvoiceDocument["paymentAccounts"][number] {
-  const lines = DETAIL_ORDER.flatMap((key) => {
-    const value = account.details[key];
-    return value ? [{ label: labels[key], value }] : [];
-  });
+  const lines = paymentAccountLines(account, labels).map(({ label, value }) => ({ label, value }));
   // Bank-like accounts already show their bank name as a line; PayPal/Wise have no such line.
   const fallbackTitle = account.type === "paypal" ? "PayPal" : account.type === "wise" ? "Wise" : "";
   return { title: account.label || fallbackTitle, lines };
