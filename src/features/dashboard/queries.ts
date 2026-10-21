@@ -1,4 +1,4 @@
-import { and, eq, gte, inArray, lt } from "drizzle-orm";
+import { and, count, eq, gte, inArray, isNotNull, lt } from "drizzle-orm";
 import { db } from "@/db/client";
 import { businessProfiles, invoices } from "@/db/schema";
 import { countPendingClaims } from "@/features/payment-claims/queries";
@@ -31,6 +31,8 @@ export type DashboardSummary = {
   overdue: DashboardCard;
   paidThisMonth: DashboardCard;
   pendingClaims: number;
+  /** Invoices a recurring schedule generated in the last 7 days that are still drafts. */
+  recurringDrafts: number;
 };
 
 const UNPAID_STATUSES = ["sent", "payment_claimed"] as const;
@@ -118,12 +120,30 @@ function buildCard(
   };
 }
 
+/** Recurring invoices created in the last 7 days that still wait to be reviewed and sent. */
+export async function countRecurringDrafts(userId: string, now: Date = new Date()): Promise<number> {
+  const since = new Date(now.getTime() - 7 * 86_400_000);
+  const [row] = await db
+    .select({ n: count() })
+    .from(invoices)
+    .where(
+      and(
+        eq(invoices.userId, userId),
+        eq(invoices.status, "draft"),
+        isNotNull(invoices.recurringScheduleId),
+        gte(invoices.createdAt, since),
+      ),
+    );
+  return row.n;
+}
+
 /**
  * The dashboard numbers of `userId`, with `today` the Asia/Jakarta date (YYYY-MM-DD):
  * - unpaid: sent and payment_claimed invoices;
  * - overdue: the part of unpaid whose due date is before today;
  * - paidThisMonth: paid invoices whose `paidAt` falls in this calendar month in Jakarta;
- * - pendingClaims: payment claims waiting for a decision.
+ * - pendingClaims: payment claims waiting for a decision;
+ * - recurringDrafts: recurring invoices generated in the last 7 days that are still drafts.
  * Each card is one total in the profile's base currency (see `buildCard`).
  */
 export async function getDashboardSummary(userId: string, today: string): Promise<DashboardSummary> {
@@ -148,11 +168,12 @@ export async function getDashboardSummary(userId: string, today: string): Promis
       .where(and(eq(invoices.userId, userId), ...conditions));
 
   const month = monthBounds(today);
-  const [unpaid, overdue, paidThisMonth, pendingClaims] = await Promise.all([
+  const [unpaid, overdue, paidThisMonth, pendingClaims, recurringDrafts] = await Promise.all([
     rowsWhere(inArray(invoices.status, UNPAID_STATUSES)),
     rowsWhere(inArray(invoices.status, UNPAID_STATUSES), lt(invoices.dueDate, today)),
     rowsWhere(eq(invoices.status, "paid"), gte(invoices.paidAt, month.start), lt(invoices.paidAt, month.end)),
     countPendingClaims(userId),
+    countRecurringDrafts(userId),
   ]);
 
   // Invoices without a usable stored rate (none yet, or computed for another base) are converted with
@@ -172,5 +193,6 @@ export async function getDashboardSummary(userId: string, today: string): Promis
     overdue: buildCard(overdue, base, tableFor),
     paidThisMonth: buildCard(paidThisMonth, base, tableFor),
     pendingClaims,
+    recurringDrafts,
   };
 }

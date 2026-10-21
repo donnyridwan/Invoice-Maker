@@ -14,6 +14,7 @@ import {
 import { getEmailTransport, type EmailTransport } from "@/lib/email";
 import { ValidationError } from "@/lib/errors";
 import { dueRunDates, isFinished, nextRunDate } from "@/lib/recurrence";
+import { notifyOwnersOfDrafts } from "./notify";
 import type { Schedule } from "./queries";
 
 export type RunDeps = {
@@ -202,6 +203,7 @@ export async function runDueSchedules(today: string, deps: RunDeps = {}): Promis
     .orderBy(asc(recurringSchedules.nextRunOn), asc(recurringSchedules.createdAt));
 
   const result: RunResult = { processed: 0, created: 0, failed: 0 };
+  const generatedIds: string[] = [];
   for (const { id } of due) {
     let outcome: Outcome | null;
     try {
@@ -216,11 +218,15 @@ export async function runDueSchedules(today: string, deps: RunDeps = {}): Promis
     if (!outcome) continue;
     result.processed += 1;
     result.created += outcome.created.length;
+    generatedIds.push(...outcome.created.map((invoice) => invoice.id));
     try {
       await deliver(outcome, deps);
     } catch (e) {
       console.error(`[recurring] delivery for schedule ${id} failed`, e);
     }
   }
+  // Whatever is still a draft (every "draft" delivery, an auto-email that could not go out) is
+  // reported to its owner in one summary email each.
+  await notifyOwnersOfDrafts(generatedIds, { transport: deps.transport });
   return result;
 }

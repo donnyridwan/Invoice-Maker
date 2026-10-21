@@ -61,6 +61,13 @@ test.describe("recurring invoices", () => {
     expect(result).toEqual({ processed: 1, created: 1, failed: 0 });
     expect(await runCron(page)).toEqual({ processed: 0, created: 0, failed: 0 });
 
+    // The dashboard points at the draft that is ready to be reviewed and sent.
+    await page.goto("/dashboard");
+    const banner = page.getByTestId("recurring-drafts-banner");
+    await expect(banner).toContainText("1 invoice berulang siap dikirim");
+    await banner.getByRole("link", { name: "Tinjau" }).click();
+    await expect(page).toHaveURL(/\/invoices\?tab=draft$/);
+
     await page.goto("/invoices");
     const rows = page.getByRole("row");
     await expect(rows.filter({ hasText: /INV-\d{4}-003/ })).toHaveCount(1);

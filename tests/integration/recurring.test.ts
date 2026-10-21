@@ -397,7 +397,8 @@ describe("runDueSchedules with auto_email", () => {
     await runDueSchedules(today, { transport: disabled.transport, renderPdf });
     expect((await generated(b.schedule.id))[0].status).toBe("draft");
     expect((await scheduleRow(b.schedule.id)).lastError).toBe("emailDisabled");
-    expect(sent).toHaveLength(0);
+    // Only the owner's summary of the stuck draft went out, never the invoice itself.
+    expect(sent.filter((e) => e.attachments)).toHaveLength(0);
     expect(disabled.sent).toHaveLength(0);
   });
 
@@ -430,6 +431,86 @@ describe("runDueSchedules with auto_email", () => {
     expect(result.created).toBe(1);
     expect((await generated(schedule.id))[0].status).toBe("draft");
     expect((await scheduleRow(schedule.id)).lastError).toBe("emailFailed");
+  });
+});
+
+describe("owner summary email after a run", () => {
+  const unverifiedOk = () => recordingTransport();
+
+  it("sends one summary to the owner for the drafts the run created, with links built from the app URL", async () => {
+    const owner = await setupOwner();
+    const a = await newSchedule(owner);
+    const b = await newSchedule(owner);
+    const { transport, sent } = unverifiedOk();
+
+    const result = await runDueSchedules(today, { transport, renderPdf });
+    expect(result.created).toBe(2);
+
+    expect(sent).toHaveLength(1);
+    const [email] = sent;
+    expect(email.to).toEqual([owner.email]);
+    expect(email.subject).toBe("2 invoice berulang siap dikirim");
+    const numbers = [...(await generated(a.schedule.id)), ...(await generated(b.schedule.id))].map((i) => i.number);
+    for (const number of numbers) expect(email.text).toContain(number);
+    expect(email.text).toContain("PT Maju Jaya");
+    expect(email.html).toContain("/invoices?tab=draft");
+    expect(email.text).toContain("/invoices?tab=draft");
+  });
+
+  it("sends one email per owner", async () => {
+    const one = await setupOwner();
+    const two = await setupOwner();
+    await newSchedule(one);
+    await newSchedule(two);
+    const { transport, sent } = unverifiedOk();
+    await runDueSchedules(today, { transport, renderPdf });
+    expect(sent.map((e) => e.to[0]).sort()).toEqual([one.email, two.email].sort());
+  });
+
+  it("includes an auto_email invoice that stayed a draft, but not one that was sent", async () => {
+    const owner = await setupOwner();
+    const noEmail = await sourceInvoice(owner.id, { clientEmail: null });
+    const stuck = await newSchedule(owner, { delivery: "auto_email" }, noEmail);
+    const fine = await newSchedule(owner, { delivery: "auto_email" });
+    const { transport, sent } = unverifiedOk();
+
+    await runDueSchedules(today, { transport, renderPdf });
+    const invoicesSent = sent.filter((e) => e.attachments);
+    expect(invoicesSent).toHaveLength(1);
+    const summaries = sent.filter((e) => !e.attachments);
+    expect(summaries).toHaveLength(1);
+    expect(summaries[0].subject).toBe("1 invoice berulang siap dikirim");
+    expect(summaries[0].text).toContain((await generated(stuck.schedule.id))[0].number);
+    expect(summaries[0].text).not.toContain((await generated(fine.schedule.id))[0].number);
+  });
+
+  it("sends nothing when no invoice was created, the owner is not verified or email is disabled", async () => {
+    const owner = await setupOwner();
+    const { transport, sent } = unverifiedOk();
+    await runDueSchedules(today, { transport, renderPdf });
+    expect(sent).toHaveLength(0);
+
+    const unverified = await setupOwner({ verified: false });
+    await newSchedule(unverified);
+    await runDueSchedules(today, { transport, renderPdf });
+    expect(sent).toHaveLength(0);
+
+    await newSchedule(owner);
+    const disabled = recordingTransport("disabled");
+    await runDueSchedules(addDays(today, 40), { transport: disabled.transport, renderPdf });
+    expect(disabled.sent).toHaveLength(0);
+  });
+
+  it("never throws: a failing transport leaves the run result untouched", async () => {
+    const owner = await setupOwner();
+    const { schedule } = await newSchedule(owner);
+    const { transport } = recordingTransport("file", new Error("smtp down"));
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+    const result = await runDueSchedules(today, { transport, renderPdf });
+    error.mockRestore();
+    expect(result).toEqual({ processed: 1, created: 1, failed: 0 });
+    expect((await generated(schedule.id))[0].status).toBe("draft");
+    expect((await scheduleRow(schedule.id)).lastError).toBeNull();
   });
 });
 

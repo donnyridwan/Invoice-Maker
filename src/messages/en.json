@@ -85,6 +85,8 @@
     },
     "claimsBanner": "{count, plural, one {# payment is} other {# payments are}} awaiting confirmation",
     "claimsBannerAction": "Review",
+    "recurringBanner": "{count, plural, one {# recurring invoice is} other {# recurring invoices are}} ready to send",
+    "recurringBannerAction": "Review",
     "recent": {
       "title": "Recent invoices",
       "viewAll": "View all"
@@ -736,6 +738,14 @@
       "paidOn": "Paid on",
       "note": "Note",
       "button": "Review payment"
+    },
+    "recurringDrafts": {
+      "subject": "{count, plural, one {# recurring invoice is} other {# recurring invoices are}} ready to send",
+      "preview": "{count, plural, one {# recurring invoice was} other {# recurring invoices were}} created as a draft.",
+      "title": "{count, plural, one {# recurring invoice is} other {# recurring invoices are}} ready to send",
+      "body": "Your recurring schedules created the drafts below. Review them, then send them to your clients.",
+      "more": "and {count} more",
+      "button": "Review drafts"
     }
   }
 }

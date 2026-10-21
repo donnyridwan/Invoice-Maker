@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock } from "lucide-react";
+import { Clock, Repeat } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { getDashboardSummary } from "@/features/dashboard/queries";
@@ -40,6 +40,19 @@ export default async function DashboardPage() {
             <span className="font-medium">{t("claimsBanner", { count: summary.pendingClaims })}</span>
             <Link href="/invoices?tab=unpaid" className="ml-auto font-medium underline underline-offset-2">
               {t("claimsBannerAction")}
+            </Link>
+          </div>
+        ) : null}
+        {summary.recurringDrafts > 0 ? (
+          <div
+            role="status"
+            data-testid="recurring-drafts-banner"
+            className="flex flex-wrap items-center gap-3 rounded-md border border-badge-info-fg/20 bg-badge-info-bg px-4 py-3 text-sm text-badge-info-fg"
+          >
+            <Repeat className="size-4 shrink-0" aria-hidden />
+            <span className="font-medium">{t("recurringBanner", { count: summary.recurringDrafts })}</span>
+            <Link href="/invoices?tab=draft" className="ml-auto font-medium underline underline-offset-2">
+              {t("recurringBannerAction")}
             </Link>
           </div>
         ) : null}

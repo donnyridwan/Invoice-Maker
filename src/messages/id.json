@@ -85,6 +85,8 @@
     },
     "claimsBanner": "{count} pembayaran menunggu konfirmasi",
     "claimsBannerAction": "Tinjau",
+    "recurringBanner": "{count} invoice berulang siap dikirim",
+    "recurringBannerAction": "Tinjau",
     "recent": {
       "title": "Invoice terbaru",
       "viewAll": "Lihat semua"
@@ -736,6 +738,14 @@
       "paidOn": "Tanggal bayar",
       "note": "Catatan",
       "button": "Tinjau pembayaran"
+    },
+    "recurringDrafts": {
+      "subject": "{count} invoice berulang siap dikirim",
+      "preview": "{count} invoice berulang sudah dibuat sebagai draft.",
+      "title": "{count} invoice berulang siap dikirim",
+      "body": "Jadwal berulang kamu membuat draft berikut. Tinjau, lalu kirim ke klien.",
+      "more": "dan {count} lainnya",
+      "button": "Tinjau draft"
     }
   }
 }
