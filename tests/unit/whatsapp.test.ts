@@ -11,6 +11,23 @@ describe("normalizeWhatsAppNumber", () => {
     expect(normalizeWhatsAppNumber("(0812)34567890")).toBe("6281234567890");
   });
 
+  it("strips the 00 international call prefix", () => {
+    expect(normalizeWhatsAppNumber("0062 812-3456-7890")).toBe("6281234567890");
+    expect(normalizeWhatsAppNumber("00 1 415 555 0100")).toBe("14155550100");
+    expect(normalizeWhatsAppNumber("0044 20 7946 0958")).toBe("442079460958");
+  });
+
+  it("drops the trunk 0 after 62", () => {
+    expect(normalizeWhatsAppNumber("+62 (0)812 3456 7890")).toBe("6281234567890");
+    expect(normalizeWhatsAppNumber("62 0812 3456 7890")).toBe("6281234567890");
+    expect(normalizeWhatsAppNumber("+620812-3456-7890")).toBe("6281234567890");
+    expect(normalizeWhatsAppNumber("0062 (0)812 3456 7890")).toBe("6281234567890");
+  });
+
+  it("leaves a clean 62 number alone", () => {
+    expect(normalizeWhatsAppNumber("6281234567890")).toBe("6281234567890");
+  });
+
   it("leaves other country codes alone", () => {
     expect(normalizeWhatsAppNumber("+1 (415) 555-0100")).toBe("14155550100");
   });

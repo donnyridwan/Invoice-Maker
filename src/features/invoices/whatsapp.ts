@@ -6,13 +6,17 @@ const MIN_DIGITS = 8;
 
 /**
  * A phone number as wa.me wants it: digits only, country code first. A leading `+` is dropped with
- * every other non-digit, and a leading `0` becomes Indonesia's `62`. Fewer than 8 digits (or
- * nothing) gives null: the message is then shared without a recipient.
+ * every other non-digit; the `00` international call prefix is stripped; a leading `0` becomes
+ * Indonesia's `62`, and the trunk `0` written after the country code (`+62 (0)812...`, `62 0812...`)
+ * is dropped. Fewer than 8 digits (or nothing) gives null: the message is then shared without a recipient.
  */
 export function normalizeWhatsAppNumber(input: string | null | undefined): string | null {
-  const digits = (input ?? "").replace(/\D/g, "");
-  if (digits.length < MIN_DIGITS) return null;
-  return digits.startsWith("0") ? `62${digits.slice(1)}` : digits;
+  const raw = (input ?? "").replace(/\D/g, "");
+  if (raw.length < MIN_DIGITS) return null;
+  let digits = raw.startsWith("00") ? raw.replace(/^0+/, "") : raw;
+  if (digits.startsWith("620")) digits = `62${digits.replace(/^620+/, "")}`;
+  else if (digits.startsWith("0")) digits = `62${digits.slice(1)}`;
+  return digits.length < MIN_DIGITS ? null : digits;
 }
 
 export type WhatsAppMessageFacts = {
