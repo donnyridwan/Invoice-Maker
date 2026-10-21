@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import { getLocale } from "next-intl/server";
 import { toActionError, type ActionResult } from "@/lib/action-result";
 import { resolveLocale } from "@/i18n/config";
+import { runUserAction } from "@/lib/run-user-action";
 import { requireUser } from "@/lib/session";
 import { archiveCatalogItem, createCatalogItem, restoreCatalogItem, updateCatalogItem } from "./queries";
 import { catalogFormToInput, type CatalogFormValues } from "./schema";
@@ -34,21 +35,10 @@ export async function saveCatalogItemAction(
   }
 }
 
-async function run(action: (userId: string) => Promise<void>): Promise<ActionResult> {
-  const user = await requireUser();
-  try {
-    await action(user.id);
-    revalidatePath(PATH);
-    return { ok: true, data: undefined };
-  } catch (e) {
-    return toActionError(e);
-  }
-}
-
 export async function archiveCatalogItemAction(id: string): Promise<ActionResult> {
-  return run((userId) => archiveCatalogItem(userId, id));
+  return runUserAction(PATH, (userId) => archiveCatalogItem(userId, id));
 }
 
 export async function restoreCatalogItemAction(id: string): Promise<ActionResult> {
-  return run((userId) => restoreCatalogItem(userId, id));
+  return runUserAction(PATH, (userId) => restoreCatalogItem(userId, id));
 }

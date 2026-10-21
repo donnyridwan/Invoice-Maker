@@ -9,3 +9,6 @@ export const LOCALE_COOKIE = "NEXT_LOCALE";
 export function resolveLocale(value: string | undefined | null): Locale {
   return LOCALES.find((locale) => locale === value) ?? DEFAULT_LOCALE;
 }
+
+/** Display time zone for every date shown in the UI and on documents. */
+export const TIME_ZONE = "Asia/Jakarta";

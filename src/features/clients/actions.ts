@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { toActionError, type ActionResult } from "@/lib/action-result";
+import { runUserAction } from "@/lib/run-user-action";
 import { requireUser } from "@/lib/session";
 import { archiveClient, createClient, restoreClient, updateClient } from "./queries";
 
@@ -19,21 +20,10 @@ export async function saveClientAction(id: string | null, input: unknown): Promi
   }
 }
 
-async function run(action: (userId: string) => Promise<void>): Promise<ActionResult> {
-  const user = await requireUser();
-  try {
-    await action(user.id);
-    revalidatePath(PATH);
-    return { ok: true, data: undefined };
-  } catch (e) {
-    return toActionError(e);
-  }
-}
-
 export async function archiveClientAction(id: string): Promise<ActionResult> {
-  return run((userId) => archiveClient(userId, id));
+  return runUserAction(PATH, (userId) => archiveClient(userId, id));
 }
 
 export async function restoreClientAction(id: string): Promise<ActionResult> {
-  return run((userId) => restoreClient(userId, id));
+  return runUserAction(PATH, (userId) => restoreClient(userId, id));
 }

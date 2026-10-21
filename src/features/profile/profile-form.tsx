@@ -4,43 +4,15 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
+import { CurrencySelect } from "@/components/currency-select";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
-import { CURRENCY_CODES } from "@/lib/currencies";
 import { useServerForm } from "@/lib/use-server-form";
 import { saveProfileAction } from "./actions";
 import type { BusinessProfile } from "./queries";
-
-export function CurrencySelect({
-  id,
-  value,
-  onValueChange,
-  name,
-}: {
-  id: string;
-  value: string;
-  onValueChange: (value: string) => void;
-  name?: string;
-}) {
-  return (
-    <Select value={value} onValueChange={onValueChange} name={name}>
-      <SelectTrigger id={id}>
-        <SelectValue />
-      </SelectTrigger>
-      <SelectContent>
-        {CURRENCY_CODES.map((code) => (
-          <SelectItem key={code} value={code}>
-            {code}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
-  );
-}
 
 export function ProfileForm({ profile }: { profile: BusinessProfile }) {
   const t = useTranslations();

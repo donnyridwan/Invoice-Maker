@@ -121,7 +121,7 @@ export function PaymentAccountList({ accounts }: { accounts: PaymentAccount[] })
                       <p className="truncate font-medium text-fg">{title}</p>
                       {account.isDefault ? <Badge variant="info">{t("paymentAccounts.default")}</Badge> : null}
                       {archived ? <Badge>{t("paymentAccounts.archived")}</Badge> : null}
-                      <Badge>{account.currency}</Badge>
+                      <Badge>{account.currency ?? t("paymentAccounts.anyCurrency")}</Badge>
                     </div>
                     {subtitle ? <p className="truncate text-sm text-muted">{subtitle}</p> : null}
                   </div>

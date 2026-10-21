@@ -34,6 +34,21 @@ test.describe("auth", () => {
     await expect(page).toHaveURL(/\/login/);
   });
 
+  test("clears a stale session cookie so /register stays reachable", async ({ page, context }) => {
+    await context.addCookies([
+      { name: "better-auth.session_token", value: "stale.invalid", url: "http://localhost:3100" },
+    ]);
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/\/login\?(next=.*&)?expired=1/);
+    await expect(page.getByRole("button", { name: "Masuk" })).toBeVisible();
+
+    await expect
+      .poll(async () => (await context.cookies()).some((c) => c.name.includes("session_token") && c.value === "stale.invalid"))
+      .toBe(false);
+    await page.getByRole("link", { name: "Daftar" }).click();
+    await expect(page).toHaveURL(/\/register$/);
+  });
+
   test("rejects a password shorter than 8 characters", async ({ page }) => {
     await page.goto("/register");
     await page.getByLabel("Nama").fill("Donny");

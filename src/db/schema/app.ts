@@ -1,4 +1,17 @@
-import { bigint, boolean, index, integer, jsonb, pgEnum, pgTable, text, timestamp, uuid } from "drizzle-orm/pg-core";
+import { sql } from "drizzle-orm";
+import {
+  bigint,
+  boolean,
+  index,
+  integer,
+  jsonb,
+  pgEnum,
+  pgTable,
+  text,
+  timestamp,
+  uniqueIndex,
+  uuid,
+} from "drizzle-orm/pg-core";
 import { user } from "./auth";
 
 const timestamps = {
@@ -41,19 +54,30 @@ export const businessProfiles = pgTable("business_profiles", {
   ...timestamps,
 });
 
-export const paymentAccounts = pgTable("payment_accounts", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
-  type: paymentAccountType("type").notNull(),
-  label: text("label").notNull(),
-  details: jsonb("details").$type<Record<string, string>>().notNull().default({}),
-  currency: text("currency").notNull(),
-  isDefault: boolean("is_default").notNull().default(false),
-  archivedAt: timestamp("archived_at", { withTimezone: true }),
-  ...timestamps,
-});
+export const paymentAccounts = pgTable(
+  "payment_accounts",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    type: paymentAccountType("type").notNull(),
+    label: text("label").notNull(),
+    // Keys are camelCase: bankName, accountName, accountNumber, swift, iban, email, instructions.
+    details: jsonb("details").$type<Record<string, string>>().notNull().default({}),
+    // NULL means the account accepts any currency.
+    currency: text("currency"),
+    isDefault: boolean("is_default").notNull().default(false),
+    archivedAt: timestamp("archived_at", { withTimezone: true }),
+    ...timestamps,
+  },
+  (t) => [
+    // At most one active default account per user.
+    uniqueIndex("payment_accounts_one_default_per_user")
+      .on(t.userId)
+      .where(sql`${t.isDefault} AND ${t.archivedAt} IS NULL`),
+  ],
+);
 
 export const clients = pgTable(
   "clients",

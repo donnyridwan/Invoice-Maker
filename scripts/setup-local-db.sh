@@ -1,11 +1,12 @@
 #!/usr/bin/env bash
 # Idempotent local Postgres 16 setup: starts the cluster, sets the postgres
-# password, creates invoice_dev and invoice_test, and writes .env.local.
+# password, creates invoice_dev, invoice_test (integration tests) and
+# invoice_e2e (Playwright), and writes .env.local.
 set -euo pipefail
 
 PG_USER=postgres
 PG_PASSWORD=postgres
-DATABASES=(invoice_dev invoice_test)
+DATABASES=(invoice_dev invoice_test invoice_e2e)
 
 cd "$(dirname "$0")/.."
 

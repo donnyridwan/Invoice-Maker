@@ -1,9 +1,6 @@
 import { z } from "zod";
 import { LOCALES } from "@/i18n/config";
-import { currencyCode, optionalEmail, optionalText, requiredText } from "@/lib/zod-helpers";
-
-const emptyToUndefined = (value: unknown) =>
-  typeof value === "string" && value.trim() === "" ? undefined : value;
+import { currencyCode, emptyToUndefined, optionalEmail, optionalText, requiredText } from "@/lib/zod-helpers";
 
 /** ISO-3166 alpha-2, stored upper-case. */
 const optionalCountry = z.preprocess(

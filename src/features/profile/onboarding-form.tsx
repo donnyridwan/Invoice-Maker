@@ -4,13 +4,14 @@ import { useState, type FormEvent } from "react";
 import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { toast } from "sonner";
+import { CurrencySelect } from "@/components/currency-select";
 import { Button } from "@/components/ui/button";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { useServerForm } from "@/lib/use-server-form";
 import { cn } from "@/lib/utils";
 import { finishOnboardingAction, skipOnboardingAction } from "./actions";
-import { CurrencySelect } from "./profile-form";
 
 export function OnboardingForm({
   businessName,
@@ -43,8 +44,17 @@ export function OnboardingForm({
 
   async function onSkip() {
     setSkipping(true);
-    await skipOnboardingAction();
-    goToDashboard();
+    try {
+      const result = await skipOnboardingAction();
+      if (result.ok) {
+        goToDashboard();
+        return;
+      }
+      toast.error(t(`errors.${result.error}`));
+    } catch {
+      toast.error(t("errors.unknown"));
+    }
+    setSkipping(false);
   }
 
   return (

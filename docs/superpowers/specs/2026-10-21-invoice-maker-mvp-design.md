@@ -148,9 +148,10 @@ mata uang menentukan jumlah desimal (IDR & JPY = 0, USD/SGD/EUR = 2).
   `default_notes`, `ui_locale`, `onboarding_completed_at`.
 
 - **payment_accounts**: `type` (`bank|paypal|wise|swift|other`), `label`,
-  `details` (jsonb: `bank_name`, `account_name`, `account_number`, `swift`,
-  `iban`, `email`, `instructions`), `currency` (opsional), `is_default`,
-  `archived_at`.
+  `details` (jsonb, kunci camelCase: `bankName`, `accountName`,
+  `accountNumber`, `swift`, `iban`, `email`, `instructions`), `currency`
+  (opsional; `NULL` = semua mata uang), `is_default` (maksimal satu rekening
+  aktif per user, dijamin indeks unik parsial), `archived_at`.
 
 - **clients**: `name`, `company`, `email`, `phone` (untuk WhatsApp),
   `address`, `country`, `default_currency`, `default_language`, `notes`,

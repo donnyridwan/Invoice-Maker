@@ -2,6 +2,7 @@ import { and, asc, eq, ilike, isNull, or } from "drizzle-orm";
 import { db } from "@/db/client";
 import { catalogItems } from "@/db/schema";
 import { NotFoundError } from "@/lib/errors";
+import { likePattern } from "@/lib/sql";
 import { parseInput, UUID_RE } from "@/lib/validate";
 import { catalogItemSchema, type CatalogItemInput } from "./schema";
 
@@ -26,11 +27,6 @@ async function findOwned(userId: string, id: string): Promise<CatalogItem> {
   const [row] = await db.select().from(catalogItems).where(ownedBy(userId, id)).limit(1);
   if (!row) throw new NotFoundError("Catalog item not found");
   return row;
-}
-
-/** Escapes LIKE wildcards so the search text is matched literally. */
-function likePattern(search: string): string {
-  return `%${search.replace(/[\\%_]/g, "\\$&")}%`;
 }
 
 /** Plan 2 uses this (with `search`) for the invoice line-item autocomplete. */

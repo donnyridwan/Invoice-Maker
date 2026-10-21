@@ -1,0 +1,3 @@
+UPDATE "payment_accounts" SET "is_default" = false WHERE "is_default" AND "id" NOT IN (SELECT DISTINCT ON ("user_id") "id" FROM "payment_accounts" WHERE "is_default" AND "archived_at" IS NULL ORDER BY "user_id", "updated_at" DESC);--> statement-breakpoint
+ALTER TABLE "payment_accounts" ALTER COLUMN "currency" DROP NOT NULL;--> statement-breakpoint
+CREATE UNIQUE INDEX "payment_accounts_one_default_per_user" ON "payment_accounts" USING btree ("user_id") WHERE "payment_accounts"."is_default" AND "payment_accounts"."archived_at" IS NULL;

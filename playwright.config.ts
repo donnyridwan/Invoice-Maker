@@ -8,11 +8,13 @@ if (existsSync(".env.local")) {
 const PORT = 3100;
 const BASE_URL = `http://localhost:${PORT}`;
 
-const testDatabaseUrl =
-  process.env.TEST_DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/invoice_test";
-const dbName = new URL(testDatabaseUrl).pathname.replace(/^\//, "");
-if (!/test/i.test(dbName)) {
-  throw new Error(`Refusing to run e2e against "${dbName}": database name must contain "test"`);
+// e2e has its own database so it never collides with the integration tests (which TRUNCATE
+// invoice_test) when both are run at the same time.
+const e2eDatabaseUrl =
+  process.env.E2E_DATABASE_URL ?? "postgres://postgres:postgres@localhost:5432/invoice_e2e";
+const dbName = new URL(e2eDatabaseUrl).pathname.replace(/^\//, "");
+if (!/e2e|test/i.test(dbName) || dbName === "invoice_test") {
+  throw new Error(`Refusing to run e2e against "${dbName}": use a dedicated database whose name contains "e2e"`);
 }
 
 const chromiumPath = process.env.CHROMIUM_PATH;
@@ -37,7 +39,7 @@ export default defineConfig({
     timeout: 300_000,
     reuseExistingServer: false,
     env: {
-      DATABASE_URL: testDatabaseUrl,
+      DATABASE_URL: e2eDatabaseUrl,
       BETTER_AUTH_SECRET: "e2e-secret-e2e-secret-e2e-secret-0123456789",
       BETTER_AUTH_URL: BASE_URL,
       AUTH_RATE_LIMIT_DISABLED: "true",

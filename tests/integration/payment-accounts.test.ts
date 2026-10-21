@@ -1,4 +1,6 @@
+import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
+import { paymentAccounts } from "@/db/schema";
 import {
   archivePaymentAccount,
   createPaymentAccount,
@@ -10,7 +12,7 @@ import {
   updatePaymentAccount,
 } from "@/features/payment-accounts/queries";
 import { NotFoundError, ValidationError } from "@/lib/errors";
-import { createTestUser, resetDb } from "./helpers";
+import { createTestUser, resetDb, testDb } from "./helpers";
 
 const bank = (overrides: Record<string, unknown> = {}) => ({
   type: "bank" as const,
@@ -60,6 +62,43 @@ describe("payment accounts", () => {
       details: { email: "pay@donny.com" },
       archivedAt: null,
     });
+  });
+
+  it("treats a missing currency as 'any currency' (null)", async () => {
+    const u = await createTestUser();
+    const created = await createPaymentAccount(u.id, bank());
+    expect(created.currency).toBeNull();
+    const updated = await updatePaymentAccount(u.id, created.id, bank({ currency: "USD" }));
+    expect(updated.currency).toBe("USD");
+    expect((await updatePaymentAccount(u.id, created.id, bank({ currency: "" }))).currency).toBeNull();
+  });
+
+  it("never makes an archived account the default", async () => {
+    const u = await createTestUser();
+    const active = await createPaymentAccount(u.id, bank({ isDefault: true }));
+    const archived = await createPaymentAccount(u.id, bank({ bankName: "Mandiri" }));
+    await archivePaymentAccount(u.id, archived.id);
+
+    await expect(setDefaultPaymentAccount(u.id, archived.id)).rejects.toBeInstanceOf(ValidationError);
+    await expect(
+      updatePaymentAccount(u.id, archived.id, bank({ bankName: "Mandiri", isDefault: true })),
+    ).rejects.toBeInstanceOf(ValidationError);
+
+    expect((await getPaymentAccount(u.id, active.id)).isDefault).toBe(true);
+    expect((await getPaymentAccount(u.id, archived.id)).isDefault).toBe(false);
+  });
+
+  it("enforces one active default per user in the database", async () => {
+    const u = await createTestUser();
+    const a = await createPaymentAccount(u.id, bank({ isDefault: true }));
+    const b = await createPaymentAccount(u.id, bank({ bankName: "Mandiri" }));
+    await expect(
+      testDb.update(paymentAccounts).set({ isDefault: true }).where(eq(paymentAccounts.id, b.id)),
+    ).rejects.toThrow();
+    // An archived default does not count.
+    await archivePaymentAccount(u.id, a.id);
+    await testDb.update(paymentAccounts).set({ isDefault: true, archivedAt: new Date() }).where(eq(paymentAccounts.id, a.id));
+    await testDb.update(paymentAccounts).set({ isDefault: true }).where(eq(paymentAccounts.id, b.id));
   });
 
   it("rejects a SWIFT account without account number or IBAN", async () => {

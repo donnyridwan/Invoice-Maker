@@ -4,7 +4,7 @@ import { isCurrencyCode } from "@/lib/currencies";
 // Shared building blocks for the feature schemas. Messages are keys of the `validation`
 // namespace (see translateValidation); "tooLong:200" carries its parameter after the colon.
 
-const emptyToUndefined = (value: unknown) =>
+export const emptyToUndefined = (value: unknown) =>
   typeof value === "string" && value.trim() === "" ? undefined : value;
 
 export const requiredText = (max: number) =>

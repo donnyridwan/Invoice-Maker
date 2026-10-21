@@ -2,6 +2,7 @@
 
 import { revalidatePath } from "next/cache";
 import { toActionError, type ActionResult } from "@/lib/action-result";
+import { runUserAction } from "@/lib/run-user-action";
 import { requireUser } from "@/lib/session";
 import {
   archivePaymentAccount,
@@ -30,25 +31,14 @@ export async function savePaymentAccountAction(
   }
 }
 
-async function run(action: (userId: string) => Promise<void>): Promise<ActionResult> {
-  const user = await requireUser();
-  try {
-    await action(user.id);
-    revalidatePath(PATH);
-    return { ok: true, data: undefined };
-  } catch (e) {
-    return toActionError(e);
-  }
-}
-
 export async function archivePaymentAccountAction(id: string): Promise<ActionResult> {
-  return run((userId) => archivePaymentAccount(userId, id));
+  return runUserAction(PATH, (userId) => archivePaymentAccount(userId, id));
 }
 
 export async function restorePaymentAccountAction(id: string): Promise<ActionResult> {
-  return run((userId) => restorePaymentAccount(userId, id));
+  return runUserAction(PATH, (userId) => restorePaymentAccount(userId, id));
 }
 
 export async function setDefaultPaymentAccountAction(id: string): Promise<ActionResult> {
-  return run((userId) => setDefaultPaymentAccount(userId, id));
+  return runUserAction(PATH, (userId) => setDefaultPaymentAccount(userId, id));
 }

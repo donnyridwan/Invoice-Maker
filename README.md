@@ -1,36 +1,68 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# Invoice Maker
 
-## Getting Started
+Invoicing SaaS for Indonesian freelancers: manage clients and a service catalog, set up payment
+accounts and a business profile, and (in later plans) create, send and track invoices. The UI is
+available in Bahasa Indonesia (default) and English; money is stored as integer minor units and
+dates are shown in Asia/Jakarta.
 
-First, run the development server:
+Design spec: `docs/superpowers/specs/2026-10-21-invoice-maker-mvp-design.md`.
+Current plan: `docs/superpowers/plans/2026-10-21-plan-1-fondasi-data-master.md`.
+
+## Stack
+
+Next.js 16 (App Router) · TypeScript (strict) · Tailwind CSS 4 · Drizzle ORM + PostgreSQL
+(`postgres` driver) · Better Auth (email + password) · next-intl · Vitest · Playwright.
+
+## Local setup
+
+Requires Node.js 20+ and PostgreSQL 16.
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+npm install
+scripts/setup-local-db.sh   # starts Postgres, creates invoice_dev, invoice_test, invoice_e2e, writes .env.local
+npm run db:migrate          # applies migrations to invoice_dev
+npm run dev                 # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### Environment variables
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+Copy `.env.example` to `.env.local` (the setup script does this for you):
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+| Variable | Purpose |
+| --- | --- |
+| `DATABASE_URL` | App database (`invoice_dev` locally). |
+| `TEST_DATABASE_URL` | Integration tests only. The name must contain "test"; never point it at `invoice_dev`. |
+| `E2E_DATABASE_URL` | Playwright only (`invoice_e2e`), so `npm run test` and `npm run e2e` use separate databases. |
+| `BETTER_AUTH_SECRET` | Auth secret. Generate with `openssl rand -base64 32`. |
+| `BETTER_AUTH_URL` | Public base URL of the app. |
 
-## Learn More
+## npm scripts
 
-To learn more about Next.js, take a look at the following resources:
+| Script | What it does |
+| --- | --- |
+| `npm run dev` / `build` / `start` | Run, build and serve the app. |
+| `npm run lint` | ESLint. |
+| `npm run typecheck` | `next typegen` + `tsc --noEmit`. |
+| `npm run test:unit` | Vitest unit tests (no database). |
+| `npm run test:int` | Vitest integration tests against `TEST_DATABASE_URL` (migrates it first). |
+| `npm run test` | Both of the above. |
+| `npm run e2e` | Playwright against a production build on port 3100 and `E2E_DATABASE_URL` (migrates, builds and starts the server itself). |
+| `npm run db:generate` / `db:migrate` | Generate a Drizzle migration from `src/db/schema` / apply migrations. |
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+### Running e2e
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+Playwright needs a Chromium binary. Point it at an installed one with `CHROMIUM_PATH`:
 
-## Deploy on Vercel
+```bash
+CHROMIUM_PATH=/path/to/chrome npm run e2e
+```
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+If a stray `next-server` is still holding port 3100 from an earlier run, stop it first.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+## Conventions
+
+- Every query takes a `userId` and filters by it; another user's id is a `NotFoundError` (404).
+- UI copy lives only in `src/messages/{id,en}.json`, with identical keys in both files.
+- Feature code is under `src/features/<name>/` (`schema.ts`, `queries.ts`, `actions.ts`, components).
+- Client navigations into the signed-in app from outside it (login, register, 404) must be full
+  page loads (`window.location` or a plain `<a>`), not `router.push` / `<Link>`.

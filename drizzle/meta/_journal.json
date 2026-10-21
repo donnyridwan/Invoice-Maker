@@ -15,6 +15,13 @@
       "when": 1792553460668,
       "tag": "0001_tranquil_photon",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1792555790777,
+      "tag": "0002_payment_account_default_and_currency",
+      "breakpoints": true
     }
   ]
 }

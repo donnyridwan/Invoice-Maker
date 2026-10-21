@@ -1,19 +1,26 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useEffect, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { syncLocaleFromProfile } from "@/i18n/actions";
 import { authClient } from "@/lib/auth-client";
 import { safeNextPath } from "./safe-next";
 
-export function LoginForm({ next }: { next?: string }) {
+export function LoginForm({ next, expired = false }: { next?: string; expired?: boolean }) {
   const t = useTranslations();
   const [error, setError] = useState<string | null>(null);
   const [pending, setPending] = useState(false);
+
+  // `expired` means the server rejected the session cookie. Clear it, otherwise the proxy keeps
+  // treating the visitor as signed in and /register bounces back here.
+  useEffect(() => {
+    if (expired) authClient.signOut().catch(() => {});
+  }, [expired]);
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -37,6 +44,11 @@ export function LoginForm({ next }: { next?: string }) {
           : t("common.genericError"),
       );
       return;
+    }
+    try {
+      await syncLocaleFromProfile();
+    } catch {
+      // The language falls back to the default; never block signing in on it.
     }
     // Full page load so the server re-evaluates the session (and any onboarding redirect).
     window.location.href = safeNextPath(next);

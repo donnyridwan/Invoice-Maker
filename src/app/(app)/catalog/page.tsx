@@ -5,16 +5,15 @@ import { PageHeader } from "@/components/ui/page-header";
 import { CatalogTable, NewCatalogItemButton } from "@/features/catalog/catalog-table";
 import { listCatalogItems } from "@/features/catalog/queries";
 import { getProfile } from "@/features/profile/queries";
+import { firstParam } from "@/lib/search-params";
 import { requireUser } from "@/lib/session";
-
-const first = (value: string | string[] | undefined) => (Array.isArray(value) ? value[0] : value);
 
 export default async function CatalogPage({ searchParams }: PageProps<"/catalog">) {
   const user = await requireUser();
   const t = await getTranslations();
   const params = await searchParams;
-  const q = first(params.q)?.trim() ?? "";
-  const archived = first(params.tab) === "archived";
+  const q = firstParam(params.q)?.trim() ?? "";
+  const archived = firstParam(params.tab) === "archived";
 
   const [profile, found] = await Promise.all([
     getProfile(user.id),

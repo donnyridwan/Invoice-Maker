@@ -48,6 +48,8 @@ const FIELDS: Record<PaymentAccountType, FieldSpec[]> = {
   other: [{ name: "instructions", required: true, multiline: true }],
 };
 
+const ANY_CURRENCY = "__any";
+
 const defaultCurrency = (type: PaymentAccountType) => (type === "bank" ? "IDR" : "USD");
 
 export function PaymentAccountForm({
@@ -74,7 +76,7 @@ function FormBody({ account, onDone }: { account: PaymentAccount | null; onDone:
   const router = useRouter();
   const [type, setType] = useState<PaymentAccountType>(account?.type ?? "bank");
   const [label, setLabel] = useState(account?.label ?? "");
-  const [currency, setCurrency] = useState(account?.currency ?? "IDR");
+  const [currency, setCurrency] = useState(account ? (account.currency ?? "") : "IDR");
   const [isDefault, setIsDefault] = useState(account?.isDefault ?? false);
   const [values, setValues] = useState<Record<string, string>>(account?.details ?? {});
   const [fieldErrors, setFieldErrors] = useState<Record<string, string[]>>({});
@@ -181,11 +183,15 @@ function FormBody({ account, onDone }: { account: PaymentAccount | null; onDone:
         </div>
         <div className="flex flex-col gap-1.5">
           <Label htmlFor="pa-currency">{t("paymentAccounts.currency")}</Label>
-          <Select value={currency} onValueChange={setCurrency}>
+          <Select
+            value={currency || ANY_CURRENCY}
+            onValueChange={(value) => setCurrency(value === ANY_CURRENCY ? "" : value)}
+          >
             <SelectTrigger id="pa-currency">
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value={ANY_CURRENCY}>{t("paymentAccounts.anyCurrency")}</SelectItem>
               {CURRENCY_CODES.map((code) => (
                 <SelectItem key={code} value={code}>
                   {code}
