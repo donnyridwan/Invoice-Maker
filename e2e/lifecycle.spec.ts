@@ -5,6 +5,7 @@ import {
   markSentViaDb,
   registerUser,
   setDueDateViaDb,
+  setForeignCurrencyViaDb,
 } from "./helpers";
 
 const PNG_1X1 = Buffer.from(
@@ -261,5 +262,26 @@ test.describe("dashboard", () => {
     await expect(page.getByText("Tersimpan")).toBeVisible();
     await page.goto("/dashboard");
     await expect(page.getByRole("region", { name: "Mulai menggunakan Invoice Maker" })).toHaveCount(0);
+  });
+
+  test("totals in the base currency: converts with the invoice's rate (≈ and a tooltip) and sets invoices without a rate apart", async ({ page }) => {
+    const id = await createInvoiceDraft(page);
+    await markSentViaDb(id);
+    const unpaid = page.getByRole("link", { name: /Belum dibayar/ });
+
+    // USD 100,00 at Rp 15.000 per dollar.
+    await setForeignCurrencyViaDb(id, { currency: "USD", totalMinor: 10_000, fx: { rate: "15000", date: "2026-10-20" } });
+    await page.goto("/dashboard");
+    await expect(unpaid).toContainText(/≈\sRp\s1\.500\.000/);
+    await expect(unpaid).not.toContainText("tanpa kurs");
+    await expect(unpaid.getByText(/≈/)).toHaveAttribute("title", "Dikonversi dengan kurs 20 Oktober 2026");
+
+    // Without a stored rate (and no rate table) the invoice is listed apart and nothing is converted.
+    await setForeignCurrencyViaDb(id, { currency: "USD", totalMinor: 10_000, fx: null });
+    await page.goto("/dashboard");
+    await expect(unpaid).toContainText("Rp 0");
+    await expect(unpaid).not.toContainText("≈");
+    await expect(unpaid).toContainText("+ USD 100,00 tanpa kurs");
+    await expect(unpaid).toContainText("1 invoice");
   });
 });

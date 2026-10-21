@@ -79,7 +79,9 @@
       "unpaid": "Unpaid",
       "overdue": "Overdue",
       "paidThisMonth": "Paid this month",
-      "count": "{count, plural, one {# invoice} other {# invoices}}"
+      "count": "{count, plural, one {# invoice} other {# invoices}}",
+      "convertedAt": "Converted at the rate of {date}",
+      "withoutRate": "no rate"
     },
     "claimsBanner": "{count, plural, one {# payment is} other {# payments are}} awaiting confirmation",
     "claimsBannerAction": "Review",

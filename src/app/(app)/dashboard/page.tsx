@@ -8,8 +8,7 @@ import { SummaryCards } from "@/features/dashboard/summary-cards";
 import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { listInvoices } from "@/features/invoices/queries";
 import { Checklist } from "@/features/profile/checklist";
-import { getChecklist, getProfile } from "@/features/profile/queries";
-import { isCurrencyCode } from "@/lib/currencies";
+import { getChecklist } from "@/features/profile/queries";
 import { todayInJakarta } from "@/lib/dates";
 import { requireUser } from "@/lib/session";
 
@@ -17,13 +16,11 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const t = await getTranslations("dashboard");
   const today = todayInJakarta();
-  const [checklist, profile, summary, recent] = await Promise.all([
+  const [checklist, summary, recent] = await Promise.all([
     getChecklist(user.id),
-    getProfile(user.id),
     getDashboardSummary(user.id, today),
     listInvoices(user.id, { limit: 5 }),
   ]);
-  const baseCurrency = isCurrencyCode(profile.baseCurrency) ? profile.baseCurrency : "IDR";
   const firstName = user.name.trim().split(/\s+/)[0] || user.email;
 
   return (
@@ -46,7 +43,7 @@ export default async function DashboardPage() {
             </Link>
           </div>
         ) : null}
-        <SummaryCards summary={summary} baseCurrency={baseCurrency} />
+        <SummaryCards summary={summary} />
         <Checklist state={checklist} />
         <RecentInvoices invoices={recent} today={today} />
       </div>

@@ -79,7 +79,9 @@
       "unpaid": "Belum dibayar",
       "overdue": "Jatuh tempo",
       "paidThisMonth": "Lunas bulan ini",
-      "count": "{count} invoice"
+      "count": "{count} invoice",
+      "convertedAt": "Dikonversi dengan kurs {date}",
+      "withoutRate": "tanpa kurs"
     },
     "claimsBanner": "{count} pembayaran menunggu konfirmasi",
     "claimsBannerAction": "Tinjau",

@@ -168,6 +168,28 @@ export async function setDueDateViaDb(invoiceId: string, dueDate: string): Promi
   }
 }
 
+/** Turns an invoice into one of `totalMinor` in `currency`, with the stored base-currency rate (none when `fx` is null). */
+export async function setForeignCurrencyViaDb(
+  invoiceId: string,
+  opts: { currency: string; totalMinor: number; fx: { rate: string; date: string } | null },
+): Promise<void> {
+  const sql = postgres(e2eDatabaseUrl(), { max: 1, onnotice: () => {} });
+  try {
+    const rows = await sql`
+      UPDATE invoices
+      SET currency = ${opts.currency},
+          subtotal_minor = ${opts.totalMinor},
+          total_minor = ${opts.totalMinor},
+          fx_rate_to_base = ${opts.fx?.rate ?? null},
+          fx_rate_date = ${opts.fx?.date ?? null}
+      WHERE id = ${invoiceId}
+      RETURNING id`;
+    if (rows.length !== 1) throw new Error(`Invoice ${invoiceId} not found in the e2e database`);
+  } finally {
+    await sql.end();
+  }
+}
+
 const OUTBOX_DIR = path.join(process.cwd(), "var", "outbox");
 
 /** Every email the file transport wrote to var/outbox/ for recipient `to` (in `to` or `cc`), oldest first. */

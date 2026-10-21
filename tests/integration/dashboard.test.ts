@@ -2,6 +2,7 @@ import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { businessProfiles, invoices, paymentClaims } from "@/db/schema";
 import { getDashboardSummary } from "@/features/dashboard/queries";
+import { saveRates } from "@/features/fx/queries";
 import { countInvoicesByTab, createDraftInvoice, listInvoices } from "@/features/invoices/queries";
 import { ensureProfile, getChecklist, hasSentInvoice } from "@/features/profile/queries";
 import { createTestUser, resetDb, testDb } from "./helpers";
@@ -14,7 +15,9 @@ type Spec = {
   total: number;
   due?: string;
   paidAt?: string;
-  sentAt?: boolean;
+  /** `fxRateToBase` stored on the invoice (units of the base currency per unit of `currency`); none by default. */
+  fx?: string;
+  fxDate?: string;
 };
 
 async function setupUser(baseCurrency = "IDR") {
@@ -35,6 +38,8 @@ async function makeInvoice(userId: string, spec: Spec) {
       subtotalMinor: spec.total,
       totalMinor: spec.total,
       dueDate: spec.due ?? "2026-11-01",
+      fxRateToBase: spec.fx ?? null,
+      fxRateDate: spec.fx ? (spec.fxDate ?? "2026-10-20") : null,
       paidAt: spec.paidAt ? new Date(spec.paidAt) : null,
       sentAt: spec.status === "draft" ? null : new Date("2026-10-01T00:00:00Z"),
     })
@@ -62,28 +67,108 @@ async function seed(userId: string) {
 describe("dashboard summary", () => {
   beforeEach(resetDb);
 
-  it("totals unpaid, overdue and paid-this-month per currency, base currency first", async () => {
+  it("totals unpaid, overdue and paid-this-month in the base currency; currencies without a rate are listed apart", async () => {
     const u = await setupUser("IDR");
     await seed(u.id);
 
     const summary = await getDashboardSummary(u.id, TODAY);
 
-    expect(summary.unpaid).toEqual([
-      { currency: "IDR", totalMinor: 1_500_000, count: 2 },
-      { currency: "EUR", totalMinor: 10_000, count: 1 },
-      { currency: "USD", totalMinor: 125_000, count: 1 },
-    ]);
-    expect(summary.overdue).toEqual([{ currency: "IDR", totalMinor: 500_000, count: 1 }]);
+    // No rates anywhere: only IDR counts towards the total, EUR and USD wait without a rate.
+    expect(summary.unpaid).toEqual({
+      baseCurrency: "IDR",
+      totalBaseMinor: 1_500_000,
+      converted: false,
+      rateDate: null,
+      withoutRate: [
+        { currency: "EUR", totalMinor: 10_000, count: 1 },
+        { currency: "USD", totalMinor: 125_000, count: 1 },
+      ],
+      count: 4,
+    });
+    expect(summary.overdue).toEqual({
+      baseCurrency: "IDR",
+      totalBaseMinor: 500_000,
+      converted: false,
+      rateDate: null,
+      withoutRate: [],
+      count: 1,
+    });
     // Calendar month in Jakarta: 05 Oct and the first instant of October count; September ones do not.
-    expect(summary.paidThisMonth).toEqual([{ currency: "IDR", totalMinor: 2_070_000, count: 2 }]);
+    expect(summary.paidThisMonth).toMatchObject({ totalBaseMinor: 2_070_000, withoutRate: [], count: 2 });
     expect(summary.pendingClaims).toBe(1);
   });
 
-  it("puts the profile's base currency first", async () => {
+  it("converts other currencies with the rate stored on each invoice", async () => {
+    const u = await setupUser("IDR");
+    await makeInvoice(u.id, { status: "sent", total: 1_000_000 });
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 10_000, fx: "15000", fxDate: "2026-10-20" });
+
+    const { unpaid } = await getDashboardSummary(u.id, TODAY);
+    expect(unpaid.totalBaseMinor).toBe(2_500_000);
+    expect(unpaid.converted).toBe(true);
+    expect(unpaid.rateDate).toBe("2026-10-20");
+    expect(unpaid.withoutRate).toEqual([]);
+    expect(unpaid.count).toBe(2);
+  });
+
+  it("converts every invoice with its own rate, overdue and paid-this-month included, and reports the newest rate date", async () => {
+    const u = await setupUser("IDR");
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 10_000, fx: "15000", fxDate: "2026-10-10", due: "2026-10-01" });
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 10_000, fx: "16000", fxDate: "2026-10-20" });
+    await makeInvoice(u.id, { status: "paid", currency: "USD", total: 5_050, fx: "15000.5", paidAt: "2026-10-05T00:00:00Z" });
+
+    const summary = await getDashboardSummary(u.id, TODAY);
+    expect(summary.unpaid).toMatchObject({ totalBaseMinor: 1_500_000 + 1_600_000, converted: true, rateDate: "2026-10-20" });
+    expect(summary.overdue).toMatchObject({ totalBaseMinor: 1_500_000, converted: true, rateDate: "2026-10-10", count: 1 });
+    // 50.50 USD * 15000.5 = 757,525.25 -> Rp 757.525
+    expect(summary.paidThisMonth).toMatchObject({ totalBaseMinor: 757_525, converted: true });
+  });
+
+  it("puts an invoice without a rate in withoutRate when there is no rate table either", async () => {
+    const u = await setupUser("IDR");
+    await makeInvoice(u.id, { status: "sent", total: 1_000_000 });
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 12_000 });
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 3_000 });
+
+    const { unpaid } = await getDashboardSummary(u.id, TODAY);
+    expect(unpaid.totalBaseMinor).toBe(1_000_000);
+    expect(unpaid.converted).toBe(false);
+    expect(unpaid.rateDate).toBeNull();
+    expect(unpaid.withoutRate).toEqual([{ currency: "USD", totalMinor: 15_000, count: 2 }]);
+    expect(unpaid.count).toBe(3);
+  });
+
+  it("falls back to the latest rates for an invoice stored without a rate", async () => {
+    await saveRates("2026-10-20", { EUR: "1", USD: "1.08", IDR: "17000" });
+    const u = await setupUser("IDR");
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 100 });
+    await makeInvoice(u.id, { status: "sent", currency: "THB", total: 5_000 });
+
+    const { unpaid } = await getDashboardSummary(u.id, TODAY);
+    // USD 1.00 -> 17000 / 1.08 = 15740.74 -> Rp 15.741; THB is missing from the table.
+    expect(unpaid.totalBaseMinor).toBe(15_741);
+    expect(unpaid.converted).toBe(true);
+    expect(unpaid.rateDate).toBe("2026-10-20");
+    expect(unpaid.withoutRate).toEqual([{ currency: "THB", totalMinor: 5_000, count: 1 }]);
+  });
+
+  it("converts into a two-decimal base currency and ignores the stored rate of base-currency invoices", async () => {
+    const u = await setupUser("USD");
+    await makeInvoice(u.id, { status: "sent", currency: "USD", total: 125_000, fx: "99" });
+    await makeInvoice(u.id, { status: "sent", currency: "IDR", total: 1_500_000, fx: "0.0000666667" });
+
+    const { unpaid } = await getDashboardSummary(u.id, TODAY);
+    // 1.500.000 IDR * 0.0000666667 = USD 100.00
+    expect(unpaid).toMatchObject({ baseCurrency: "USD", totalBaseMinor: 125_000 + 10_000, converted: true });
+  });
+
+  it("uses the profile's base currency", async () => {
     const u = await setupUser("USD");
     await seed(u.id);
-    const summary = await getDashboardSummary(u.id, TODAY);
-    expect(summary.unpaid.map((t) => t.currency)).toEqual(["USD", "EUR", "IDR"]);
+    const { unpaid } = await getDashboardSummary(u.id, TODAY);
+    expect(unpaid.baseCurrency).toBe("USD");
+    expect(unpaid.totalBaseMinor).toBe(125_000);
+    expect(unpaid.withoutRate.map((t) => t.currency)).toEqual(["EUR", "IDR"]);
   });
 
   it("calls an invoice due today not overdue, and one due yesterday overdue", async () => {
@@ -91,16 +176,17 @@ describe("dashboard summary", () => {
     await makeInvoice(u.id, { status: "sent", total: 100, due: TODAY });
     await makeInvoice(u.id, { status: "sent", total: 7, due: "2026-10-20" });
     const summary = await getDashboardSummary(u.id, TODAY);
-    expect(summary.overdue).toEqual([{ currency: "IDR", totalMinor: 7, count: 1 }]);
-    expect(summary.unpaid).toEqual([{ currency: "IDR", totalMinor: 107, count: 2 }]);
+    expect(summary.overdue).toMatchObject({ totalBaseMinor: 7, count: 1 });
+    expect(summary.unpaid).toMatchObject({ totalBaseMinor: 107, count: 2 });
   });
 
   it("is empty for a user without invoices", async () => {
     const u = await setupUser();
+    const empty = { baseCurrency: "IDR", totalBaseMinor: 0, converted: false, rateDate: null, withoutRate: [], count: 0 };
     expect(await getDashboardSummary(u.id, TODAY)).toEqual({
-      unpaid: [],
-      overdue: [],
-      paidThisMonth: [],
+      unpaid: empty,
+      overdue: empty,
+      paidThisMonth: empty,
       pendingClaims: 0,
     });
   });
@@ -112,9 +198,9 @@ describe("dashboard summary", () => {
     await makeInvoice(mine.id, { status: "sent", total: 42 });
 
     const summary = await getDashboardSummary(mine.id, TODAY);
-    expect(summary.unpaid).toEqual([{ currency: "IDR", totalMinor: 42, count: 1 }]);
-    expect(summary.overdue).toEqual([]);
-    expect(summary.paidThisMonth).toEqual([]);
+    expect(summary.unpaid).toMatchObject({ totalBaseMinor: 42, count: 1, withoutRate: [] });
+    expect(summary.overdue).toMatchObject({ totalBaseMinor: 0, count: 0 });
+    expect(summary.paidThisMonth).toMatchObject({ totalBaseMinor: 0, count: 0 });
     expect(summary.pendingClaims).toBe(0);
   });
 });
