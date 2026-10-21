@@ -17,7 +17,9 @@
     "no": "Tidak",
     "notFoundTitle": "Halaman tidak ditemukan",
     "notFoundDescription": "Halaman yang Anda cari tidak ada atau sudah dipindahkan.",
-    "genericError": "Terjadi kesalahan. Silakan coba lagi."
+    "genericError": "Terjadi kesalahan. Silakan coba lagi.",
+    "saved": "Tersimpan",
+    "optional": "opsional"
   },
   "nav": {
     "dashboard": "Dasbor",
@@ -81,7 +83,7 @@
   "paymentAccounts": {
     "title": "Rekening Pembayaran",
     "description": "Tempat klien mentransfer pembayaran invoice.",
-    "new": "Rekening baru",
+    "new": "Tambah rekening",
     "label": "Nama rekening",
     "type": "Jenis",
     "types": {
@@ -95,7 +97,20 @@
     "isDefault": "Jadikan default",
     "default": "Default",
     "emptyTitle": "Belum ada rekening pembayaran",
-    "emptyDescription": "Tambahkan rekening agar klien tahu ke mana harus membayar."
+    "emptyDescription": "Tambahkan rekening agar klien tahu ke mana harus membayar.",
+    "edit": "Ubah rekening",
+    "makeDefault": "Jadikan default",
+    "showArchived": "Tampilkan arsip",
+    "archived": "Diarsipkan",
+    "fields": {
+      "bankName": "Nama bank",
+      "accountName": "Nama pemilik rekening",
+      "accountNumber": "Nomor rekening",
+      "email": "Email",
+      "iban": "IBAN",
+      "swift": "Kode SWIFT/BIC",
+      "instructions": "Instruksi pembayaran"
+    }
   },
   "clients": {
     "title": "Klien",
@@ -134,6 +149,13 @@
     "invalidCurrency": "Mata uang tidak didukung.",
     "invalidNumber": "Angka tidak valid.",
     "notFound": "Data tidak ditemukan.",
-    "passwordMin": "Password minimal 8 karakter"
+    "passwordMin": "Password minimal 8 karakter",
+    "invalidSwift": "Kode SWIFT harus 8–11 huruf atau angka.",
+    "accountNumberOrIban": "Isi nomor rekening atau IBAN."
+  },
+  "errors": {
+    "validation": "Periksa kembali isian Anda.",
+    "notFound": "Data tidak ditemukan.",
+    "unknown": "Terjadi kesalahan. Silakan coba lagi."
   }
 }

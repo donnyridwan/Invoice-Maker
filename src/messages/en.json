@@ -17,7 +17,9 @@
     "no": "No",
     "notFoundTitle": "Page not found",
     "notFoundDescription": "The page you are looking for does not exist or has been moved.",
-    "genericError": "Something went wrong. Please try again."
+    "genericError": "Something went wrong. Please try again.",
+    "saved": "Saved",
+    "optional": "optional"
   },
   "nav": {
     "dashboard": "Dashboard",
@@ -81,7 +83,7 @@
   "paymentAccounts": {
     "title": "Payment accounts",
     "description": "Where your clients send payment for invoices.",
-    "new": "New account",
+    "new": "Add account",
     "label": "Account name",
     "type": "Type",
     "types": {
@@ -95,7 +97,20 @@
     "isDefault": "Make default",
     "default": "Default",
     "emptyTitle": "No payment accounts yet",
-    "emptyDescription": "Add an account so your clients know where to pay."
+    "emptyDescription": "Add an account so your clients know where to pay.",
+    "edit": "Edit account",
+    "makeDefault": "Make default",
+    "showArchived": "Show archived",
+    "archived": "Archived",
+    "fields": {
+      "bankName": "Bank name",
+      "accountName": "Account holder name",
+      "accountNumber": "Account number",
+      "email": "Email",
+      "iban": "IBAN",
+      "swift": "SWIFT/BIC code",
+      "instructions": "Payment instructions"
+    }
   },
   "clients": {
     "title": "Clients",
@@ -134,6 +149,13 @@
     "invalidCurrency": "Unsupported currency.",
     "invalidNumber": "Invalid number.",
     "notFound": "Not found.",
-    "passwordMin": "Password must be at least 8 characters"
+    "passwordMin": "Password must be at least 8 characters",
+    "invalidSwift": "SWIFT code must be 8–11 letters or digits.",
+    "accountNumberOrIban": "Enter an account number or IBAN."
+  },
+  "errors": {
+    "validation": "Please check your input.",
+    "notFound": "Not found.",
+    "unknown": "Something went wrong. Please try again."
   }
 }

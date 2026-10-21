@@ -32,7 +32,7 @@ export default defineConfig({
   },
   projects: [{ name: "chromium", use: { ...devices["Desktop Chrome"] } }],
   webServer: {
-    command: `npx drizzle-kit migrate && npm run build && npm run start -- -p ${PORT}`,
+    command: `npm run db:migrate && npm run build && npm run start -- -p ${PORT}`,
     port: PORT,
     timeout: 300_000,
     reuseExistingServer: false,
