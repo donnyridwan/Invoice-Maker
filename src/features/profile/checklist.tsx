@@ -4,16 +4,18 @@ import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { cn } from "@/lib/utils";
 
-type ChecklistState = { profileComplete: boolean; hasPaymentAccount: boolean };
+type ChecklistState = { profileComplete: boolean; hasPaymentAccount: boolean; hasSentInvoice: boolean };
 
-/** "Get started" card on the dashboard: what is done and what still needs setting up. */
+/** "Get started" card on the dashboard: what is done and what still needs setting up. Gone once every step is done. */
 export async function Checklist({ state }: { state: ChecklistState }) {
   const t = await getTranslations("dashboard.checklist");
   const items = [
     { key: "profile", done: state.profileComplete, href: "/settings", label: t("profile") },
     { key: "paymentAccount", done: state.hasPaymentAccount, href: "/settings/payment-accounts", label: t("paymentAccount") },
+    { key: "sendInvoice", done: state.hasSentInvoice, href: "/invoices", label: t("sendInvoice") },
   ];
   const doneCount = items.filter((item) => item.done).length;
+  if (doneCount === items.length) return null;
 
   return (
     <Card role="region" aria-labelledby="checklist-title">

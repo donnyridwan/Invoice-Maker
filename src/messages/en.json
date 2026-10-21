@@ -71,7 +71,21 @@
       "profile": "Complete your business profile",
       "paymentAccount": "Add a payment account",
       "done": "Done",
-      "todo": "Not done"
+      "todo": "Not done",
+      "sendInvoice": "Send your first invoice"
+    },
+    "summary": {
+      "label": "Summary",
+      "unpaid": "Unpaid",
+      "overdue": "Overdue",
+      "paidThisMonth": "Paid this month",
+      "count": "{count, plural, one {# invoice} other {# invoices}}"
+    },
+    "claimsBanner": "{count, plural, one {# payment is} other {# payments are}} awaiting confirmation",
+    "claimsBannerAction": "Review",
+    "recent": {
+      "title": "Recent invoices",
+      "viewAll": "View all"
     }
   },
   "invoices": {
@@ -303,7 +317,18 @@
         },
         "paidOnDetail": "Payment date {date}"
       }
-    }
+    },
+    "tabs": {
+      "label": "Filter by status",
+      "all": "All",
+      "draft": "Draft",
+      "unpaid": "Unpaid",
+      "paid": "Paid",
+      "void": "Void"
+    },
+    "emptyTabTitle": "No invoices here",
+    "emptyTabDescription": "There are no invoices with this status yet.",
+    "needsConfirmation": "Needs confirmation"
   },
   "settings": {
     "title": "Settings",

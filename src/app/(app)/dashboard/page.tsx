@@ -1,15 +1,29 @@
+import Link from "next/link";
+import { Clock } from "lucide-react";
 import { getTranslations } from "next-intl/server";
-import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { getDashboardSummary } from "@/features/dashboard/queries";
+import { RecentInvoices } from "@/features/dashboard/recent-invoices";
+import { SummaryCards } from "@/features/dashboard/summary-cards";
 import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
+import { listInvoices } from "@/features/invoices/queries";
 import { Checklist } from "@/features/profile/checklist";
-import { getChecklist } from "@/features/profile/queries";
+import { getChecklist, getProfile } from "@/features/profile/queries";
+import { isCurrencyCode } from "@/lib/currencies";
+import { todayInJakarta } from "@/lib/dates";
 import { requireUser } from "@/lib/session";
 
 export default async function DashboardPage() {
   const user = await requireUser();
   const t = await getTranslations("dashboard");
-  const checklist = await getChecklist(user.id);
+  const today = todayInJakarta();
+  const [checklist, profile, summary, recent] = await Promise.all([
+    getChecklist(user.id),
+    getProfile(user.id),
+    getDashboardSummary(user.id, today),
+    listInvoices(user.id, { limit: 5 }),
+  ]);
+  const baseCurrency = isCurrencyCode(profile.baseCurrency) ? profile.baseCurrency : "IDR";
   const firstName = user.name.trim().split(/\s+/)[0] || user.email;
 
   return (
@@ -20,8 +34,21 @@ export default async function DashboardPage() {
         actions={<NewInvoiceButton />}
       />
       <div className="flex flex-col gap-6">
+        {summary.pendingClaims > 0 ? (
+          <div
+            role="status"
+            className="flex flex-wrap items-center gap-3 rounded-md border border-badge-warning-fg/20 bg-badge-warning-bg px-4 py-3 text-sm text-badge-warning-fg"
+          >
+            <Clock className="size-4 shrink-0" aria-hidden />
+            <span className="font-medium">{t("claimsBanner", { count: summary.pendingClaims })}</span>
+            <Link href="/invoices?tab=unpaid" className="ml-auto font-medium underline underline-offset-2">
+              {t("claimsBannerAction")}
+            </Link>
+          </div>
+        ) : null}
+        <SummaryCards summary={summary} baseCurrency={baseCurrency} />
         <Checklist state={checklist} />
-        <EmptyState title={t("emptyTitle")} description={t("emptyDescription")} />
+        <RecentInvoices invoices={recent} today={today} />
       </div>
     </>
   );

@@ -1,5 +1,5 @@
 import { randomBytes } from "node:crypto";
-import { and, asc, desc, eq, gt, ilike, inArray, ne, or, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, gt, ilike, inArray, ne, or, sql } from "drizzle-orm";
 import { db } from "@/db/client";
 import { businessProfiles, clients, invoiceEvents, invoiceItems, invoices, paymentAccounts } from "@/db/schema";
 import { getClient } from "@/features/clients/queries";
@@ -349,16 +349,50 @@ export async function deleteDraftInvoice(userId: string, id: string): Promise<vo
   });
 }
 
-export async function listInvoices(userId: string, { search }: { search?: string } = {}): Promise<Invoice[]> {
+/** The tabs of the invoice list. `unpaid` is sent + payment_claimed. */
+export const INVOICE_TABS = ["all", "draft", "unpaid", "paid", "void"] as const;
+export type InvoiceTab = (typeof INVOICE_TABS)[number];
+
+const TAB_STATUSES: Record<Exclude<InvoiceTab, "all">, Invoice["status"][]> = {
+  draft: ["draft"],
+  unpaid: ["sent", "payment_claimed"],
+  paid: ["paid"],
+  void: ["void"],
+};
+
+export async function listInvoices(
+  userId: string,
+  { search, tab = "all", limit }: { search?: string; tab?: InvoiceTab; limit?: number } = {},
+): Promise<Invoice[]> {
   const conditions = [eq(invoices.userId, userId)];
+  if (tab !== "all") conditions.push(inArray(invoices.status, TAB_STATUSES[tab]));
   const term = search?.trim();
   if (term) {
     const pattern = likePattern(term);
     conditions.push(or(ilike(invoices.number, pattern), sql`${invoices.clientSnapshot}->>'name' ILIKE ${pattern}`)!);
   }
-  return db
+  const query = db
     .select()
     .from(invoices)
     .where(and(...conditions))
     .orderBy(desc(invoices.issueDate), desc(invoices.number));
+  return limit === undefined ? query : query.limit(limit);
+}
+
+/** How many invoices each tab of the list holds, in one query. */
+export async function countInvoicesByTab(userId: string): Promise<Record<InvoiceTab, number>> {
+  const rows = await db
+    .select({ status: invoices.status, n: count() })
+    .from(invoices)
+    .where(eq(invoices.userId, userId))
+    .groupBy(invoices.status);
+  const byStatus = new Map(rows.map((row) => [row.status, row.n]));
+  const sum = (statuses: Invoice["status"][]) => statuses.reduce((total, status) => total + (byStatus.get(status) ?? 0), 0);
+  return {
+    all: rows.reduce((total, row) => total + row.n, 0),
+    draft: sum(TAB_STATUSES.draft),
+    unpaid: sum(TAB_STATUSES.unpaid),
+    paid: sum(TAB_STATUSES.paid),
+    void: sum(TAB_STATUSES.void),
+  };
 }

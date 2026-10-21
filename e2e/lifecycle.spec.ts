@@ -4,6 +4,7 @@ import {
   createInvoiceViaUi,
   markSentViaDb,
   registerUser,
+  setDueDateViaDb,
 } from "./helpers";
 
 const PNG_1X1 = Buffer.from(
@@ -192,5 +193,73 @@ test.describe("invoice lifecycle", () => {
     // Sent -> detail, draft -> editor.
     await page.getByRole("row").filter({ hasText: "Terkirim" }).getByRole("link").click();
     await expect(page).toHaveURL(new RegExp(`/invoices/${id}$`));
+  });
+});
+
+function plusDays(date: string, days: number): string {
+  const d = new Date(`${date}T00:00:00Z`);
+  d.setUTCDate(d.getUTCDate() + days);
+  return d.toISOString().slice(0, 10);
+}
+
+/** Today's date in Jakarta, as the server sees it. */
+function todayInJakarta(): string {
+  return new Intl.DateTimeFormat("en-CA", { timeZone: "Asia/Jakarta" }).format(new Date());
+}
+
+test.describe("dashboard", () => {
+  test("shows the unpaid total, ticks the first-invoice step and lists the invoice under its tab", async ({ page }) => {
+    const id = await createInvoiceDraft(page);
+    await page.goto("/dashboard");
+    await expect(page.getByRole("heading", { level: 1, name: "Halo, Donny" })).toBeVisible();
+    const step = page.getByRole("listitem").filter({ hasText: "Kirim invoice pertama" });
+    await expect(step).toHaveAttribute("data-done", "false");
+    const unpaid = page.getByRole("link", { name: /Belum dibayar/ });
+    await expect(unpaid).toContainText("Rp 0");
+
+    await markSentViaDb(id);
+    await page.goto("/dashboard");
+    await expect(unpaid).toContainText(/Rp\s1\.500\.000/);
+    await expect(unpaid).toContainText("1 invoice");
+    await expect(page.getByRole("link", { name: /Lunas bulan ini/ })).toContainText("Rp 0");
+    await expect(step).toHaveAttribute("data-done", "true");
+    await expect(page.getByRole("region", { name: "Invoice terbaru" })).toContainText(/INV-\d{4}-002/);
+
+    await page.goto("/invoices");
+    await expect(page.getByRole("link", { name: /^Semua\s*2$/ })).toBeVisible();
+    await expect(page.getByRole("link", { name: /^Draft\s*1$/ })).toBeVisible();
+    await page.getByRole("link", { name: /^Belum lunas\s*1$/ }).click();
+    await expect(page).toHaveURL(/tab=unpaid/);
+    await expect(page.getByRole("row")).toHaveCount(2);
+    await expect(page.getByRole("row").nth(1)).toContainText("Terkirim");
+    await page.getByRole("link", { name: /^Draft/ }).click();
+    await expect(page.getByRole("row").nth(1)).toContainText("Draft");
+    await expect(page.getByRole("row")).toHaveCount(2);
+  });
+
+  test("flags overdue invoices and waiting payment claims, and hides the checklist once it is complete", async ({ page, browser, baseURL }) => {
+    const id = await createInvoiceDraft(page);
+    const token = await markSentViaDb(id);
+    await setDueDateViaDb(id, plusDays(todayInJakarta(), -3));
+    await submitClaim(browser, baseURL, token, "Budi");
+
+    await page.goto("/dashboard");
+    await expect(page.getByText("1 pembayaran menunggu konfirmasi")).toBeVisible();
+    await expect(page.getByRole("link", { name: /Jatuh tempo/ }).first()).toContainText(/Rp\s1\.500\.000/);
+
+    await page.goto("/invoices?tab=unpaid");
+    const row = page.getByRole("row").nth(1);
+    await expect(row).toContainText("Perlu konfirmasi");
+    await expect(row.getByText("telat 3 hari")).toHaveClass(/text-danger/);
+    await expect(row).toContainText("Jatuh tempo");
+
+    // Profile (address) was the only open step besides the sent invoice, which is done now.
+    await page.goto("/settings");
+    const profileCard = page.getByRole("region", { name: "Profil bisnis" });
+    await profileCard.getByLabel("Alamat").fill("Jl. Sudirman No. 1, Jakarta");
+    await profileCard.getByRole("button", { name: "Simpan" }).click();
+    await expect(page.getByText("Tersimpan")).toBeVisible();
+    await page.goto("/dashboard");
+    await expect(page.getByRole("region", { name: "Mulai menggunakan Invoice Maker" })).toHaveCount(0);
   });
 });

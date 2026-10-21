@@ -111,10 +111,10 @@ describe("business profile", () => {
   it("getChecklist tracks profile completeness and payment accounts", async () => {
     const u = await createTestUser();
     await ensureProfile(u.id, { businessName: "Donny", email: u.email });
-    expect(await getChecklist(u.id)).toEqual({ profileComplete: false, hasPaymentAccount: false });
+    expect(await getChecklist(u.id)).toEqual({ profileComplete: false, hasPaymentAccount: false, hasSentInvoice: false });
 
     await updateProfile(u.id, profileInput({ address: "Jl. Sudirman 1" }));
-    expect(await getChecklist(u.id)).toEqual({ profileComplete: true, hasPaymentAccount: false });
+    expect(await getChecklist(u.id)).toEqual({ profileComplete: true, hasPaymentAccount: false, hasSentInvoice: false });
 
     await createPaymentAccount(u.id, {
       type: "bank",
@@ -123,7 +123,7 @@ describe("business profile", () => {
       accountNumber: "123",
       isDefault: true,
     });
-    expect(await getChecklist(u.id)).toEqual({ profileComplete: true, hasPaymentAccount: true });
+    expect(await getChecklist(u.id)).toEqual({ profileComplete: true, hasPaymentAccount: true, hasSentInvoice: false });
   });
 
   it("completeOnboarding stamps the time once", async () => {

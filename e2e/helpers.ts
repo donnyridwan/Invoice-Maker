@@ -153,3 +153,14 @@ export async function createInvoiceDraft(page: Page, opts: { english?: boolean }
   await setupOwner(page);
   return fillNewInvoice(page, opts);
 }
+
+/** Moves an invoice's due date straight in the e2e database (to make it overdue). */
+export async function setDueDateViaDb(invoiceId: string, dueDate: string): Promise<void> {
+  const sql = postgres(e2eDatabaseUrl(), { max: 1, onnotice: () => {} });
+  try {
+    const rows = await sql`UPDATE invoices SET due_date = ${dueDate} WHERE id = ${invoiceId} RETURNING id`;
+    if (rows.length !== 1) throw new Error(`Invoice ${invoiceId} not found in the e2e database`);
+  } finally {
+    await sql.end();
+  }
+}
