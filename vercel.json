@@ -1,0 +1,11 @@
+{
+  "regions": ["sin1"],
+  "crons": [
+    { "path": "/api/cron/fx", "schedule": "0 17 * * *" },
+    { "path": "/api/cron/recurring", "schedule": "0 0 * * *" }
+  ],
+  "functions": {
+    "src/app/api/invoices/[id]/pdf/route.ts": { "maxDuration": 30, "memory": 1024 },
+    "src/app/i/[token]/pdf/route.ts": { "maxDuration": 30, "memory": 1024 }
+  }
+}
