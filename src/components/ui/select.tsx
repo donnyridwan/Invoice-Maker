@@ -18,7 +18,7 @@ function SelectTrigger({
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       className={cn(
-        "flex h-9 w-full items-center justify-between gap-2 rounded-md border border-border bg-white px-3 text-sm text-fg data-[placeholder]:text-muted focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-accent/30 disabled:cursor-not-allowed disabled:opacity-60 aria-invalid:border-danger",
+        "flex h-9 w-full items-center justify-between gap-2 rounded-input border border-border bg-white px-3 text-sm text-fg data-[placeholder]:text-muted focus-visible:border-accent focus-visible:outline-2 focus-visible:outline-offset-0 focus-visible:outline-accent/30 disabled:cursor-not-allowed disabled:opacity-60 aria-invalid:border-danger",
         className,
       )}
       {...props}
@@ -43,7 +43,7 @@ function SelectContent({
         data-slot="select-content"
         position={position}
         className={cn(
-          "z-50 max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-md border border-border bg-white text-sm text-fg shadow-md",
+          "z-50 max-h-72 min-w-[var(--radix-select-trigger-width)] overflow-hidden rounded-card border border-border bg-white text-sm text-fg shadow-md",
           className,
         )}
         {...props}

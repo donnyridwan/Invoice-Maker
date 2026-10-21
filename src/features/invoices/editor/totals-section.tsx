@@ -86,9 +86,9 @@ export function TotalsSection({
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-4 border-t border-border pt-3 text-base">
-          <dt className="font-semibold text-fg">{t("totals.total")}</dt>
-          <dd className="font-semibold text-fg">{money(evaluation.totalMinor)}</dd>
+        <div className="flex items-center justify-between gap-4 border-t border-border pt-3 text-lg">
+          <dt className="font-bold text-fg">{t("totals.total")}</dt>
+          <dd className="font-extrabold tracking-tight text-accent">{money(evaluation.totalMinor)}</dd>
         </div>
       </dl>
     </EditorSection>

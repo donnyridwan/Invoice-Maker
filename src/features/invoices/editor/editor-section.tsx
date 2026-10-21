@@ -19,7 +19,7 @@ export function useErrorText(errors: EditorErrors): (key: string) => string | un
   return (key) => (errors[key] ? translateValidation(t, errors[key]) : undefined);
 }
 
-/** A compact card with a small sentence-case title. */
+/** A rounded card with a bold sentence-case title; corner radius and colours come from the page theme. */
 export function EditorSection({
   title,
   action,
@@ -33,14 +33,14 @@ export function EditorSection({
 }) {
   const headingId = useId();
   return (
-    <section aria-labelledby={headingId} className={cn("rounded-md border border-border bg-white", className)}>
-      <div className="flex min-h-11 items-center justify-between gap-3 px-4 pt-3">
-        <h2 id={headingId} className="text-sm font-semibold text-fg">
+    <section aria-labelledby={headingId} className={cn("rounded-card border border-border bg-white", className)}>
+      <div className="flex min-h-12 items-center justify-between gap-3 px-5 pt-4">
+        <h2 id={headingId} className="text-base font-bold tracking-tight text-fg">
           {title}
         </h2>
         {action}
       </div>
-      <div className="flex flex-col gap-4 p-4 pt-3">{children}</div>
+      <div className="flex flex-col gap-4 p-5 pt-3">{children}</div>
     </section>
   );
 }

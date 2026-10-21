@@ -185,6 +185,30 @@ function ClientCombobox({
   );
 }
 
+function initials(name: string): string {
+  const words = name.trim().split(/\s+/).filter(Boolean);
+  return (words.length > 1 ? words[0][0] + words[1][0] : (words[0] ?? "?").slice(0, 2)).toUpperCase();
+}
+
+/** The chosen client as a recipient row: initials avatar, name and contact line. */
+function ClientSummary({ client }: { client: ClientOption }) {
+  const details = [client.company, client.email, client.address?.split("\n")[0]].filter(Boolean).join(" · ");
+  return (
+    <div className="flex items-center gap-3 rounded-card bg-subtle px-3 py-2.5">
+      <span
+        aria-hidden
+        className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-sm font-extrabold text-accent"
+      >
+        {initials(client.name)}
+      </span>
+      <span className="min-w-0">
+        <span className="block truncate font-semibold text-fg">{client.name}</span>
+        {details ? <span className="block truncate text-xs text-muted">{details}</span> : null}
+      </span>
+    </div>
+  );
+}
+
 /**
  * Client picker. Choosing a client also applies the client's default currency and invoice
  * language, when it has them.
@@ -247,11 +271,7 @@ export function ClientSection({
         />
         {errorText("clientId") ? <p className="text-xs text-danger">{errorText("clientId")}</p> : null}
       </div>
-      {selected && (selected.company || selected.email || selected.address) ? (
-        <p className="-mt-2 text-xs text-muted">
-          {[selected.company, selected.email, selected.address?.split("\n")[0]].filter(Boolean).join(" · ")}
-        </p>
-      ) : null}
+      {selected ? <ClientSummary client={selected} /> : null}
       {clients.length === 0 ? (
         <p className="-mt-2 text-xs text-muted">
           {t("client.none")}{" "}

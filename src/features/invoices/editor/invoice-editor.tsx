@@ -8,6 +8,7 @@ import { buildInvoiceDocument } from "@/documents/build-document";
 import { resolveLocale } from "@/i18n/config";
 import { translateValidation } from "@/lib/validation-message";
 import { cn } from "@/lib/utils";
+import { buttonVariants } from "@/components/ui/button";
 import { saveInvoiceDraftAction } from "../actions";
 import { useAutosave, type SaveOutcome } from "../autosave";
 import {
@@ -25,6 +26,7 @@ import type { InvoiceDraftInput } from "../schema";
 import type { BusinessSnapshot } from "../snapshots";
 import type { DisplayStatus } from "../display-status";
 import type { Invoice } from "../queries";
+import { AmountHero } from "./amount-hero";
 import { AppearanceSection } from "./appearance-section";
 import { ClientSection } from "./client-section";
 import { DetailsSection } from "./details-section";
@@ -144,7 +146,7 @@ export function InvoiceEditor({
   const formError = errors._form ? translateValidation(tAll, errors._form) : null;
 
   return (
-    <div>
+    <div data-theme="wise">
       <EditorHeader
         number={state.number}
         status={displayStatus}
@@ -153,10 +155,7 @@ export function InvoiceEditor({
         actions={
           <>
             {status !== "draft" ? (
-              <Link
-                href={`/invoices/${invoiceId}`}
-                className="text-sm font-medium text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-              >
+              <Link href={`/invoices/${invoiceId}`} className={buttonVariants({ variant: "ghost", size: "sm" })}>
                 {t("view")}
               </Link>
             ) : null}
@@ -165,7 +164,7 @@ export function InvoiceEditor({
               download
               onClick={(event) => void downloadPdf(event)}
               aria-label={t("downloadPdf")}
-              className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              className={buttonVariants({ variant: "secondary", size: "sm" })}
             >
               <Download className="size-4" aria-hidden />
               <span className="hidden sm:inline">{t("downloadPdf")}</span>
@@ -184,7 +183,7 @@ export function InvoiceEditor({
       />
 
       <div className="sticky top-[112px] z-10 -mx-4 border-b border-border bg-white px-4 py-2 md:top-14 md:-mx-6 md:px-6 xl:hidden">
-        <div role="tablist" aria-label={t("tabs.label")} className="flex gap-1 rounded-md border border-border bg-white p-0.5">
+        <div role="tablist" aria-label={t("tabs.label")} className="flex gap-1 rounded-button bg-subtle p-1">
           {(["form", "preview"] as const).map((value) => (
             <button
               key={value}
@@ -195,8 +194,8 @@ export function InvoiceEditor({
               aria-controls={`editor-panel-${value}`}
               onClick={() => setTab(value)}
               className={cn(
-                "h-8 flex-1 rounded text-sm font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-                tab === value ? "bg-subtle text-fg" : "text-muted hover:text-fg",
+                "h-8 flex-1 rounded-button text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                tab === value ? "bg-white text-fg shadow-sm" : "text-muted hover:text-fg",
               )}
             >
               {t(`tabs.${value}`)}
@@ -205,7 +204,7 @@ export function InvoiceEditor({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-6 xl:flex-row xl:items-start xl:gap-8">
+      <div className="mt-6 flex flex-col gap-6 xl:flex-row xl:items-start xl:gap-10">
         <div
           role="tabpanel"
           id="editor-panel-form"
@@ -219,6 +218,7 @@ export function InvoiceEditor({
                 {formError}
               </p>
             ) : null}
+            <AmountHero state={state} evaluation={evaluation} locale={locale} />
             <ClientSection
               {...section}
               clients={clients}

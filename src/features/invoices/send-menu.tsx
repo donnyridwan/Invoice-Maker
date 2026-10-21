@@ -109,8 +109,8 @@ export function SendMenu({
         <DropdownMenuTrigger asChild>
           <Button variant={variant} size="sm" disabled={busy}>
             {busy ? <Loader2 className="size-4 animate-spin" /> : <Send className="size-4" />}
-            {t("actions.send")}
-            <ChevronDown className="size-3.5 opacity-70" />
+            <span className="sr-only sm:not-sr-only">{t("actions.send")}</span>
+            <ChevronDown className="hidden size-3.5 opacity-70 sm:block" />
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">

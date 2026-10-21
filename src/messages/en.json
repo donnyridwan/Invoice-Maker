@@ -120,6 +120,7 @@
       "awaitingConfirmation": "Awaiting confirmation"
     },
     "editor": {
+      "hero": {"label": "Invoice total", "items": "{count, plural, one {# item} other {# items}}", "due": "Due {date}", "dueOnReceipt": "Due on receipt"},
       "backToList": "Back to invoices",
       "tabs": {
         "label": "Editor view",

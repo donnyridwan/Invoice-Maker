@@ -52,7 +52,7 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
         >
           <Menu className="size-5" />
         </Button>
-        <span className="text-base font-semibold tracking-tight text-fg">{t("common.appName")}</span>
+        <span data-slot="wordmark" className="text-base font-semibold tracking-tight text-fg">{t("common.appName")}</span>
       </header>
       <Dialog open={drawerOpen} onOpenChange={setDrawerOpen}>
         <DialogPortal>

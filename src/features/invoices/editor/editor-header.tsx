@@ -17,14 +17,14 @@ function AutosaveIndicator({ status, onRetry }: { status: AutosaveStatus; onRetr
     content = (
       <span className="inline-flex items-center gap-1.5 text-muted">
         <Loader2 className="size-3.5 animate-spin" aria-hidden />
-        {t("saving")}
+        <span className="sr-only sm:not-sr-only">{t("saving")}</span>
       </span>
     );
   } else if (status === "saved") {
     content = (
       <span className="inline-flex items-center gap-1.5 text-muted">
         <Check className="size-3.5 text-badge-success-fg" aria-hidden />
-        {t("saved")}
+        <span className="sr-only sm:not-sr-only">{t("saved")}</span>
       </span>
     );
   } else if (status === "error") {
@@ -35,14 +35,14 @@ function AutosaveIndicator({ status, onRetry }: { status: AutosaveStatus; onRetr
         className="inline-flex items-center gap-1.5 rounded text-danger underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <AlertCircle className="size-3.5" aria-hidden />
-        {t("error")}
+        <span className="sr-only sm:not-sr-only">{t("error")}</span>
       </button>
     );
   } else if (status === "invalid") {
     content = (
       <span className="inline-flex items-center gap-1.5 text-badge-warning-fg">
         <AlertCircle className="size-3.5" aria-hidden />
-        {t("invalid")}
+        <span className="sr-only sm:not-sr-only">{t("invalid")}</span>
       </span>
     );
   }
@@ -75,17 +75,17 @@ export function EditorHeader({
   const t = useTranslations("invoices.editor");
 
   return (
-    <header className="sticky top-14 z-20 -mx-4 flex h-14 items-center gap-3 border-b border-border bg-white px-4 md:top-0 md:-mx-6 md:px-6">
+    <header className="sticky top-14 z-20 -mx-4 flex h-16 items-center gap-3 border-b border-border bg-white px-4 md:top-0 md:-mx-6 md:px-6">
       <Link
         href="/invoices"
         aria-label={t("backToList")}
-        className="-ml-1.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-subtle text-fg transition-colors hover:bg-border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <ArrowLeft className="size-4" />
       </Link>
-      <h1 className="min-w-0 truncate text-base font-semibold tracking-tight text-fg">{number.trim() || "—"}</h1>
+      <h1 className="min-w-0 truncate text-lg font-extrabold tracking-tight text-fg">{number.trim() || "—"}</h1>
       <StatusBadge status={status} className="shrink-0" />
-      <div className="ml-auto flex min-w-0 items-center gap-3">
+      <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
         <AutosaveIndicator status={autosave} onRetry={onRetry} />
         {actions}
       </div>

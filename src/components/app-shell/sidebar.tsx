@@ -25,7 +25,7 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
   return (
     <div className="flex h-full flex-col">
       <div className="flex h-14 items-center px-5">
-        <Link href="/dashboard" onClick={onNavigate} className="text-base font-semibold tracking-tight text-fg">
+        <Link href="/dashboard" onClick={onNavigate} data-slot="wordmark" className="text-base font-semibold tracking-tight text-fg">
           {t("common.appName")}
         </Link>
       </div>
@@ -39,8 +39,8 @@ export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
               onClick={onNavigate}
               aria-current={active ? "page" : undefined}
               className={cn(
-                "flex h-9 items-center gap-2.5 rounded-md px-3 text-sm font-medium text-muted transition-colors hover:bg-subtle hover:text-fg",
-                active && "bg-subtle text-accent hover:text-accent",
+                "flex h-9 items-center gap-2.5 rounded-button px-3 text-sm font-medium text-muted transition-colors hover:bg-subtle hover:text-fg",
+                active && "bg-subtle font-semibold text-accent hover:text-accent",
               )}
             >
               <Icon className="size-4" />

@@ -80,10 +80,10 @@ export function DetailsSection({ state, errors, update }: EditorSectionProps) {
               aria-pressed={active}
               onClick={() => chooseTerm(days)}
               className={cn(
-                "h-7 rounded-full border px-3 text-xs font-medium transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                "h-8 rounded-full border px-3.5 text-xs font-semibold transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
                 active
-                  ? "border-accent bg-accent/10 text-accent"
-                  : "border-border bg-white text-muted hover:bg-subtle hover:text-fg",
+                  ? "border-accent bg-tint text-tint-fg"
+                  : "border-border bg-white text-fg hover:bg-subtle",
               )}
             >
               {days === 0 ? t("details.onReceipt") : t("details.days", { count: days })}

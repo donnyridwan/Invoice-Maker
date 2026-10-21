@@ -28,6 +28,64 @@
 
   --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
   --font-doc-serif: Georgia, "Times New Roman", Times, serif;
+
+  /* Semantic tokens a page theme can override (see [data-theme="wise"] below). The defaults keep
+     the Stripe-like look: indigo primary buttons, 6px corners everywhere. */
+  --color-primary: var(--color-accent);
+  --color-primary-fg: #ffffff;
+  --color-primary-hover: var(--color-accent-hover);
+  --color-tint: var(--color-subtle);
+  --color-tint-fg: var(--color-accent);
+  --radius-button: var(--radius);
+  --radius-input: var(--radius);
+  --radius-card: var(--radius);
+  --radius-panel: var(--radius-lg);
+}
+
+/* Wise-inspired theme, switched on by any element with data-theme="wise" on the page (the invoice
+   editor for now): forest green ink, lime pill buttons, generously rounded cards on a soft
+   green-grey canvas. */
+:root:has([data-theme="wise"]) {
+  --color-accent: #163300;
+  --color-accent-hover: #0d2100;
+  --color-primary: #9fe870;
+  --color-primary-fg: #163300;
+  --color-primary-hover: #8fd75f;
+  --color-tint: #e2f6d5;
+  --color-tint-fg: #163300;
+  --color-fg: #0e0f0c;
+  --color-muted: #5d605a;
+  --color-subtle: #f1f3ee;
+  --color-border: #e1e5dd;
+  --color-badge-success-bg: #e2f6d5;
+  --color-badge-success-fg: #163300;
+  --color-badge-info-bg: #e3f1fb;
+  --color-badge-info-fg: #0a4a75;
+  --color-badge-neutral-bg: #eceee9;
+  --color-badge-neutral-fg: #454745;
+  --radius-button: 9999px;
+  --radius-input: 10px;
+  --radius-card: 20px;
+  --radius-panel: 24px;
+}
+:root:has([data-theme="wise"]) [data-slot="input"],
+:root:has([data-theme="wise"]) [data-slot="select-trigger"] {
+  height: 2.75rem;
+  border-color: #c9cdc5;
+}
+:root:has([data-theme="wise"]) [data-slot="input"]:focus-visible,
+:root:has([data-theme="wise"]) [data-slot="select-trigger"]:focus-visible {
+  border-color: var(--color-accent);
+  outline-color: color-mix(in srgb, var(--color-accent) 25%, transparent);
+}
+:root:has([data-theme="wise"]) [data-slot="button"] {
+  font-weight: 600;
+}
+:root:has([data-theme="wise"]) [data-slot="wordmark"] {
+  color: var(--color-accent);
+  font-size: 1.125rem;
+  font-weight: 900;
+  letter-spacing: -0.04em;
 }
 
 @layer base {

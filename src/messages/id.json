@@ -120,6 +120,7 @@
       "awaitingConfirmation": "Menunggu konfirmasi"
     },
     "editor": {
+      "hero": {"label": "Total tagihan", "items": "{count} item", "due": "Jatuh tempo {date}", "dueOnReceipt": "Jatuh tempo saat diterima"},
       "backToList": "Kembali ke daftar invoice",
       "tabs": {
         "label": "Tampilan editor",
