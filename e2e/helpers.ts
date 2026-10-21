@@ -1,5 +1,8 @@
 import { expect, type Page } from "@playwright/test";
+import { readFile, readdir, rm } from "node:fs/promises";
+import path from "node:path";
 import postgres from "postgres";
+import type { OutgoingEmail } from "../src/lib/email/transport";
 
 export const DEFAULT_PASSWORD = "rahasia123";
 
@@ -160,6 +163,60 @@ export async function setDueDateViaDb(invoiceId: string, dueDate: string): Promi
   try {
     const rows = await sql`UPDATE invoices SET due_date = ${dueDate} WHERE id = ${invoiceId} RETURNING id`;
     if (rows.length !== 1) throw new Error(`Invoice ${invoiceId} not found in the e2e database`);
+  } finally {
+    await sql.end();
+  }
+}
+
+const OUTBOX_DIR = path.join(process.cwd(), "var", "outbox");
+
+/** Every email the file transport wrote to var/outbox/ for recipient `to` (in `to` or `cc`), oldest first. */
+export async function readOutbox(to: string): Promise<OutgoingEmail[]> {
+  let names: string[];
+  try {
+    names = (await readdir(OUTBOX_DIR)).filter((name) => name.endsWith(".json")).sort();
+  } catch {
+    return [];
+  }
+  const emails: OutgoingEmail[] = [];
+  for (const name of names) {
+    let raw: string;
+    try {
+      raw = await readFile(path.join(OUTBOX_DIR, name), "utf8");
+    } catch {
+      continue; // removed between readdir and read
+    }
+    const stored = JSON.parse(raw) as Omit<OutgoingEmail, "attachments"> & {
+      attachments?: { filename: string; content: string }[];
+    };
+    const recipients = [...stored.to, ...(stored.cc ?? [])].map((address) => address.toLowerCase());
+    if (!recipients.includes(to.toLowerCase())) continue;
+    emails.push({
+      ...stored,
+      attachments: stored.attachments?.map((a) => ({ filename: a.filename, content: Buffer.from(a.content, "base64") })),
+    });
+  }
+  return emails;
+}
+
+/** Empties var/outbox/ (call in beforeAll so old runs never show up; emails are also scoped by recipient). */
+export async function clearOutbox(): Promise<void> {
+  await rm(OUTBOX_DIR, { recursive: true, force: true });
+}
+
+/** The first http(s) URL in an email's text body. */
+export function firstLink(email: OutgoingEmail): string {
+  const match = /https?:\/\/[^\s<>"]+/.exec(email.text);
+  if (!match) throw new Error(`No link in the email "${email.subject}"`);
+  return match[0];
+}
+
+/** Marks an account's email as verified straight in the e2e database (the verification flow has its own test). */
+export async function verifyEmailViaDb(email: string): Promise<void> {
+  const sql = postgres(e2eDatabaseUrl(), { max: 1, onnotice: () => {} });
+  try {
+    const rows = await sql`UPDATE "user" SET email_verified = true WHERE email = ${email} RETURNING id`;
+    if (rows.length !== 1) throw new Error(`User ${email} not found in the e2e database`);
   } finally {
     await sql.end();
   }

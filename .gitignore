@@ -50,3 +50,6 @@ next-env.d.ts
 
 # local file uploads (dev/test storage)
 /public/uploads/
+
+# email outbox of the file transport
+/var/

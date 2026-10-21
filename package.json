@@ -25,6 +25,7 @@
     "@radix-ui/react-label": "^2.1.17",
     "@radix-ui/react-select": "^2.4.1",
     "@radix-ui/react-slot": "^1.5.0",
+    "@react-email/components": "^1.0.12",
     "@sparticuz/chromium": "^153.0.0",
     "@vercel/blob": "^2.8.2",
     "better-auth": "1.7",
@@ -38,6 +39,7 @@
     "puppeteer-core": "25.11.0",
     "react": "19.3.0",
     "react-dom": "19.3.0",
+    "resend": "^6.34.1",
     "sonner": "^2.0.8",
     "tailwind-merge": "^3.7.0",
     "zod": "^4.6.7"

@@ -377,7 +377,17 @@
     "logoHint": "JPG, PNG, or WebP, max. 2 MB",
     "logoDescription": "Shown on your invoices.",
     "logoAlt": "Business logo",
-    "logoRemoved": "Logo removed."
+    "logoRemoved": "Logo removed.",
+    "verifyEmail": {
+      "title": "Email verification",
+      "description": "A verified email is required to send invoices by email and to receive payment notifications.",
+      "verified": "Verified",
+      "unverified": "Not verified",
+      "send": "Send verification link",
+      "sent": "Verification link sent to {email}. Check your inbox.",
+      "disabled": "Email delivery is not configured",
+      "failed": "Could not send the verification link. Please try again later."
+    }
   },
   "paymentAccounts": {
     "title": "Payment accounts",
@@ -556,6 +566,18 @@
     "notFound": {
       "title": "Invoice not found",
       "description": "This link is not valid or the invoice is no longer available. Ask the sender for a new link."
+    }
+  },
+  "emails": {
+    "footer": "Sent with Invoice Maker",
+    "verify": {
+      "subject": "Verify your email",
+      "preview": "Verify your email to start sending invoices.",
+      "title": "Verify your email",
+      "body": "Hi {name}, click the button below to verify the email address of your Invoice Maker account. After that you can send invoices by email.",
+      "button": "Verify email",
+      "linkHint": "Or copy this link into your browser:",
+      "expires": "The link is valid for 1 hour. If you did not sign up, you can ignore this email."
     }
   }
 }

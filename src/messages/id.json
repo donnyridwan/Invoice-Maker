@@ -377,7 +377,17 @@
     "logoHint": "JPG, PNG, atau WebP, maks. 2 MB",
     "logoDescription": "Tampil di invoice Anda.",
     "logoAlt": "Logo bisnis",
-    "logoRemoved": "Logo dihapus."
+    "logoRemoved": "Logo dihapus.",
+    "verifyEmail": {
+      "title": "Verifikasi email",
+      "description": "Email yang terverifikasi diperlukan untuk mengirim invoice lewat email dan menerima pemberitahuan pembayaran.",
+      "verified": "Terverifikasi",
+      "unverified": "Belum diverifikasi",
+      "send": "Kirim link verifikasi",
+      "sent": "Link verifikasi dikirim ke {email}. Cek kotak masuk kamu.",
+      "disabled": "Pengiriman email belum dikonfigurasi",
+      "failed": "Link verifikasi gagal dikirim. Coba lagi nanti."
+    }
   },
   "paymentAccounts": {
     "title": "Rekening Pembayaran",
@@ -556,6 +566,18 @@
     "notFound": {
       "title": "Invoice tidak ditemukan",
       "description": "Tautan ini tidak valid atau invoice sudah tidak tersedia. Hubungi pengirim invoice untuk tautan yang baru."
+    }
+  },
+  "emails": {
+    "footer": "Dikirim lewat Invoice Maker",
+    "verify": {
+      "subject": "Verifikasi email kamu",
+      "preview": "Verifikasi email kamu untuk mulai mengirim invoice.",
+      "title": "Verifikasi email kamu",
+      "body": "Halo {name}, klik tombol di bawah untuk memverifikasi alamat email akun Invoice Maker kamu. Setelah itu kamu bisa mengirim invoice lewat email.",
+      "button": "Verifikasi email",
+      "linkHint": "Atau salin link ini ke browser kamu:",
+      "expires": "Link berlaku selama 1 jam. Jika kamu tidak merasa mendaftar, abaikan email ini."
     }
   }
 }

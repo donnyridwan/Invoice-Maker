@@ -49,6 +49,8 @@ export default defineConfig({
       // PDF rendering: the server opens its own signed print page with headless Chromium.
       APP_URL: BASE_URL,
       PRINT_SECRET: process.env.PRINT_SECRET,
+      // Emails are written to var/outbox/*.json instead of being sent (see readOutbox in e2e/helpers.ts).
+      EMAIL_TRANSPORT: "file",
       ...(chromiumPath ? { CHROMIUM_PATH: chromiumPath } : {}),
     },
   },
