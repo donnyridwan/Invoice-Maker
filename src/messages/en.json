@@ -26,7 +26,10 @@
     "catalog": "Catalog",
     "paymentAccounts": "Payment accounts",
     "settings": "Settings",
-    "signOut": "Sign out"
+    "signOut": "Sign out",
+    "mainMenu": "Main menu",
+    "userMenu": "User menu",
+    "openMenu": "Open menu"
   },
   "auth": {
     "signIn": "Sign in",
@@ -53,7 +56,8 @@
     "title": "Dashboard",
     "description": "An overview of your invoices and payments.",
     "emptyTitle": "No invoices yet",
-    "emptyDescription": "Create your first invoice to start billing your clients."
+    "emptyDescription": "Create your first invoice to start billing your clients.",
+    "greeting": "Hello, {name}"
   },
   "settings": {
     "title": "Settings",

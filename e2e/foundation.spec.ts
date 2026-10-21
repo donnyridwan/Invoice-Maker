@@ -44,3 +44,47 @@ test.describe("auth", () => {
     await expect(page).toHaveURL(/\/register/);
   });
 });
+
+test.describe("shell", () => {
+  test("shows a greeting and the sidebar navigation", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/dashboard");
+
+    await expect(page.getByRole("heading", { level: 1 })).toContainText("Halo, Donny");
+    const sidebar = page.getByRole("navigation", { name: "Menu utama" });
+    await expect(sidebar.getByRole("link", { name: "Klien" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Katalog" })).toBeVisible();
+    await expect(sidebar.getByRole("link", { name: "Pengaturan" })).toBeVisible();
+  });
+
+  test("signs out from the user menu", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/dashboard");
+
+    await page.getByRole("button", { name: "Menu pengguna" }).click();
+    await page.getByRole("menuitem", { name: "Keluar" }).click();
+    await expect(page).toHaveURL(/\/login/);
+
+    await page.goto("/dashboard");
+    await expect(page).toHaveURL(/\/login\?next=%2Fdashboard$/);
+  });
+
+  test("switches language from the user menu and ignores invalid locales", async ({
+    page,
+    context,
+  }) => {
+    await registerUser(page);
+    await page.goto("/dashboard");
+
+    await page.getByRole("button", { name: "Menu pengguna" }).click();
+    await page.getByRole("menuitem", { name: "English" }).click();
+    const sidebar = page.getByRole("navigation", { name: "Main menu" });
+    await expect(sidebar.getByRole("link", { name: "Clients" })).toBeVisible();
+
+    await context.addCookies([{ name: "NEXT_LOCALE", value: "fr", url: "http://localhost:3100" }]);
+    await page.reload();
+    await expect(
+      page.getByRole("navigation", { name: "Menu utama" }).getByRole("link", { name: "Klien" }),
+    ).toBeVisible();
+  });
+});

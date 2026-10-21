@@ -40,7 +40,7 @@ export default defineConfig({
       DATABASE_URL: testDatabaseUrl,
       BETTER_AUTH_SECRET: "e2e-secret-e2e-secret-e2e-secret-0123456789",
       BETTER_AUTH_URL: BASE_URL,
-      NEXT_PUBLIC_APP_URL: BASE_URL,
+      AUTH_RATE_LIMIT_DISABLED: "true",
     },
   },
 });
