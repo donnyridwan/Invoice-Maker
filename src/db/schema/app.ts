@@ -295,3 +295,18 @@ export const paymentClaims = pgTable(
   },
   (t) => [index("payment_claims_invoice_id_status_idx").on(t.invoiceId, t.status)],
 );
+
+/**
+ * Fixed-window counters of `consumeRateLimit` (`@/lib/rate-limit`): rate limits for actions open to
+ * anyone, kept in the database because serverless instances share no memory. `key` names who is
+ * limited for what, e.g. `claim:<invoice token>:<client IP>`.
+ */
+export const actionRateLimits = pgTable(
+  "action_rate_limits",
+  {
+    key: text("key").primaryKey(),
+    count: integer("count").notNull(),
+    windowStart: timestamp("window_start", { withTimezone: true }).notNull(),
+  },
+  (t) => [index("action_rate_limits_window_start_idx").on(t.windowStart)],
+);

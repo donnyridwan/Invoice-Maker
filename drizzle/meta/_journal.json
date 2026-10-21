@@ -57,6 +57,13 @@
       "when": 1792570360963,
       "tag": "0007_striped_zemo",
       "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1792572043268,
+      "tag": "0008_concerned_the_renegades",
+      "breakpoints": true
     }
   ]
 }

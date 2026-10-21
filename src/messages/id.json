@@ -639,7 +639,8 @@
     "dateInPast": "Tanggal tidak boleh sebelum hari ini",
     "endNotAfterStart": "Tanggal berakhir harus setelah tanggal invoice berikutnya",
     "scheduleExists": "Invoice ini sudah punya jadwal berulang",
-    "scheduleFinished": "Jadwal ini sudah selesai. Ubah jadwalnya untuk melanjutkan."
+    "scheduleFinished": "Jadwal ini sudah selesai. Ubah jadwalnya untuk melanjutkan.",
+    "tooManyAttempts": "Terlalu banyak percobaan. Coba lagi nanti."
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",

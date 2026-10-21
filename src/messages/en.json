@@ -639,7 +639,8 @@
     "dateInPast": "The date cannot be before today",
     "endNotAfterStart": "The end date must be after the next invoice date",
     "scheduleExists": "This invoice already has a recurring schedule",
-    "scheduleFinished": "This schedule has finished. Edit it to continue."
+    "scheduleFinished": "This schedule has finished. Edit it to continue.",
+    "tooManyAttempts": "Too many attempts. Please try again later."
   },
   "errors": {
     "validation": "Please check your input.",
