@@ -2,15 +2,16 @@ import chromium from "@sparticuz/chromium";
 import puppeteer, { type Browser } from "puppeteer-core";
 
 /**
- * Starts headless Chromium: the bundled @sparticuz/chromium build on Vercel, otherwise the binary
- * named by CHROMIUM_PATH. The caller must close the browser.
+ * Starts headless Chromium: the bundled @sparticuz/chromium build on Vercel (a chrome-headless-shell
+ * binary, so `headless: "shell"` as its README documents), otherwise the binary named by
+ * CHROMIUM_PATH. The caller must close the browser.
  */
 export async function launchBrowser(): Promise<Browser> {
   if (process.env.VERCEL) {
     return puppeteer.launch({
       args: chromium.args,
       executablePath: await chromium.executablePath(),
-      headless: true,
+      headless: "shell",
     });
   }
 

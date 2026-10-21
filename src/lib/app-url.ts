@@ -3,7 +3,7 @@ const FALLBACK = "http://localhost:3000";
 type HeaderReader = { get(name: string): string | null };
 
 /** `value` as a clean origin-and-path URL (no trailing slash), or null when it is not an http(s) URL. */
-function cleanUrl(value: string | undefined): string | null {
+export function cleanUrl(value: string | undefined): string | null {
   const trimmed = value?.trim();
   if (!trimmed) return null;
   try {
@@ -27,8 +27,11 @@ function first(value: string | null | undefined): string | null {
  * Pass `await headers()` from a server action or route; without headers (and without env) it is
  * the local dev address. Used for every link that leaves the app (share link, email, WhatsApp).
  */
-export function getAppUrl(requestHeaders?: HeaderReader): string {
-  const fromEnv = cleanUrl(process.env.APP_URL) ?? cleanUrl(process.env.BETTER_AUTH_URL);
+export function getAppUrl(
+  requestHeaders?: HeaderReader,
+  env: Record<string, string | undefined> = process.env,
+): string {
+  const fromEnv = cleanUrl(env.APP_URL) ?? cleanUrl(env.BETTER_AUTH_URL);
   if (fromEnv) return fromEnv;
 
   const host = first(requestHeaders?.get("x-forwarded-host")) ?? first(requestHeaders?.get("host"));
