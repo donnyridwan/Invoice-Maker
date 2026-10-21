@@ -1,9 +1,10 @@
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import { businessProfiles } from "@/db/schema";
+import { businessProfiles, paymentClaims } from "@/db/schema";
 import { createClient } from "@/features/clients/queries";
 import { markSent } from "@/features/invoices/lifecycle";
 import { createDraftInvoice, getInvoice, saveInvoiceDraft } from "@/features/invoices/queries";
+import { CLAIM_NOTIFY_TIMEOUT_MS, notifyOwnerOfClaim } from "@/features/invoices/notify-claim";
 import { createPaymentClaim } from "@/features/payment-claims/queries";
 import { ensureProfile } from "@/features/profile/queries";
 import type { EmailTransport, OutgoingEmail } from "@/lib/email";
@@ -107,5 +108,24 @@ describe("owner notification for a payment claim", () => {
 
     expect(claim.status).toBe("pending");
     expect((await getInvoice(owner.id, invoice.id)).status).toBe("payment_claimed");
+  });
+
+  it("does not wait for a transport that never answers: gives up after the timeout, best effort", async () => {
+    expect(CLAIM_NOTIFY_TIMEOUT_MS).toBe(5000);
+    const { invoice } = await sentInvoiceOf({ verified: true });
+    const [claimRow] = await testDb.insert(paymentClaims).values({
+      invoiceId: invoice.id,
+      payerName: "Budi",
+      paidOn: todayInJakarta(),
+      amountMinor: 1_000_000,
+    }).returning();
+    const hanging: EmailTransport = { kind: "resend", send: () => new Promise(() => {}) };
+    const error = vi.spyOn(console, "error").mockImplementation(() => {});
+
+    const started = Date.now();
+    await notifyOwnerOfClaim(claimRow.id, { transport: hanging, timeoutMs: 100 });
+    error.mockRestore();
+
+    expect(Date.now() - started).toBeLessThan(2000);
   });
 });

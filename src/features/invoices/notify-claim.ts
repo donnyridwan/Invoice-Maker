@@ -9,12 +9,35 @@ import { formatDocDate } from "@/lib/dates";
 import { fromAddress, getEmailTransport, type EmailTransport } from "@/lib/email";
 import { formatMoney } from "@/lib/money";
 
+/** How long the public claim request waits for the owner's email before moving on without it. */
+export const CLAIM_NOTIFY_TIMEOUT_MS = 5000;
+
 /**
  * Tells the invoice's owner that a client reported a payment. Best effort: nothing is sent when
  * the owner's email is not verified or email is disabled, and any error is logged, never thrown,
- * so a mail problem can never undo the claim. The language is the owner's default invoice language.
+ * so a mail problem can never undo the claim. The wait is capped at `CLAIM_NOTIFY_TIMEOUT_MS`, so a
+ * slow mail provider cannot stall the client's request. The language is the owner's default invoice language.
  */
-export async function notifyOwnerOfClaim(claimId: string, deps: { transport?: EmailTransport } = {}): Promise<void> {
+export async function notifyOwnerOfClaim(
+  claimId: string,
+  deps: { transport?: EmailTransport; timeoutMs?: number } = {},
+): Promise<void> {
+  const timeoutMs = deps.timeoutMs ?? CLAIM_NOTIFY_TIMEOUT_MS;
+  let timer: ReturnType<typeof setTimeout> | undefined;
+  const timedOut = new Promise<void>((resolve) => {
+    timer = setTimeout(() => {
+      console.error(`Gave up waiting ${timeoutMs} ms for the payment claim notification`);
+      resolve();
+    }, timeoutMs);
+  });
+  try {
+    await Promise.race([sendClaimNotification(claimId, deps), timedOut]);
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+async function sendClaimNotification(claimId: string, deps: { transport?: EmailTransport }): Promise<void> {
   try {
     const transport = deps.transport ?? getEmailTransport();
     if (transport.kind === "disabled") return;
