@@ -1,6 +1,6 @@
 "use client";
 
-import { useDeferredValue, useMemo, useRef, useState } from "react";
+import { useDeferredValue, useMemo, useRef, useState, type MouseEvent } from "react";
 import Link from "next/link";
 import { Download } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
@@ -119,6 +119,20 @@ export function InvoiceEditor({
     [previewState, previewContext, locale],
   );
 
+  // The PDF is rendered from the saved invoice, so pending edits are written before it is fetched.
+  // Modified clicks (new tab, save link as) keep the plain link and its behaviour.
+  const downloadPdf = async (event: MouseEvent<HTMLAnchorElement>) => {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const url = event.currentTarget.href;
+    try {
+      await autosave.flush();
+    } catch {
+      // A failed save shows in the autosave indicator; the PDF then reflects the last saved version.
+    }
+    window.location.assign(url);
+  };
+
   const section: EditorSectionProps = { state, errors, update };
   const formError = errors._form ? translateValidation(tAll, errors._form) : null;
 
@@ -142,6 +156,7 @@ export function InvoiceEditor({
             <a
               href={`/api/invoices/${invoiceId}/pdf`}
               download
+              onClick={(event) => void downloadPdf(event)}
               aria-label={t("downloadPdf")}
               className="inline-flex items-center gap-1.5 text-sm font-medium text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >

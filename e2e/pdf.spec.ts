@@ -1,3 +1,4 @@
+import { execFileSync } from "node:child_process";
 import { createHmac } from "node:crypto";
 import { expect, test } from "@playwright/test";
 import { createInvoiceDraft, markSentViaDb, publicTokenViaDb, registerUser, setStatusViaDb } from "./helpers";
@@ -8,6 +9,15 @@ function signedPrintPath(id: string, expSeconds: number): string {
   if (!secret) throw new Error("PRINT_SECRET is not set for the e2e run");
   const sig = createHmac("sha256", secret).update(`${id}.${expSeconds}`).digest("hex");
   return `/print/${id}?exp=${expSeconds}&sig=${sig}`;
+}
+
+function hasPdftotext(): boolean {
+  try {
+    execFileSync("pdftotext", ["-v"], { stdio: "ignore" });
+    return true;
+  } catch {
+    return false;
+  }
 }
 
 const nowSeconds = () => Math.floor(Date.now() / 1000);
@@ -42,6 +52,24 @@ test.describe("owner pdf", () => {
 
     const [download] = await Promise.all([page.waitForEvent("download"), detailLink.click()]);
     expect(download.suggestedFilename()).toMatch(/^INV-[A-Za-z0-9._-]+\.pdf$/);
+  });
+
+  test("flushes a pending edit before downloading, so the PDF has it", async ({ page }, testInfo) => {
+    test.skip(!hasPdftotext(), "pdftotext (poppler-utils) is needed to read the PDF text");
+    await createInvoiceDraft(page);
+
+    // Edit and click straight away: the 1 s autosave debounce has not fired yet.
+    await page.getByRole("group", { name: "Item 1" }).getByLabel("Nama item").fill("Revisi mendadak");
+    const [download] = await Promise.all([
+      page.waitForEvent("download"),
+      page.getByRole("link", { name: "Unduh PDF" }).click(),
+    ]);
+    const file = testInfo.outputPath("invoice.pdf");
+    await download.saveAs(file);
+
+    const text = execFileSync("pdftotext", ["-layout", file, "-"], { encoding: "utf8" });
+    expect(text).toContain("Revisi mendadak");
+    expect(text).not.toContain("Desain logo");
   });
 
   test("needs a session", async ({ request }) => {
