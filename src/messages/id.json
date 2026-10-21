@@ -74,6 +74,32 @@
       "todo": "Belum selesai"
     }
   },
+  "invoices": {
+    "title": "Invoice",
+    "description": "Semua invoice yang Anda buat.",
+    "new": "Invoice baru",
+    "newForClient": "Invoice baru untuk klien ini",
+    "searchLabel": "Cari invoice",
+    "searchPlaceholder": "Cari nomor atau klien",
+    "emptyTitle": "Belum ada invoice",
+    "emptyDescription": "Buat invoice pertama Anda untuk mulai menagih klien.",
+    "noResultsTitle": "Tidak ada invoice yang cocok",
+    "noResultsDescription": "Coba kata kunci lain atau hapus pencarian.",
+    "colNumber": "Nomor",
+    "colClient": "Klien",
+    "colIssueDate": "Tanggal terbit",
+    "colDueDate": "Jatuh tempo",
+    "colAmount": "Jumlah",
+    "colStatus": "Status",
+    "noClient": "Belum ada klien",
+    "status": {
+      "draft": "Draft",
+      "sent": "Terkirim",
+      "paymentClaimed": "Menunggu konfirmasi",
+      "paid": "Lunas",
+      "void": "Void"
+    }
+  },
   "settings": {
     "title": "Pengaturan",
     "description": "Kelola profil bisnis dan preferensi invoice.",

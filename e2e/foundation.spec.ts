@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { registerUser } from "./helpers";
+import { EDITOR_URL_RE, registerUser } from "./helpers";
 
 test.describe("auth", () => {
   test("redirects anonymous users from /dashboard to /login with next", async ({ page }) => {
@@ -138,7 +138,8 @@ test.describe("onboarding", () => {
 
     await page.getByLabel("Nama bisnis").fill("Studio Donny");
     await page.getByRole("button", { name: "Lanjut" }).click();
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page).toHaveURL(EDITOR_URL_RE);
+    await page.goto("/dashboard");
 
     const profileItem = page.getByRole("listitem").filter({ hasText: "Lengkapi profil bisnis" });
     await expect(profileItem).toHaveAttribute("data-done", "false");
@@ -166,7 +167,8 @@ test.describe("onboarding", () => {
     await page.getByLabel("Nama pemilik rekening").fill("Donny");
     await page.getByLabel("Nomor rekening").fill("1234567890");
     await page.getByRole("button", { name: "Lanjut" }).click();
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page).toHaveURL(EDITOR_URL_RE);
+    await page.goto("/dashboard");
     await expect(page.getByRole("listitem").filter({ hasText: "Tambah rekening pembayaran" })).toHaveAttribute(
       "data-done",
       "true",
@@ -179,7 +181,7 @@ test.describe("onboarding", () => {
   test("lets a new user skip onboarding and reopen it later", async ({ page }) => {
     await registerUser(page, { onboarding: "stay" });
     await page.getByRole("button", { name: "Lewati" }).click();
-    await expect(page).toHaveURL(/\/dashboard$/);
+    await expect(page).toHaveURL(EDITOR_URL_RE);
 
     await page.goto("/onboarding");
     await expect(page).toHaveURL(/\/onboarding$/);

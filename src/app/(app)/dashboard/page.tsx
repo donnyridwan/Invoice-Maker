@@ -1,6 +1,7 @@
 import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { PageHeader } from "@/components/ui/page-header";
+import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { Checklist } from "@/features/profile/checklist";
 import { getChecklist } from "@/features/profile/queries";
 import { requireUser } from "@/lib/session";
@@ -13,7 +14,11 @@ export default async function DashboardPage() {
 
   return (
     <>
-      <PageHeader title={t("greeting", { name: firstName })} description={t("description")} />
+      <PageHeader
+        title={t("greeting", { name: firstName })}
+        description={t("description")}
+        actions={<NewInvoiceButton />}
+      />
       <div className="flex flex-col gap-6">
         <Checklist state={checklist} />
         <EmptyState title={t("emptyTitle")} description={t("emptyDescription")} />

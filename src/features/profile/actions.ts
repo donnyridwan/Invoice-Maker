@@ -1,6 +1,7 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createDraftInvoice } from "@/features/invoices/queries";
 import { createPaymentAccount } from "@/features/payment-accounts/queries";
 import { paymentAccountSchema } from "@/features/payment-accounts/schema";
 import { toActionError, type ActionResult } from "@/lib/action-result";
@@ -18,6 +19,25 @@ import { profileSchema } from "./schema";
 function refresh() {
   revalidatePath("/settings");
   revalidatePath("/dashboard");
+}
+
+export type OnboardingResult = { redirectTo: string };
+
+/**
+ * Where to go once onboarding is done: the editor of a fresh first draft (so the user lands
+ * straight in the product), or the dashboard when onboarding had already been completed earlier
+ * (the page was reopened) or the draft could not be created.
+ */
+async function onboardingRedirect(userId: string, firstTime: boolean): Promise<OnboardingResult> {
+  if (!firstTime) return { redirectTo: "/dashboard" };
+  try {
+    const draft = await createDraftInvoice(userId);
+    revalidatePath("/invoices");
+    return { redirectTo: `/invoices/${draft.id}/edit` };
+  } catch (e) {
+    console.error(e);
+    return { redirectTo: "/dashboard" };
+  }
 }
 
 export async function saveProfileAction(input: unknown): Promise<ActionResult> {
@@ -51,10 +71,12 @@ function text(formData: FormData, name: string): string {
  * Saves the business name and base currency, optionally creates a first bank account, and marks
  * onboarding as done. Everything is validated before anything is written.
  */
-export async function finishOnboardingAction(formData: FormData): Promise<ActionResult> {
+export async function finishOnboardingAction(formData: FormData): Promise<ActionResult<OnboardingResult>> {
   const user = await requireUser();
   try {
-    const current = profileToInput(await getProfile(user.id));
+    const existing = await getProfile(user.id);
+    const firstTime = !existing.onboardingCompletedAt;
+    const current = profileToInput(existing);
     const baseCurrency = text(formData, "baseCurrency") || current.baseCurrency;
     const profile = parseInput(profileSchema, {
       ...current,
@@ -78,18 +100,19 @@ export async function finishOnboardingAction(formData: FormData): Promise<Action
     if (hasBank) await createPaymentAccount(user.id, bank);
     await completeOnboarding(user.id);
     refresh();
-    return { ok: true, data: undefined };
+    return { ok: true, data: await onboardingRedirect(user.id, firstTime) };
   } catch (e) {
     return toActionError(e);
   }
 }
 
-export async function skipOnboardingAction(): Promise<ActionResult> {
+export async function skipOnboardingAction(): Promise<ActionResult<OnboardingResult>> {
   const user = await requireUser();
   try {
+    const firstTime = !(await getProfile(user.id)).onboardingCompletedAt;
     await completeOnboarding(user.id);
     refresh();
-    return { ok: true, data: undefined };
+    return { ok: true, data: await onboardingRedirect(user.id, firstTime) };
   } catch (e) {
     return toActionError(e);
   }

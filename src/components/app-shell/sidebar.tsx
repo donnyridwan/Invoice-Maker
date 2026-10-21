@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Package, Settings, Users, type LucideIcon } from "lucide-react";
+import { FileText, LayoutDashboard, Package, Settings, Users, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
-// Plan 2 adds invoices.
 export const NAV_ITEMS: { href: string; labelKey: string; icon: LucideIcon }[] = [
   { href: "/dashboard", labelKey: "nav.dashboard", icon: LayoutDashboard },
+  { href: "/invoices", labelKey: "nav.invoices", icon: FileText },
   { href: "/clients", labelKey: "nav.clients", icon: Users },
   { href: "/catalog", labelKey: "nav.catalog", icon: Package },
   { href: "/settings", labelKey: "nav.settings", icon: Settings },

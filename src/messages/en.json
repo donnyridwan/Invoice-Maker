@@ -74,6 +74,32 @@
       "todo": "Not done"
     }
   },
+  "invoices": {
+    "title": "Invoices",
+    "description": "All the invoices you create.",
+    "new": "New invoice",
+    "newForClient": "New invoice for this client",
+    "searchLabel": "Search invoices",
+    "searchPlaceholder": "Search by number or client",
+    "emptyTitle": "No invoices yet",
+    "emptyDescription": "Create your first invoice to start billing your clients.",
+    "noResultsTitle": "No matching invoices",
+    "noResultsDescription": "Try another keyword or clear the search.",
+    "colNumber": "Number",
+    "colClient": "Client",
+    "colIssueDate": "Issue date",
+    "colDueDate": "Due date",
+    "colAmount": "Amount",
+    "colStatus": "Status",
+    "noClient": "No client yet",
+    "status": {
+      "draft": "Draft",
+      "sent": "Sent",
+      "paymentClaimed": "Awaiting confirmation",
+      "paid": "Paid",
+      "void": "Void"
+    }
+  },
   "settings": {
     "title": "Settings",
     "description": "Manage your business profile and invoice preferences.",

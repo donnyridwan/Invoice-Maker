@@ -4,6 +4,7 @@ import { ChevronLeft } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { Badge } from "@/components/ui/badge";
 import { PageHeader } from "@/components/ui/page-header";
+import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { ClientArchiveButton, ClientForm } from "@/features/clients/client-form";
 import { getClient } from "@/features/clients/queries";
 import { NotFoundError } from "@/lib/errors";
@@ -31,7 +32,7 @@ export default async function ClientPage({ params }: PageProps<"/clients/[id]">)
         description={archived ? t("clients.archivedNotice") : (client.company ?? undefined)}
         actions={
           <>
-            {archived ? <Badge>{t("clients.archived")}</Badge> : null}
+            {archived ? <Badge>{t("clients.archived")}</Badge> : <NewInvoiceButton clientId={client.id} variant="secondary" />}
             <ClientArchiveButton id={client.id} archived={archived} />
           </>
         }

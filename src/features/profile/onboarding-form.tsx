@@ -1,7 +1,6 @@
 "use client";
 
 import { useState, type FormEvent } from "react";
-import { useRouter } from "next/navigation";
 import { ChevronDown } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
@@ -21,25 +20,29 @@ export function OnboardingForm({
   baseCurrency: string;
 }) {
   const t = useTranslations();
-  const router = useRouter();
   const [currency, setCurrency] = useState(baseCurrency);
   const [showBank, setShowBank] = useState(false);
   const [skipping, setSkipping] = useState(false);
-  const { pending, formError, errorFor, submit } = useServerForm<FormData>((data) =>
-    finishOnboardingAction(data),
-  );
+  const [redirecting, setRedirecting] = useState(false);
+  const { pending, formError, errorFor, submit } = useServerForm<FormData>(async (data) => {
+    const result = await finishOnboardingAction(data);
+    if (result.ok) goTo(result.data.redirectTo);
+    return result;
+  });
 
   const bankHasError = ["bankName", "accountName", "accountNumber"].some((name) => errorFor(name));
   const bankOpen = showBank || bankHasError;
 
-  function goToDashboard() {
-    router.replace("/dashboard");
-    router.refresh();
+  // A full navigation, not router.push: the (app) layout's onboarding gate redirects, and a client
+  // transition into it can loop right after the onboarding flag flips.
+  function goTo(redirectTo: string) {
+    setRedirecting(true);
+    window.location.assign(redirectTo);
   }
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (await submit(new FormData(event.currentTarget))) goToDashboard();
+    await submit(new FormData(event.currentTarget));
   }
 
   async function onSkip() {
@@ -47,7 +50,7 @@ export function OnboardingForm({
     try {
       const result = await skipOnboardingAction();
       if (result.ok) {
-        goToDashboard();
+        goTo(result.data.redirectTo);
         return;
       }
       toast.error(t(`errors.${result.error}`));
@@ -99,10 +102,10 @@ export function OnboardingForm({
       ) : null}
 
       <div className="flex items-center justify-end gap-2">
-        <Button type="button" variant="ghost" onClick={onSkip} disabled={pending || skipping}>
+        <Button type="button" variant="ghost" onClick={onSkip} disabled={pending || skipping || redirecting}>
           {t("onboarding.skip")}
         </Button>
-        <Button type="submit" disabled={pending || skipping}>
+        <Button type="submit" disabled={pending || skipping || redirecting}>
           {t("onboarding.continue")}
         </Button>
       </div>
