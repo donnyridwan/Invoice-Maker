@@ -216,9 +216,7 @@
       "appearance": {
         "template": "Template",
         "accent": "Accent color",
-        "hex": "Color code (hex)",
         "picker": "Pick a color",
-        "invalidHex": "Use the #RRGGBB format.",
         "presetLabel": "Preset colors"
       },
       "menu": {

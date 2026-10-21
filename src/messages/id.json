@@ -216,9 +216,7 @@
       "appearance": {
         "template": "Template",
         "accent": "Warna aksen",
-        "hex": "Kode warna (hex)",
         "picker": "Pilih warna",
-        "invalidHex": "Gunakan format #RRGGBB.",
         "presetLabel": "Warna siap pakai"
       },
       "menu": {

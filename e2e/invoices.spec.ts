@@ -293,17 +293,19 @@ test.describe("editor extras", () => {
     await expect(page.getByRole("radio", { name: "Modern" })).toBeChecked();
     await expect(preview.locator('[data-template="modern"]')).toBeVisible();
 
-    await page.getByLabel("Kode warna (hex)").fill("#00A67E");
+    await page.getByRole("button", { name: "#00A67E" }).click();
+    await expect(page.getByRole("button", { name: "#00A67E" })).toHaveAttribute("aria-pressed", "true");
     await expect(preview.locator('[data-template="modern"]')).toHaveAttribute("style", /#00A67E/i);
+    await page.getByLabel("Pilih warna").fill("#123456");
+    await expect(preview.locator('[data-template="modern"]')).toHaveAttribute("style", /#123456/i);
+    await expect(page.getByRole("button", { name: "#00A67E" })).toHaveAttribute("aria-pressed", "false");
     await page.getByRole("button", { name: "#0A2540" }).click();
-    await expect(page.getByLabel("Kode warna (hex)")).toHaveValue("#0A2540");
-    await page.getByLabel("Kode warna (hex)").fill("#00A67E");
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
 
     await page.reload();
     await expect(page.getByRole("radio", { name: "Modern" })).toBeChecked();
-    await expect(page.getByLabel("Kode warna (hex)")).toHaveValue(/^#00a67e$/i);
-    await expect(preview.locator('[data-template="modern"]')).toHaveAttribute("style", /#00A67E/i);
+    await expect(page.getByRole("button", { name: "#0A2540" })).toHaveAttribute("aria-pressed", "true");
+    await expect(preview.locator('[data-template="modern"]')).toHaveAttribute("style", /#0A2540/i);
   });
 
   test("reorders items by dragging", async ({ page }) => {

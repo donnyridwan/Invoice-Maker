@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent } from "react";
+import type { KeyboardEvent } from "react";
 import { useTranslations } from "next-intl";
 import { TEMPLATES, type Template } from "@/features/profile/schema";
 import { cn } from "@/lib/utils";
@@ -9,27 +9,20 @@ import type { EditorSectionProps } from "./editor-section";
 /** Accent colours offered as one-click presets. */
 export const ACCENT_PRESETS = ["#2F4B73", "#0A2540", "#00A67E", "#111111", "#E25950", "#F5A623"] as const;
 
-const HEX_RE = /^#?[0-9A-Fa-f]{6}$/;
+const SWATCH_CLASS =
+  "size-7 shrink-0 rounded-full border border-black/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+const SWATCH_SELECTED_CLASS = "ring-2 ring-offset-2 ring-fg";
 
 /**
  * Template and accent colour, shown as a compact bar above the live preview so the form stays
  * short: a pill switch for the template (the preview below is the thumbnail) and a row of colour
- * swatches, a colour picker and a hex field for the accent.
+ * swatches, the last of which opens the colour picker for any other colour.
  */
 export function AppearanceBar({ state, update, disabled }: Omit<EditorSectionProps, "errors"> & { disabled?: boolean }) {
   const t = useTranslations("invoices.editor");
   const tTemplates = useTranslations("settings.templates");
-  // What is being typed in the hex field while it is not (yet) a colour; null = show the state's.
-  const [draft, setDraft] = useState<string | null>(null);
-
-  const hexShown = draft ?? state.accentColor;
-  const hexInvalid = draft !== null && !HEX_RE.test(draft.trim());
-
-  function onHexChange(value: string) {
-    setDraft(value);
-    const text = value.trim();
-    if (HEX_RE.test(text)) update({ accentColor: text.startsWith("#") ? text : `#${text}` });
-  }
+  const accent = state.accentColor.toUpperCase();
+  const custom = !(ACCENT_PRESETS as readonly string[]).includes(accent);
 
   function onTemplateKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
     const step = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0;
@@ -73,57 +66,32 @@ export function AppearanceBar({ state, update, disabled }: Omit<EditorSectionPro
         })}
       </div>
 
-      <div className="flex min-w-0 flex-wrap items-center gap-2">
-        <div role="group" aria-label={t("appearance.presetLabel")} className="flex items-center gap-1.5">
-          {ACCENT_PRESETS.map((color) => (
-            <button
-              key={color}
-              type="button"
-              aria-label={color}
-              aria-pressed={state.accentColor.toUpperCase() === color}
-              onClick={() => {
-                setDraft(null);
-                update({ accentColor: color });
-              }}
-              style={{ backgroundColor: color }}
-              className={cn(
-                "size-6 rounded-full border border-black/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-                state.accentColor.toUpperCase() === color && "ring-2 ring-offset-2 ring-fg",
-              )}
-            />
-          ))}
-        </div>
-        <input
-          type="color"
-          aria-label={t("appearance.picker")}
-          value={state.accentColor.toLowerCase()}
-          onChange={(event) => {
-            setDraft(null);
-            update({ accentColor: event.target.value });
-          }}
-          className="size-8 shrink-0 cursor-pointer rounded-full border border-border bg-white p-0.5"
-        />
-        <input
-          value={hexShown}
-          spellCheck={false}
-          autoComplete="off"
-          maxLength={7}
-          aria-label={t("appearance.hex")}
-          aria-invalid={hexInvalid || undefined}
-          aria-describedby={hexInvalid ? "invoice-accent-hex-error" : undefined}
-          onChange={(event) => onHexChange(event.target.value)}
-          onBlur={() => setDraft(null)}
-          className={cn(
-            "h-8 w-24 rounded-button border bg-white px-3 font-mono text-xs uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-            hexInvalid ? "border-danger" : "border-border",
-          )}
-        />
+      <div role="group" aria-label={t("appearance.presetLabel")} className="flex flex-wrap items-center gap-2">
+        {ACCENT_PRESETS.map((color) => (
+          <button
+            key={color}
+            type="button"
+            aria-label={color}
+            aria-pressed={accent === color}
+            onClick={() => update({ accentColor: color })}
+            style={{ backgroundColor: color }}
+            className={cn(SWATCH_CLASS, accent === color && SWATCH_SELECTED_CLASS)}
+          />
+        ))}
+        {/* The last swatch picks any colour: a rainbow until a custom colour is chosen, then that colour. */}
+        <span
+          style={{ background: custom ? accent : "conic-gradient(#e25950, #f5a623, #f8e71c, #00a67e, #4a90e2, #9013fe, #e25950)" }}
+          className={cn("relative", SWATCH_CLASS, custom && SWATCH_SELECTED_CLASS, "has-[:focus-visible]:outline-2 has-[:focus-visible]:outline-offset-2 has-[:focus-visible]:outline-accent")}
+        >
+          <input
+            type="color"
+            aria-label={t("appearance.picker")}
+            value={state.accentColor.toLowerCase()}
+            onChange={(event) => update({ accentColor: event.target.value })}
+            className="absolute inset-0 size-full cursor-pointer rounded-full opacity-0 disabled:cursor-not-allowed"
+          />
+        </span>
       </div>
-      {hexInvalid ? (
-        <p id="invoice-accent-hex-error" className="w-full text-xs text-danger">
-          {t("appearance.invalidHex")}
-        </p>
-      ) : null}
     </fieldset>
   );
 }
