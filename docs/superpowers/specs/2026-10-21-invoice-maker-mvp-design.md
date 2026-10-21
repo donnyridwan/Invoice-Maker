@@ -59,23 +59,23 @@ Gaya Wise
 ([Wise home](https://mobbin.com/screens/ede78e65-ca02-449f-96c0-f36420fe9281),
 [Wise send](https://mobbin.com/screens/ebc6f8fd-a5eb-44be-b881-1f023bc32f88)):
 
-- Hijau Wise: tinta aksen hijau tua `#163300`, tombol utama hijau lime
-  `#9FE870` dengan teks `#163300`, teks `#0E0F0C`, teks sekunder `#5D605A`,
-  kanvas `#F1F3EE`, border `#E1E5DD`. Merah (`#C4271C`) untuk error, aksi hapus,
-  dan status Jatuh tempo.
-- Tombol berbentuk pil: utama lime, sekunder bergaris. Input setinggi 44px
+- Biru tua yang soft: tombol utama dan tinta aksen navy kalem `#2F4B73` (teks
+  tombol putih), teks `#111827`, teks sekunder `#5B6577`, kanvas `#F2F5F9`,
+  border `#E1E7EF`. Merah (`#C4271C`) untuk error, aksi hapus, dan status Jatuh
+  tempo.
+- Tombol berbentuk pil: utama biru, sekunder bergaris. Input setinggi 44px
   dengan radius 10px.
 - Kartu dan panel membulat (20–24px), sebagian di atas kanvas tanpa border.
-  Tab dan filter berupa pil; pil aktif hijau tua.
+  Tab dan filter berupa pil; pil aktif biru.
 - Font Inter, ukuran dasar 14px, judul halaman 30px extrabold, angka nominal
   utama (total tagihan, kartu ringkasan) black weight `tabular-nums`. Wordmark
-  "Invoice Maker" black weight hijau tua.
+  "Invoice Maker" black weight biru.
 - Badge status: Lunas hijau muda, Terkirim/Dilihat biru muda, Menunggu
   konfirmasi kuning, Draft/Void abu, Jatuh tempo merah muda.
 - Tabel padat dengan baris setinggi ±44px dalam kartu membulat. Empty state
   memakai kotak bergaris putus-putus.
 - Template dokumen invoice tetap bersih dan minimal; warna aksen default
-  dokumen `#163300` (pengguna bisa memilih warna lain). Template default:
+  dokumen `#2F4B73` (pengguna bisa memilih warna lain). Template default:
   **Minimal**.
 
 ## 3. Arsitektur

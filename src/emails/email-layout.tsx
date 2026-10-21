@@ -1,14 +1,13 @@
 import type { ReactNode } from "react";
 import { Body, Container, Head, Html, Preview, Section, Text } from "@react-email/components";
 
-// Colours follow the app's Wise-inspired theme: forest green ink, lime buttons.
+// Colours follow the app's soft deep blue theme.
 export const EMAIL_COLORS = {
-  accent: "#163300",
-  primary: "#9FE870",
-  border: "#E1E5DD",
-  text: "#0E0F0C",
-  muted: "#5D605A",
-  subtle: "#F1F3EE",
+  accent: "#2F4B73",
+  border: "#E1E7EF",
+  text: "#111827",
+  muted: "#5B6577",
+  subtle: "#F2F5F9",
 } as const;
 
 export const EMAIL_FONT =
@@ -17,8 +16,8 @@ export const EMAIL_FONT =
 /** Primary button style shared by every email: one accent button per message. */
 export const buttonStyle = {
   display: "inline-block",
-  backgroundColor: EMAIL_COLORS.primary,
-  color: EMAIL_COLORS.accent,
+  backgroundColor: EMAIL_COLORS.accent,
+  color: "#FFFFFF",
   fontSize: "14px",
   fontWeight: 600,
   lineHeight: "20px",

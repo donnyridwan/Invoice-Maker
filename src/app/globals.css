@@ -1,27 +1,27 @@
 @import "tailwindcss";
 
 @theme {
-  /* Wise-inspired: forest green ink, lime pill buttons, generously rounded cards on a soft
-     green-grey canvas. Red is kept for errors, destructive actions and overdue. */
-  --color-accent: #163300;
-  --color-accent-hover: #0d2100;
-  --color-border: #e1e5dd;
-  --color-fg: #0e0f0c;
-  --color-muted: #5d605a;
-  --color-subtle: #f1f3ee;
+  /* Wise-inspired shapes in a soft deep blue: dusty navy pill buttons and ink, generously rounded
+     cards on a blue-grey canvas. Red is kept for errors, destructive actions and overdue. */
+  --color-accent: #2f4b73;
+  --color-accent-hover: #263e60;
+  --color-border: #e1e7ef;
+  --color-fg: #111827;
+  --color-muted: #5b6577;
+  --color-subtle: #f2f5f9;
   --color-danger: #c4271c;
   --color-danger-hover: #a51f16;
 
-  --color-badge-success-bg: #e2f6d5;
-  --color-badge-success-fg: #163300;
-  --color-badge-info-bg: #e3f1fb;
-  --color-badge-info-fg: #0a4a75;
+  --color-badge-success-bg: #e3f4e8;
+  --color-badge-success-fg: #1e6b3a;
+  --color-badge-info-bg: #e6edf6;
+  --color-badge-info-fg: #2f4b73;
   --color-badge-warning-bg: #fff1c2;
   --color-badge-warning-fg: #7a4b00;
   --color-badge-danger-bg: #fdecea;
   --color-badge-danger-fg: #b3261e;
-  --color-badge-neutral-bg: #eceee9;
-  --color-badge-neutral-fg: #454745;
+  --color-badge-neutral-bg: #edf0f4;
+  --color-badge-neutral-fg: #4a5465;
 
   --radius: 10px;
   --radius-sm: 8px;
@@ -32,11 +32,11 @@
   --font-doc-serif: Georgia, "Times New Roman", Times, serif;
 
   /* Semantic tokens the components read. */
-  --color-primary: #9fe870;
-  --color-primary-fg: #163300;
-  --color-primary-hover: #8fd75f;
-  --color-tint: #e2f6d5;
-  --color-tint-fg: #163300;
+  --color-primary: #2f4b73;
+  --color-primary-fg: #ffffff;
+  --color-primary-hover: #263e60;
+  --color-tint: #e6edf6;
+  --color-tint-fg: #2f4b73;
   --radius-button: 9999px;
   --radius-input: 10px;
   --radius-card: 20px;
@@ -46,10 +46,10 @@
 [data-slot="input"],
 [data-slot="select-trigger"] {
   height: 2.75rem;
-  border-color: #c9cdc5;
+  border-color: #cbd3de;
 }
 [data-slot="textarea"] {
-  border-color: #c9cdc5;
+  border-color: #cbd3de;
 }
 [data-slot="input"]:focus-visible,
 [data-slot="select-trigger"]:focus-visible,
