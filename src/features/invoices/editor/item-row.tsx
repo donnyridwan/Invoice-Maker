@@ -1,7 +1,9 @@
 "use client";
 
-import type { KeyboardEvent, ReactNode } from "react";
-import { Trash2 } from "lucide-react";
+import { useState, type KeyboardEvent, type ReactNode } from "react";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+import { BookmarkPlus, GripVertical, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -9,7 +11,9 @@ import { Textarea } from "@/components/ui/textarea";
 import { isCurrencyCode } from "@/lib/currencies";
 import { formatMoney } from "@/lib/money";
 import type { Locale } from "@/i18n/config";
-import type { EditorItem, EditorItemEvaluation } from "../editor-state";
+import { cn } from "@/lib/utils";
+import { applyCatalogItem, type CatalogOption, type EditorItem, type EditorItemEvaluation } from "../editor-state";
+import { CatalogAutocomplete } from "./catalog-autocomplete";
 import { useErrorText } from "./editor-section";
 
 function MiniField({
@@ -38,7 +42,8 @@ function MiniField({
  * One invoice line: name, optional description, quantity, unit, price and the (read-only) amount.
  * Enter in the price field moves on to the next line (adding one after the last), so a list of
  * items can be typed without the mouse. The name input carries `data-item-name` so the section
- * can move focus to it.
+ * can move focus to it, suggests catalog items while typing and the line can be saved to the
+ * catalog. The grip on the left drags the line (sortable); the order is the `items` array.
  */
 export function ItemRow({
   item,
@@ -47,9 +52,12 @@ export function ItemRow({
   locale,
   evaluation,
   errors,
+  catalog,
+  savingToCatalog,
   onChange,
   onRemove,
   onEnterPrice,
+  onSaveToCatalog,
 }: {
   item: EditorItem;
   index: number;
@@ -57,15 +65,31 @@ export function ItemRow({
   locale: Locale;
   evaluation: EditorItemEvaluation;
   errors: Record<string, string>;
+  catalog: CatalogOption[];
+  savingToCatalog: boolean;
   onChange: (patch: Partial<EditorItem>) => void;
   onRemove: () => void;
   onEnterPrice: () => void;
+  onSaveToCatalog: () => void;
 }) {
   const t = useTranslations("invoices.editor.items");
   const errorText = useErrorText(errors);
   const field = (name: string) => `items.${index}.${name}`;
   const id = (name: string) => `item-${item.key}-${name}`;
   const n = index + 1;
+  // Set when a catalog item in another currency was picked: its price was not taken over.
+  const [catalogCurrency, setCatalogCurrency] = useState<string | null>(null);
+  const { attributes, listeners, setNodeRef, setActivatorNodeRef, transform, transition, isDragging } = useSortable({
+    id: item.key,
+  });
+  // Rows only move vertically.
+  const style = { transform: CSS.Transform.toString(transform ? { ...transform, x: 0 } : null), transition };
+
+  function pickCatalogItem(option: CatalogOption) {
+    const { patch, priceCurrency } = applyCatalogItem(option, currency, locale);
+    onChange(patch);
+    setCatalogCurrency(priceCurrency);
+  }
 
   function onPriceKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key !== "Enter" || event.nativeEvent.isComposing) return;
@@ -79,24 +103,61 @@ export function ItemRow({
       : "—";
 
   return (
-    <div role="group" aria-label={t("itemN", { n })} className="flex flex-col gap-2 py-3 first:pt-0 last:pb-0">
-      <div className="flex items-start gap-2">
+    <div
+      ref={setNodeRef}
+      style={style}
+      role="group"
+      aria-label={t("itemN", { n })}
+      className={cn(
+        "relative flex flex-col gap-2 bg-white py-3 first:pt-0 last:pb-0",
+        isDragging && "z-20 rounded-md shadow-md ring-1 ring-border",
+      )}
+    >
+      <div className="flex items-start gap-1">
+        <button
+          type="button"
+          ref={setActivatorNodeRef}
+          {...attributes}
+          {...listeners}
+          aria-label={t("dragHandle", { n })}
+          className="inline-flex size-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:cursor-grabbing disabled:cursor-default"
+        >
+          <GripVertical className="size-4" />
+        </button>
         <div className="min-w-0 flex-1">
           <label htmlFor={id("name")} className="sr-only">
             {t("name")}
           </label>
-          <Input
+          <CatalogAutocomplete
             id={id("name")}
-            data-item-name={item.key}
+            itemKey={item.key}
             value={item.name}
             placeholder={t("name")}
-            autoComplete="off"
-            onChange={(event) => onChange({ name: event.target.value })}
-            aria-invalid={Boolean(errors[field("name")]) || undefined}
-            className="font-medium"
+            invalid={Boolean(errors[field("name")])}
+            catalog={catalog}
+            onValueChange={(name) => {
+              setCatalogCurrency(null);
+              onChange({ name });
+            }}
+            onPick={pickCatalogItem}
           />
           {errors[field("name")] ? <p className="mt-1 text-xs text-danger">{errorText(field("name"))}</p> : null}
+          {catalogCurrency ? (
+            <p className="mt-1 text-xs text-muted">{t("catalogCurrencyHint", { currency: catalogCurrency })}</p>
+          ) : null}
         </div>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          aria-label={t("saveToCatalog")}
+          title={t("saveToCatalog")}
+          disabled={item.name.trim() === "" || savingToCatalog}
+          onClick={onSaveToCatalog}
+          className="size-9 shrink-0 px-0 text-muted hover:text-fg"
+        >
+          <BookmarkPlus className="size-4" />
+        </Button>
         <Button
           type="button"
           variant="ghost"
@@ -152,7 +213,10 @@ export function ItemRow({
             id={id("unitPrice")}
             inputMode="decimal"
             value={item.unitPrice}
-            onChange={(event) => onChange({ unitPrice: event.target.value })}
+            onChange={(event) => {
+              setCatalogCurrency(null);
+              onChange({ unitPrice: event.target.value });
+            }}
             onKeyDown={onPriceKeyDown}
             aria-invalid={Boolean(errors[field("unitPrice")]) || undefined}
             className="text-right tabular-nums"

@@ -120,7 +120,8 @@
         "items": "Item",
         "totals": "Total",
         "payment": "Rekening pembayaran",
-        "notes": "Catatan"
+        "notes": "Catatan",
+        "appearance": "Tampilan"
       },
       "client": {
         "label": "Klien",
@@ -129,7 +130,8 @@
         "noResults": "Klien tidak ditemukan",
         "none": "Belum ada klien.",
         "add": "Tambah klien",
-        "archivedTag": "Diarsipkan"
+        "archivedTag": "Diarsipkan",
+        "newClient": "+ Klien baru"
       },
       "details": {
         "number": "Nomor invoice",
@@ -152,7 +154,19 @@
         "amount": "Jumlah",
         "add": "Tambah item",
         "remove": "Hapus item {n}",
-        "empty": "Belum ada item."
+        "empty": "Belum ada item.",
+        "dragHandle": "Geser item {n}",
+        "saveToCatalog": "Simpan ke katalog",
+        "savedToCatalog": "Disimpan ke katalog",
+        "catalogCurrencyHint": "Harga katalog dalam {currency}",
+        "catalogSuggestions": "Saran dari katalog",
+        "dnd": {
+          "instructions": "Tekan spasi untuk mengangkat item, panah atas atau bawah untuk memindahkan, spasi untuk menjatuhkan, Esc untuk batal.",
+          "start": "Item {n} diangkat.",
+          "over": "Item {from} berada di posisi {to}.",
+          "end": "Item {from} dipindahkan ke posisi {to}.",
+          "cancel": "Pemindahan dibatalkan. Item {n} kembali ke posisinya."
+        }
       },
       "totals": {
         "subtotal": "Subtotal",
@@ -174,6 +188,25 @@
       "notes": {
         "label": "Catatan",
         "placeholder": "Catatan untuk klien (opsional)"
+      },
+      "newClient": {
+        "description": "Tambahkan klien baru tanpa meninggalkan invoice ini."
+      },
+      "appearance": {
+        "template": "Template",
+        "accent": "Warna aksen",
+        "hex": "Kode warna (hex)",
+        "picker": "Pilih warna",
+        "invalidHex": "Gunakan format #RRGGBB.",
+        "presetLabel": "Warna siap pakai"
+      },
+      "menu": {
+        "actions": "Aksi invoice",
+        "duplicate": "Duplikat",
+        "delete": "Hapus draft",
+        "deleteTitle": "Hapus draft ini?",
+        "deleteDescription": "Draft {number} akan dihapus permanen dan tidak bisa dikembalikan.",
+        "confirmDelete": "Hapus"
       }
     }
   },

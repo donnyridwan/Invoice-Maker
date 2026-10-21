@@ -1,6 +1,9 @@
 import { describe, expect, it } from "vitest";
 import {
+  applyCatalogItem,
   editorStateFromInvoice,
+  filterCatalogOptions,
+  type CatalogOption,
   evaluateEditor,
   mapServerErrors,
   newEditorItem,
@@ -316,5 +319,61 @@ describe("evaluateEditor and toPreviewSource", () => {
     expect(src.issueDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(src.dueDate).toMatch(/^\d{4}-\d{2}-\d{2}$/);
     expect(toPreviewSource(state({ clientId: null }), ctx, "id").client).toBeNull();
+  });
+});
+
+const catalog = (overrides: Partial<CatalogOption> & { name: string }): CatalogOption => ({
+  id: overrides.name,
+  description: null,
+  unit: null,
+  unitPriceMinor: 0,
+  currency: "IDR",
+  ...overrides,
+});
+
+describe("filterCatalogOptions", () => {
+  const options = [
+    catalog({ name: "Desain logo" }),
+    catalog({ name: "Revisi desain" }),
+    catalog({ name: "Hosting" }),
+    ...Array.from({ length: 10 }, (_, i) => catalog({ name: `Desa ${i}` })),
+  ];
+
+  it("returns nothing for an empty query", () => {
+    expect(filterCatalogOptions(options, "")).toEqual([]);
+    expect(filterCatalogOptions(options, "   ")).toEqual([]);
+  });
+
+  it("matches names case-insensitively, names starting with the query first", () => {
+    expect(filterCatalogOptions(options, "DESAIN").map((o) => o.name)).toEqual(["Desain logo", "Revisi desain"]);
+    expect(filterCatalogOptions(options, "host").map((o) => o.name)).toEqual(["Hosting"]);
+  });
+
+  it("returns at most 8 items", () => {
+    expect(filterCatalogOptions(options, "desa")).toHaveLength(8);
+  });
+});
+
+describe("applyCatalogItem", () => {
+  const item = catalog({ name: "Desain logo", description: "Tiga konsep", unit: "proyek", unitPriceMinor: 1500000 });
+
+  it("fills name, description, unit and the price when the currencies match", () => {
+    expect(applyCatalogItem(item, "IDR", "id")).toEqual({
+      patch: { name: "Desain logo", description: "Tiga konsep", unit: "proyek", unitPrice: "1.500.000" },
+      priceCurrency: null,
+    });
+  });
+
+  it("leaves the price alone and reports the catalog currency when they differ", () => {
+    const usd = catalog({ name: "Consulting", unit: "jam", unitPriceMinor: 12500, currency: "USD" });
+    expect(applyCatalogItem(usd, "IDR", "id")).toEqual({
+      patch: { name: "Consulting", description: "", unit: "jam" },
+      priceCurrency: "USD",
+    });
+  });
+
+  it("formats the price for the UI locale", () => {
+    const usd = catalog({ name: "Consulting", unitPriceMinor: 12550, currency: "USD" });
+    expect(applyCatalogItem(usd, "USD", "en").patch.unitPrice).toBe("125.50");
   });
 });

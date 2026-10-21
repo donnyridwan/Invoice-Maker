@@ -203,3 +203,189 @@ test.describe("editor", () => {
     expect(box!.width).toBeLessThanOrEqual(390);
   });
 });
+
+async function addCatalogItem(page: Page, item: { name: string; price: string; unit?: string }) {
+  await page.goto("/catalog");
+  await page.getByRole("button", { name: "Item baru" }).first().click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Nama", { exact: true }).fill(item.name);
+  if (item.unit) await dialog.getByLabel("Satuan", { exact: true }).fill(item.unit);
+  await dialog.getByLabel("Harga satuan").fill(item.price);
+  await dialog.getByRole("button", { name: "Simpan" }).click();
+  await expect(dialog).toHaveCount(0);
+}
+
+test.describe("editor extras", () => {
+  test("fills an item from the catalog autocomplete", async ({ page }) => {
+    await registerUser(page);
+    await addCatalogItem(page, { name: "Desain logo", price: "1.500.000", unit: "proyek" });
+    await createInvoiceViaUi(page);
+
+    const row = page.getByRole("group", { name: "Item 1" });
+    const name = row.getByLabel("Nama item");
+    await name.fill("desa");
+    await expect(page.getByRole("option", { name: /Desain logo/ })).toBeVisible();
+    await page.getByRole("option", { name: /Desain logo/ }).click();
+    await expect(name).toHaveValue("Desain logo");
+    await expect(row.getByLabel("Harga", { exact: true })).toHaveValue("1.500.000");
+    await expect(row.getByLabel("Satuan", { exact: true })).toHaveValue("proyek");
+
+    // The same with the keyboard: arrows and Enter pick, Escape closes.
+    await page.getByRole("button", { name: "Tambah item" }).click();
+    const second = page.getByRole("group", { name: "Item 2" });
+    await expect(second.getByLabel("Nama item")).toBeFocused();
+    await page.keyboard.type("LOGO");
+    await expect(page.getByRole("option", { name: /Desain logo/ })).toBeVisible();
+    await page.keyboard.press("Escape");
+    await expect(page.getByRole("option")).toHaveCount(0);
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await expect(second.getByLabel("Nama item")).toHaveValue("Desain logo");
+    await expect(second.getByLabel("Harga", { exact: true })).toHaveValue("1.500.000");
+  });
+
+  test("saves an item to the catalog", async ({ page }) => {
+    await registerUser(page);
+    await createInvoiceViaUi(page);
+    const row = page.getByRole("group", { name: "Item 1" });
+    await expect(row.getByRole("button", { name: "Simpan ke katalog" })).toBeDisabled();
+
+    await row.getByLabel("Nama item").fill("Konsultasi");
+    await row.getByLabel("Harga", { exact: true }).fill("750.000");
+    await row.getByRole("button", { name: "Simpan ke katalog" }).click();
+    await expect(page.getByText("Disimpan ke katalog")).toBeVisible();
+
+    await page.goto("/catalog");
+    const catalogRow = page.getByRole("row").filter({ hasText: "Konsultasi" });
+    await expect(catalogRow).toContainText(/Rp\s750\.000/);
+  });
+
+  test("creates a client from the editor and selects it", async ({ page }) => {
+    await registerUser(page);
+    await createInvoiceViaUi(page);
+
+    await page.getByRole("combobox", { name: "Klien" }).click();
+    await page.getByRole("option", { name: "+ Klien baru" }).click();
+    const dialog = page.getByRole("dialog");
+    await dialog.getByLabel("Nama", { exact: true }).fill("Beta LLC");
+    await dialog.getByLabel("Email").fill("billing@beta.example");
+    await dialog.getByRole("button", { name: "Simpan" }).click();
+    await expect(dialog).toHaveCount(0);
+
+    await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Beta LLC");
+    await expect(page.getByRole("region", { name: "Preview invoice" })).toContainText("Beta LLC");
+    await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
+
+    // The client exists for real: it survives a reload and shows up in the client list.
+    await page.reload();
+    await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Beta LLC");
+    await page.goto("/clients");
+    await expect(page.getByRole("link", { name: "Beta LLC" })).toBeVisible();
+  });
+
+  test("picks a template and an accent colour, and keeps them", async ({ page }) => {
+    await registerUser(page);
+    await createInvoiceViaUi(page);
+    const preview = page.getByRole("region", { name: "Preview invoice" });
+
+    await expect(page.getByRole("radio", { name: "Minimal" })).toBeChecked();
+    await page.getByRole("radio", { name: "Modern" }).click();
+    await expect(page.getByRole("radio", { name: "Modern" })).toBeChecked();
+    await expect(preview.locator('[data-template="modern"]')).toBeVisible();
+
+    await page.getByLabel("Kode warna (hex)").fill("#00A67E");
+    await expect(preview.locator('[data-template="modern"]')).toHaveAttribute("style", /#00A67E/i);
+    await page.getByRole("button", { name: "#0A2540" }).click();
+    await expect(page.getByLabel("Kode warna (hex)")).toHaveValue("#0A2540");
+    await page.getByLabel("Kode warna (hex)").fill("#00A67E");
+    await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByRole("radio", { name: "Modern" })).toBeChecked();
+    await expect(page.getByLabel("Kode warna (hex)")).toHaveValue(/^#00a67e$/i);
+    await expect(preview.locator('[data-template="modern"]')).toHaveAttribute("style", /#00A67E/i);
+  });
+
+  test("reorders items by dragging", async ({ page }) => {
+    await registerUser(page);
+    await createInvoiceViaUi(page);
+
+    const first = page.getByRole("group", { name: "Item 1" });
+    await first.getByLabel("Nama item").fill("Pertama");
+    await first.getByLabel("Harga", { exact: true }).press("Enter");
+    await page.keyboard.type("Kedua");
+    await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
+
+    const handle = page.getByRole("group", { name: "Item 2" }).getByRole("button", { name: /Geser item 2/ });
+    const target = await page.getByRole("group", { name: "Item 1" }).boundingBox();
+    const from = await handle.boundingBox();
+    await page.mouse.move(from!.x + from!.width / 2, from!.y + from!.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(from!.x + from!.width / 2, from!.y - 10, { steps: 5 });
+    await page.mouse.move(from!.x + from!.width / 2, target!.y + 10, { steps: 15 });
+    await page.mouse.up();
+
+    await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Nama item")).toHaveValue("Kedua");
+    await expect(page.getByRole("group", { name: "Item 2" }).getByLabel("Nama item")).toHaveValue("Pertama");
+    await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
+
+    await page.reload();
+    await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Nama item")).toHaveValue("Kedua");
+    await expect(page.getByRole("group", { name: "Item 2" }).getByLabel("Nama item")).toHaveValue("Pertama");
+  });
+
+  test("shows autosaved changes in the list without a server revalidation", async ({ page }) => {
+    await openEditorWithClient(page);
+    const row = page.getByRole("group", { name: "Item 1" });
+    await row.getByLabel("Nama item").fill("Hosting");
+    await row.getByLabel("Harga", { exact: true }).fill("250.000");
+    await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
+
+    await page.getByRole("link", { name: "Kembali ke daftar invoice" }).click();
+    await expect(page).toHaveURL(/\/invoices$/);
+    await expect(page.getByRole("row").filter({ hasText: "-002" })).toContainText(/Rp\s250\.000/);
+  });
+
+  test("duplicates an invoice into a new draft", async ({ page }) => {
+    await openEditorWithClient(page);
+    const before = page.url();
+    await page.getByRole("combobox", { name: "Klien" }).click();
+    await page.getByRole("option", { name: /Acme Inc/ }).click();
+    const row = page.getByRole("group", { name: "Item 1" });
+    await row.getByLabel("Nama item").fill("Desain logo");
+    await row.getByLabel("Harga", { exact: true }).fill("1.500.000");
+    await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
+
+    await page.getByRole("button", { name: "Aksi invoice" }).click();
+    await page.getByRole("menuitem", { name: "Duplikat" }).click();
+    await expect(page).toHaveURL(EDITOR_URL_RE);
+    await expect(page).not.toHaveURL(before);
+    await expect(page.getByRole("heading", { level: 1, name: /^INV-/ })).toHaveText(/-003$/);
+    await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Nama item")).toHaveValue("Desain logo");
+    await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Harga", { exact: true })).toHaveValue("1.500.000");
+    await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Acme Inc");
+  });
+
+  test("deletes a draft and shows the empty state when it was the last one", async ({ page }) => {
+    await openEditorWithClient(page);
+    await page.getByRole("button", { name: "Aksi invoice" }).click();
+    await page.getByRole("menuitem", { name: "Hapus draft" }).click();
+    const dialog = page.getByRole("dialog");
+    await expect(dialog).toContainText(/INV-\d{4}-002/);
+    await dialog.getByRole("button", { name: "Hapus", exact: true }).click();
+    await expect(page).toHaveURL(/\/invoices$/);
+    await expect(page.getByRole("row")).toHaveCount(2);
+    await expect(page.getByRole("table")).not.toContainText("-002");
+    await expect(page.getByRole("table")).toContainText("-001");
+
+    // Delete the only draft left.
+    await page.getByRole("row").nth(1).getByRole("link").click();
+    await expect(page).toHaveURL(EDITOR_URL_RE);
+    await page.getByRole("button", { name: "Aksi invoice" }).click();
+    await page.getByRole("menuitem", { name: "Hapus draft" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Hapus", exact: true }).click();
+    await expect(page).toHaveURL(/\/invoices$/);
+    await expect(page.getByText("Belum ada invoice")).toBeVisible();
+    await expect(page.getByRole("button", { name: "Invoice baru", exact: true }).first()).toBeVisible();
+  });
+});

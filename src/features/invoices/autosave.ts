@@ -171,5 +171,16 @@ export function useAutosave<T>(
     void saverRef.current?.flush();
   }, []);
 
-  return { status, schedule, markInvalid, retry };
+  /** Writes whatever is waiting now (e.g. before duplicating, so the copy has the latest edits). */
+  const flush = useCallback(async () => {
+    await saverRef.current?.flush();
+  }, []);
+
+  /** Drops what is waiting without saving it (e.g. right before the draft is deleted). */
+  const cancel = useCallback(() => {
+    version.current += 1;
+    saverRef.current?.cancel();
+  }, []);
+
+  return { status, schedule, markInvalid, retry, flush, cancel };
 }

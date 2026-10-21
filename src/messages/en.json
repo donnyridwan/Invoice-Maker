@@ -120,7 +120,8 @@
         "items": "Items",
         "totals": "Total",
         "payment": "Payment accounts",
-        "notes": "Notes"
+        "notes": "Notes",
+        "appearance": "Appearance"
       },
       "client": {
         "label": "Client",
@@ -129,7 +130,8 @@
         "noResults": "No client found",
         "none": "No clients yet.",
         "add": "Add client",
-        "archivedTag": "Archived"
+        "archivedTag": "Archived",
+        "newClient": "+ New client"
       },
       "details": {
         "number": "Invoice number",
@@ -152,7 +154,19 @@
         "amount": "Amount",
         "add": "Add item",
         "remove": "Remove item {n}",
-        "empty": "No items yet."
+        "empty": "No items yet.",
+        "dragHandle": "Drag item {n}",
+        "saveToCatalog": "Save to catalog",
+        "savedToCatalog": "Saved to catalog",
+        "catalogCurrencyHint": "Catalog price is in {currency}",
+        "catalogSuggestions": "Catalog suggestions",
+        "dnd": {
+          "instructions": "Press space to pick up an item, the up or down arrow to move it, space to drop it, Escape to cancel.",
+          "start": "Picked up item {n}.",
+          "over": "Item {from} is at position {to}.",
+          "end": "Item {from} moved to position {to}.",
+          "cancel": "Move cancelled. Item {n} returned to its position."
+        }
       },
       "totals": {
         "subtotal": "Subtotal",
@@ -174,6 +188,25 @@
       "notes": {
         "label": "Notes",
         "placeholder": "Notes for the client (optional)"
+      },
+      "newClient": {
+        "description": "Add a client without leaving this invoice."
+      },
+      "appearance": {
+        "template": "Template",
+        "accent": "Accent color",
+        "hex": "Color code (hex)",
+        "picker": "Pick a color",
+        "invalidHex": "Use the #RRGGBB format.",
+        "presetLabel": "Preset colors"
+      },
+      "menu": {
+        "actions": "Invoice actions",
+        "duplicate": "Duplicate",
+        "delete": "Delete draft",
+        "deleteTitle": "Delete this draft?",
+        "deleteDescription": "Draft {number} will be permanently deleted and cannot be restored.",
+        "confirmDelete": "Delete"
       }
     }
   },

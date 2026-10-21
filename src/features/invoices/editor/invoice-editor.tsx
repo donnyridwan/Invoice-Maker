@@ -14,6 +14,7 @@ import {
   toDraftInput,
   toPreviewSource,
   type AccountOption,
+  type CatalogOption,
   type ClientOption,
   type EditorErrors,
   type EditorState,
@@ -21,9 +22,11 @@ import {
 import type { InvoiceDraftInput } from "../schema";
 import type { BusinessSnapshot } from "../snapshots";
 import type { Invoice } from "../queries";
+import { AppearanceSection } from "./appearance-section";
 import { ClientSection } from "./client-section";
 import { DetailsSection } from "./details-section";
 import { EditorHeader } from "./editor-header";
+import { EditorMenu } from "./editor-menu";
 import type { EditorSectionProps } from "./editor-section";
 import { ItemsSection } from "./items-section";
 import { NotesSection } from "./notes-section";
@@ -43,8 +46,9 @@ export function InvoiceEditor({
   status,
   initial,
   business,
-  clients,
+  clients: initialClients,
   accounts,
+  catalog,
 }: {
   invoiceId: string;
   status: Invoice["status"];
@@ -52,6 +56,7 @@ export function InvoiceEditor({
   business: BusinessSnapshot;
   clients: ClientOption[];
   accounts: AccountOption[];
+  catalog: CatalogOption[];
 }) {
   const t = useTranslations("invoices.editor");
   const tAll = useTranslations();
@@ -63,6 +68,8 @@ export function InvoiceEditor({
   const [clientErrors, setClientErrors] = useState<EditorErrors>({});
   const [serverErrors, setServerErrors] = useState<EditorErrors>({});
   const [tab, setTab] = useState<Tab>("form");
+  // Clients created from the editor join the ones the page loaded.
+  const [clients, setClients] = useState(initialClients);
 
   const autosave = useAutosave<InvoiceDraftInput>(async (input, isCurrent): Promise<SaveOutcome> => {
     const result = await saveInvoiceDraftAction(invoiceId, input);
@@ -110,7 +117,21 @@ export function InvoiceEditor({
 
   return (
     <div>
-      <EditorHeader number={state.number} status={status} autosave={autosave.status} onRetry={autosave.retry} />
+      <EditorHeader
+        number={state.number}
+        status={status}
+        autosave={autosave.status}
+        onRetry={autosave.retry}
+        actions={
+          <EditorMenu
+            invoiceId={invoiceId}
+            number={state.number}
+            status={status}
+            flush={autosave.flush}
+            cancel={autosave.cancel}
+          />
+        }
+      />
 
       <div className="sticky top-[112px] z-10 -mx-4 border-b border-border bg-white px-4 py-2 md:top-14 md:-mx-6 md:px-6 xl:hidden">
         <div role="tablist" aria-label={t("tabs.label")} className="flex gap-1 rounded-md border border-border bg-white p-0.5">
@@ -148,12 +169,17 @@ export function InvoiceEditor({
                 {formError}
               </p>
             ) : null}
-            <ClientSection {...section} clients={clients} />
+            <ClientSection
+              {...section}
+              clients={clients}
+              onClientAdded={(client) => setClients((current) => [...current, client])}
+            />
             <DetailsSection {...section} />
-            <ItemsSection {...section} evaluation={evaluation} locale={locale} />
+            <ItemsSection {...section} evaluation={evaluation} locale={locale} catalog={catalog} />
             <TotalsSection {...section} evaluation={evaluation} locale={locale} />
             <PaymentSection {...section} accounts={accounts} />
             <NotesSection {...section} />
+            <AppearanceSection {...section} doc={doc} />
           </fieldset>
         </div>
 

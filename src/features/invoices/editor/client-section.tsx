@@ -8,8 +8,10 @@ import { Label } from "@/components/ui/label";
 import { INVOICE_LANGUAGES } from "@/features/profile/schema";
 import { isCurrencyCode } from "@/lib/currencies";
 import { cn } from "@/lib/utils";
+import type { InlineClient } from "@/features/clients/actions";
 import type { ClientOption } from "../editor-state";
 import { EditorSection, useErrorText, type EditorSectionProps } from "./editor-section";
+import { NewClientDialog } from "./new-client-dialog";
 
 function matches(option: ClientOption, query: string): boolean {
   const needle = query.trim().toLowerCase();
@@ -22,11 +24,14 @@ function ClientCombobox({
   options,
   value,
   onSelect,
+  onCreate,
 }: {
   id: string;
   options: ClientOption[];
   value: string | null;
   onSelect: (option: ClientOption | null) => void;
+  /** "+ Klien baru": `name` is what was typed in the field. */
+  onCreate: (name: string) => void;
 }) {
   const t = useTranslations("invoices.editor.client");
   const listId = useId();
@@ -40,7 +45,9 @@ function ClientCombobox({
     () => options.filter((option) => !option.archived || option.id === value).filter((option) => matches(option, query)),
     [options, value, query],
   );
-  const activeIndex = Math.min(active, Math.max(visible.length - 1, 0));
+  // The "+ Klien baru" entry comes after the clients and is reached with the arrow keys as well.
+  const lastIndex = visible.length;
+  const activeIndex = Math.min(active, lastIndex);
 
   function choose(option: ClientOption | null) {
     onSelect(option);
@@ -48,18 +55,28 @@ function ClientCombobox({
     setQuery("");
   }
 
+  function create() {
+    const name = query.trim();
+    setOpen(false);
+    setQuery("");
+    onCreate(name);
+  }
+
   function onKeyDown(event: KeyboardEvent<HTMLInputElement>) {
     if (event.key === "ArrowDown") {
       event.preventDefault();
       setOpen(true);
-      setActive(Math.min(activeIndex + 1, visible.length - 1));
+      setActive(Math.min(activeIndex + 1, lastIndex));
     } else if (event.key === "ArrowUp") {
       event.preventDefault();
       setActive(Math.max(activeIndex - 1, 0));
     } else if (event.key === "Enter") {
       // Never submit anything from here; with the list open, Enter picks the highlighted client.
       event.preventDefault();
-      if (open && visible[activeIndex]) choose(visible[activeIndex]);
+      if (open) {
+        if (activeIndex === lastIndex) create();
+        else choose(visible[activeIndex]);
+      }
     } else if (event.key === "Escape" && open) {
       event.preventDefault();
       setOpen(false);
@@ -75,7 +92,9 @@ function ClientCombobox({
         aria-expanded={open}
         aria-controls={listId}
         aria-autocomplete="list"
-        aria-activedescendant={open && visible[activeIndex] ? `${listId}-${visible[activeIndex].id}` : undefined}
+        aria-activedescendant={
+          open ? (activeIndex === lastIndex ? `${listId}-new` : `${listId}-${visible[activeIndex].id}`) : undefined
+        }
         autoComplete="off"
         placeholder={selected && !open ? undefined : t("placeholder")}
         value={open ? query : (selected?.name ?? "")}
@@ -147,6 +166,19 @@ function ClientCombobox({
               </li>
             ))
           )}
+          <li
+            id={`${listId}-new`}
+            role="option"
+            aria-selected={false}
+            onClick={create}
+            onMouseMove={() => setActive(lastIndex)}
+            className={cn(
+              "mt-1 cursor-pointer rounded-sm border-t border-border px-2 py-1.5 font-medium text-accent",
+              activeIndex === lastIndex && "bg-subtle",
+            )}
+          >
+            {t("newClient")}
+          </li>
         </ul>
       ) : null}
     </div>
@@ -162,10 +194,12 @@ export function ClientSection({
   state,
   errors,
   update,
-}: EditorSectionProps & { clients: ClientOption[] }) {
+  onClientAdded,
+}: EditorSectionProps & { clients: ClientOption[]; onClientAdded: (client: ClientOption) => void }) {
   const t = useTranslations("invoices.editor");
   const errorText = useErrorText(errors);
   const selected = clients.find((client) => client.id === state.clientId);
+  const [dialog, setDialog] = useState<{ name: string } | null>(null);
 
   function select(option: ClientOption | null) {
     update((current) => {
@@ -179,6 +213,24 @@ export function ClientSection({
     });
   }
 
+  /** A client made in the dialog: offered from now on and selected right away. */
+  function created(client: InlineClient) {
+    const option: ClientOption = {
+      id: client.id,
+      name: client.name,
+      ...(client.company ? { company: client.company } : {}),
+      ...(client.email ? { email: client.email } : {}),
+      ...(client.phone ? { phone: client.phone } : {}),
+      ...(client.address ? { address: client.address } : {}),
+      ...(client.country ? { country: client.country } : {}),
+      defaultCurrency: client.defaultCurrency,
+      defaultLanguage: client.defaultLanguage,
+      archived: false,
+    };
+    onClientAdded(option);
+    select(option);
+  }
+
   return (
     <EditorSection title={t("sections.client")}>
       <div className="flex flex-col gap-1.5">
@@ -186,7 +238,13 @@ export function ClientSection({
         <Label htmlFor="invoice-client" className="sr-only">
           {t("client.label")}
         </Label>
-        <ClientCombobox id="invoice-client" options={clients} value={state.clientId} onSelect={select} />
+        <ClientCombobox
+          id="invoice-client"
+          options={clients}
+          value={state.clientId}
+          onSelect={select}
+          onCreate={(name) => setDialog({ name })}
+        />
         {errorText("clientId") ? <p className="text-xs text-danger">{errorText("clientId")}</p> : null}
       </div>
       {selected && (selected.company || selected.email || selected.address) ? (
@@ -202,6 +260,15 @@ export function ClientSection({
           </a>
         </p>
       ) : null}
+      <NewClientDialog
+        open={dialog !== null}
+        onOpenChange={(open) => {
+          if (!open) setDialog(null);
+        }}
+        initialName={dialog?.name ?? ""}
+        defaults={{ currency: state.currency, language: state.language }}
+        onCreated={created}
+      />
     </EditorSection>
   );
 }

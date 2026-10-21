@@ -1,0 +1,158 @@
+"use client";
+
+import { useState, type KeyboardEvent } from "react";
+import { useTranslations } from "next-intl";
+import { InvoiceDocumentView } from "@/documents/invoice-document-view";
+import { ScaledDocument } from "@/documents/scaled-document";
+import type { InvoiceDocument } from "@/documents/types";
+import { TEMPLATES, type Template } from "@/features/profile/schema";
+import { cn } from "@/lib/utils";
+import { EditorSection, type EditorSectionProps } from "./editor-section";
+
+/** Accent colours offered as one-click presets. */
+export const ACCENT_PRESETS = ["#5850EC", "#0A2540", "#00A67E", "#E25950", "#F5A623", "#1A1F36"] as const;
+
+const HEX_RE = /^#?[0-9A-Fa-f]{6}$/;
+
+function TemplateCard({
+  template,
+  doc,
+  selected,
+  onSelect,
+  onKeyDown,
+}: {
+  template: Template;
+  doc: InvoiceDocument;
+  selected: boolean;
+  onSelect: () => void;
+  onKeyDown: (event: KeyboardEvent<HTMLButtonElement>) => void;
+}) {
+  const t = useTranslations("settings.templates");
+  return (
+    <button
+      type="button"
+      role="radio"
+      aria-checked={selected}
+      aria-label={t(template)}
+      tabIndex={selected ? 0 : -1}
+      data-template-option={template}
+      onClick={onSelect}
+      onKeyDown={onKeyDown}
+      className={cn(
+        "flex min-w-0 flex-col gap-1.5 rounded-md border bg-white p-2 text-left transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+        selected ? "border-accent ring-1 ring-accent" : "border-border hover:border-muted/60",
+      )}
+    >
+      {/* A miniature of the real document in this template: same view, scaled down, not interactive. */}
+      <span
+        aria-hidden
+        // @ts-expect-error `inert` is a valid attribute; React's types for it vary by version.
+        inert=""
+        className="pointer-events-none block aspect-[210/297] w-full select-none overflow-hidden rounded-sm border border-border bg-white"
+      >
+        <ScaledDocument>
+          <InvoiceDocumentView doc={{ ...doc, template }} />
+        </ScaledDocument>
+      </span>
+      <span className={cn("text-center text-xs font-medium", selected ? "text-accent" : "text-fg")}>{t(template)}</span>
+    </button>
+  );
+}
+
+/** Template picker (three live thumbnails) and accent colour (picker, hex field, presets). */
+export function AppearanceSection({ state, update, doc }: EditorSectionProps & { doc: InvoiceDocument }) {
+  const t = useTranslations("invoices.editor");
+  // What is being typed in the hex field while it is not (yet) a colour; null = show the state's.
+  const [draft, setDraft] = useState<string | null>(null);
+
+  const hexShown = draft ?? state.accentColor;
+  const hexInvalid = draft !== null && !HEX_RE.test(draft.trim());
+
+  function onHexChange(value: string) {
+    setDraft(value);
+    const text = value.trim();
+    if (HEX_RE.test(text)) update({ accentColor: text.startsWith("#") ? text : `#${text}` });
+  }
+
+  function onTemplateKeyDown(event: KeyboardEvent<HTMLButtonElement>, index: number) {
+    const step = event.key === "ArrowRight" || event.key === "ArrowDown" ? 1 : event.key === "ArrowLeft" || event.key === "ArrowUp" ? -1 : 0;
+    if (step === 0) return;
+    event.preventDefault();
+    const next = TEMPLATES[(index + step + TEMPLATES.length) % TEMPLATES.length];
+    update({ template: next });
+    // Move focus with the selection (radio group behaviour).
+    requestAnimationFrame(() =>
+      document.querySelector<HTMLButtonElement>(`[data-template-option="${next}"]`)?.focus(),
+    );
+  }
+
+  return (
+    <EditorSection title={t("sections.appearance")}>
+      <div role="radiogroup" aria-label={t("appearance.template")} className="grid grid-cols-3 gap-2 sm:gap-3">
+        {TEMPLATES.map((template, index) => (
+          <TemplateCard
+            key={template}
+            template={template}
+            doc={doc}
+            selected={state.template === template}
+            onSelect={() => update({ template })}
+            onKeyDown={(event) => onTemplateKeyDown(event, index)}
+          />
+        ))}
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <label htmlFor="invoice-accent-hex" className="text-sm font-medium text-fg">
+          {t("appearance.accent")}
+        </label>
+        <div className="flex flex-wrap items-center gap-2">
+          <input
+            type="color"
+            aria-label={t("appearance.picker")}
+            value={state.accentColor.toLowerCase()}
+            onChange={(event) => {
+              setDraft(null);
+              update({ accentColor: event.target.value });
+            }}
+            className="size-9 shrink-0 cursor-pointer rounded-md border border-border bg-white p-1"
+          />
+          <input
+            id="invoice-accent-hex"
+            value={hexShown}
+            spellCheck={false}
+            autoComplete="off"
+            maxLength={7}
+            aria-label={t("appearance.hex")}
+            aria-invalid={hexInvalid || undefined}
+            onChange={(event) => onHexChange(event.target.value)}
+            onBlur={() => setDraft(null)}
+            className={cn(
+              "h-9 w-28 rounded-md border bg-white px-3 font-mono text-sm uppercase focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+              hexInvalid ? "border-danger" : "border-border",
+            )}
+          />
+          <div role="group" aria-label={t("appearance.presetLabel")} className="flex flex-wrap gap-1.5">
+            {ACCENT_PRESETS.map((color) => (
+              <button
+                key={color}
+                type="button"
+                aria-label={color}
+                aria-pressed={state.accentColor.toUpperCase() === color}
+                onClick={() => {
+                  setDraft(null);
+                  update({ accentColor: color });
+                }}
+                style={{ backgroundColor: color }}
+                className={cn(
+                  "size-6 rounded-full border border-black/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                  state.accentColor.toUpperCase() === color && "ring-2 ring-offset-2 ring-fg",
+                )}
+              />
+            ))}
+          </div>
+        </div>
+        {hexInvalid ? <p className="text-xs text-danger">{t("appearance.invalidHex")}</p> : null}
+      </div>
+    </EditorSection>
+  );
+}

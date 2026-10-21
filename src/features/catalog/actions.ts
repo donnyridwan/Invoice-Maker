@@ -35,6 +35,27 @@ export async function saveCatalogItemAction(
   }
 }
 
+/**
+ * "Save to catalog" from an invoice line: the values are already parsed (minor units), so they go
+ * straight to the zod schema. Field errors use the schema's keys (`name`, `unitPriceMinor`, ...).
+ */
+export async function saveItemToCatalogAction(input: {
+  name: string;
+  description: string;
+  unit: string;
+  unitPriceMinor: number;
+  currency: string;
+}): Promise<ActionResult<{ id: string }>> {
+  const user = await requireUser();
+  try {
+    const created = await createCatalogItem(user.id, input);
+    revalidatePath(PATH);
+    return { ok: true, data: { id: created.id } };
+  } catch (e) {
+    return toActionError(e);
+  }
+}
+
 export async function archiveCatalogItemAction(id: string): Promise<ActionResult> {
   return runUserAction(PATH, (userId) => archiveCatalogItem(userId, id));
 }

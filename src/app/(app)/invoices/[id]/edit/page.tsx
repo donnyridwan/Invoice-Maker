@@ -1,7 +1,8 @@
 import { notFound } from "next/navigation";
 import { getLocale } from "next-intl/server";
+import { listCatalogItems } from "@/features/catalog/queries";
 import { getClient, listClients, type Client } from "@/features/clients/queries";
-import { editorStateFromInvoice, type AccountOption, type ClientOption } from "@/features/invoices/editor-state";
+import { editorStateFromInvoice, type AccountOption, type CatalogOption, type ClientOption } from "@/features/invoices/editor-state";
 import { InvoiceEditor } from "@/features/invoices/editor/invoice-editor";
 import { getInvoice } from "@/features/invoices/queries";
 import {
@@ -36,10 +37,11 @@ export default async function EditInvoicePage({ params }: PageProps<"/invoices/[
     throw error;
   });
 
-  const [profile, activeClients, allAccounts] = await Promise.all([
+  const [profile, activeClients, allAccounts, catalogItems] = await Promise.all([
     getProfile(user.id),
     listClients(user.id),
     listPaymentAccounts(user.id, { includeArchived: true }),
+    listCatalogItems(user.id),
   ]);
 
   // The invoice's own client stays selectable even after it was archived.
@@ -60,6 +62,16 @@ export default async function EditInvoicePage({ params }: PageProps<"/invoices/[
       archived: Boolean(account.archivedAt),
     }));
 
+  // Active catalog items for the item-name autocomplete (filtered in the browser).
+  const catalog: CatalogOption[] = catalogItems.map((item) => ({
+    id: item.id,
+    name: item.name,
+    description: item.description,
+    unit: item.unit,
+    unitPriceMinor: item.unitPriceMinor,
+    currency: item.currency,
+  }));
+
   return (
     // Keyed by locale: the typed numbers are formatted for the UI language, so a language switch
     // starts the form over from the saved invoice.
@@ -71,6 +83,7 @@ export default async function EditInvoicePage({ params }: PageProps<"/invoices/[
       business={businessSnapshotFrom(profile)}
       clients={clients}
       accounts={accounts}
+      catalog={catalog}
     />
   );
 }

@@ -59,6 +59,53 @@ export type AccountOption = {
   archived: boolean;
 };
 
+/** An active catalog item the item-name autocomplete can offer. */
+export type CatalogOption = {
+  id: string;
+  name: string;
+  description: string | null;
+  unit: string | null;
+  unitPriceMinor: number;
+  currency: string;
+};
+
+export const MAX_CATALOG_SUGGESTIONS = 8;
+
+/**
+ * Catalog items whose name contains `query` (case-insensitive), names that start with it first,
+ * at most `MAX_CATALOG_SUGGESTIONS`. An empty query offers nothing.
+ */
+export function filterCatalogOptions(options: CatalogOption[], query: string): CatalogOption[] {
+  const needle = query.trim().toLowerCase();
+  if (!needle) return [];
+  const hits = options.filter((option) => option.name.toLowerCase().includes(needle));
+  const starts = (option: CatalogOption) => (option.name.toLowerCase().startsWith(needle) ? 0 : 1);
+  // Array.prototype.sort is stable, so the catalog's own (alphabetical) order holds within a group.
+  return hits.sort((a, b) => starts(a) - starts(b)).slice(0, MAX_CATALOG_SUGGESTIONS);
+}
+
+/**
+ * What picking a catalog item changes on a row. The price is only taken over when the catalog
+ * item is in the invoice's currency; otherwise `priceCurrency` names the catalog currency so the
+ * UI can say so, and the price is left as it was.
+ */
+export function applyCatalogItem(
+  option: CatalogOption,
+  invoiceCurrency: string,
+  locale: Locale,
+): { patch: Partial<EditorItem>; priceCurrency: string | null } {
+  const patch: Partial<EditorItem> = {
+    name: option.name,
+    description: option.description ?? "",
+    unit: option.unit ?? "",
+  };
+  if (option.currency === invoiceCurrency && isCurrencyCode(option.currency)) {
+    patch.unitPrice = formatMoneyInput(option.unitPriceMinor, option.currency, locale);
+    return { patch, priceCurrency: null };
+  }
+  return { patch, priceCurrency: option.currency };
+}
+
 /** Message-key errors keyed by field: `number`, `dueDate`, `items.<row>.unitPrice`, `_form`, ... */
 export type EditorErrors = Record<string, string>;
 
