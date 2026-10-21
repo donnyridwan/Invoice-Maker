@@ -159,7 +159,21 @@
     "notes": "Notes",
     "searchPlaceholder": "Search clients",
     "emptyTitle": "No clients yet",
-    "emptyDescription": "Add your first client to start creating invoices."
+    "emptyDescription": "Add your first client to start creating invoices.",
+    "tabActive": "Active",
+    "tabArchived": "Archived",
+    "archived": "Archived",
+    "colCurrency": "Currency",
+    "colLanguage": "Language",
+    "searchLabel": "Search clients",
+    "noResultsTitle": "No matching clients",
+    "noResultsDescription": "Try another keyword or clear the search.",
+    "archivedEmptyTitle": "No archived clients",
+    "editTitle": "Edit client",
+    "newDescription": "Enter the details of the client you bill.",
+    "countryPlaceholder": "Select a country",
+    "countryNone": "Not set",
+    "archivedNotice": "This client is archived and does not appear in the active list."
   },
   "catalog": {
     "title": "Catalog",
@@ -171,7 +185,17 @@
     "unitPrice": "Unit price",
     "currency": "Currency",
     "emptyTitle": "Your catalog is empty",
-    "emptyDescription": "Save services you bill often to create invoices faster."
+    "emptyDescription": "Save services you bill often to create invoices faster.",
+    "tabActive": "Active",
+    "tabArchived": "Archived",
+    "archived": "Archived",
+    "searchLabel": "Search items",
+    "searchPlaceholder": "Search items",
+    "noResultsTitle": "No matching items",
+    "noResultsDescription": "Try another keyword or clear the search.",
+    "archivedEmptyTitle": "No archived items",
+    "editTitle": "Edit item",
+    "newDescription": "Save services or products you bill often."
   },
   "validation": {
     "required": "This field is required.",
@@ -186,7 +210,8 @@
     "accountNumberOrIban": "Enter an account number or IBAN.",
     "invalidPrefix": "Letters, digits and / . _ - only",
     "invalidColor": "Use the #RRGGBB format.",
-    "invalidValue": "Invalid choice."
+    "invalidValue": "Invalid choice.",
+    "invalidCountry": "Select a valid country."
   },
   "errors": {
     "validation": "Please check your input.",

@@ -159,7 +159,21 @@
     "notes": "Catatan",
     "searchPlaceholder": "Cari klien",
     "emptyTitle": "Belum ada klien",
-    "emptyDescription": "Tambahkan klien pertama Anda untuk mulai membuat invoice."
+    "emptyDescription": "Tambahkan klien pertama Anda untuk mulai membuat invoice.",
+    "tabActive": "Aktif",
+    "tabArchived": "Arsip",
+    "archived": "Diarsipkan",
+    "colCurrency": "Mata uang",
+    "colLanguage": "Bahasa",
+    "searchLabel": "Cari klien",
+    "noResultsTitle": "Tidak ada klien yang cocok",
+    "noResultsDescription": "Coba kata kunci lain atau hapus pencarian.",
+    "archivedEmptyTitle": "Belum ada klien yang diarsipkan",
+    "editTitle": "Ubah klien",
+    "newDescription": "Isi data klien yang akan Anda tagih.",
+    "countryPlaceholder": "Pilih negara",
+    "countryNone": "Tidak diisi",
+    "archivedNotice": "Klien ini diarsipkan dan tidak muncul di daftar aktif."
   },
   "catalog": {
     "title": "Katalog",
@@ -171,7 +185,17 @@
     "unitPrice": "Harga satuan",
     "currency": "Mata uang",
     "emptyTitle": "Katalog masih kosong",
-    "emptyDescription": "Simpan layanan yang sering ditagih agar invoice lebih cepat dibuat."
+    "emptyDescription": "Simpan layanan yang sering ditagih agar invoice lebih cepat dibuat.",
+    "tabActive": "Aktif",
+    "tabArchived": "Arsip",
+    "archived": "Diarsipkan",
+    "searchLabel": "Cari item",
+    "searchPlaceholder": "Cari item",
+    "noResultsTitle": "Tidak ada item yang cocok",
+    "noResultsDescription": "Coba kata kunci lain atau hapus pencarian.",
+    "archivedEmptyTitle": "Belum ada item yang diarsipkan",
+    "editTitle": "Ubah item",
+    "newDescription": "Simpan layanan atau produk yang sering Anda tagih."
   },
   "validation": {
     "required": "Wajib diisi.",
@@ -186,7 +210,8 @@
     "accountNumberOrIban": "Isi nomor rekening atau IBAN.",
     "invalidPrefix": "Hanya huruf, angka, dan / . _ -",
     "invalidColor": "Gunakan format #RRGGBB.",
-    "invalidValue": "Pilihan tidak valid."
+    "invalidValue": "Pilihan tidak valid.",
+    "invalidCountry": "Pilih negara yang valid."
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",

@@ -154,3 +154,65 @@ test.describe("onboarding", () => {
     await expect(page).toHaveURL(/\/onboarding$/);
   });
 });
+
+test.describe("clients", () => {
+  test("creates, searches and archives a client", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/clients");
+    await expect(page.getByText("Belum ada klien")).toBeVisible();
+
+    const rows = page.getByRole("row");
+    for (const [name, email] of [
+      ["Acme Inc", "billing@acme.com"],
+      ["Budi Studio", "budi@example.com"],
+    ]) {
+      await page.getByRole("link", { name: "Klien baru" }).first().click();
+      await expect(page).toHaveURL(/\/clients\/new$/);
+      await page.getByLabel("Nama", { exact: true }).fill(name);
+      await page.getByLabel("Email", { exact: true }).fill(email);
+      if (name === "Acme Inc") {
+        await page.getByLabel("Mata uang default").click();
+        await page.getByRole("option", { name: "USD" }).click();
+        await page.getByLabel("Bahasa invoice").click();
+        await page.getByRole("option", { name: "English" }).click();
+      }
+      await page.getByRole("button", { name: "Simpan" }).click();
+      await expect(page).toHaveURL(/\/clients$/);
+    }
+
+    // Two clients plus the header row.
+    await expect(rows).toHaveCount(3);
+    const acme = rows.filter({ hasText: "Acme Inc" });
+    await expect(acme).toContainText("billing@acme.com");
+    await expect(acme).toContainText("USD");
+    await expect(acme).toContainText("English");
+
+    await page.getByLabel("Cari klien").fill("acme");
+    await page.getByLabel("Cari klien").press("Enter");
+    await expect(page).toHaveURL(/q=acme/);
+    await expect(rows).toHaveCount(2);
+    await expect(rows.filter({ hasText: "Budi Studio" })).toHaveCount(0);
+
+    await page.getByRole("link", { name: "Acme Inc" }).click();
+    await expect(page.getByRole("heading", { level: 1 })).toHaveText("Acme Inc");
+    await page.getByRole("button", { name: "Arsipkan" }).click();
+    await expect(page.getByRole("button", { name: "Pulihkan" })).toBeVisible();
+
+    await page.goto("/clients");
+    await expect(page.getByRole("link", { name: "Acme Inc" })).toHaveCount(0);
+    await page.getByRole("link", { name: "Arsip", exact: true }).click();
+    await expect(page.getByRole("link", { name: "Acme Inc" })).toBeVisible();
+  });
+
+  test("shows validation errors and 404s for an unknown client", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/clients/new");
+    await page.getByLabel("Email", { exact: true }).fill("bukan-email");
+    await page.getByRole("button", { name: "Simpan" }).click();
+    await expect(page.getByText("Wajib diisi.")).toBeVisible();
+    await expect(page.getByText("Format email tidak valid.")).toBeVisible();
+
+    await page.goto("/clients/00000000-0000-4000-8000-000000000000");
+    await expect(page.getByText("Halaman tidak ditemukan")).toBeVisible();
+  });
+});
