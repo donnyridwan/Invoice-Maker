@@ -95,9 +95,11 @@
     "status": {
       "draft": "Draft",
       "sent": "Terkirim",
-      "paymentClaimed": "Menunggu konfirmasi",
       "paid": "Lunas",
-      "void": "Void"
+      "void": "Void",
+      "viewed": "Dilihat",
+      "overdue": "Jatuh tempo",
+      "awaitingConfirmation": "Menunggu konfirmasi"
     },
     "editor": {
       "backToList": "Kembali ke daftar invoice",
@@ -207,6 +209,99 @@
         "deleteTitle": "Hapus draft ini?",
         "deleteDescription": "Draft {number} akan dihapus permanen dan tidak bisa dikembalikan.",
         "confirmDelete": "Hapus"
+      },
+      "view": "Lihat"
+    },
+    "detail": {
+      "back": "Kembali ke daftar invoice",
+      "documentLabel": "Dokumen invoice",
+      "status": {
+        "label": "Status invoice",
+        "total": "Total",
+        "client": "Klien",
+        "dueOn": "Jatuh tempo {date}",
+        "paidOn": "Dibayar pada {date}",
+        "voidedOn": "Dibatalkan pada {date}",
+        "note": "Catatan: {note}"
+      },
+      "due": {
+        "today": "hari ini",
+        "inDays": "dalam {days} hari",
+        "overdueDays": "telat {days} hari"
+      },
+      "actions": {
+        "title": "Aksi",
+        "label": "Aksi invoice",
+        "edit": "Edit",
+        "send": "Kirim",
+        "copyLink": "Salin link",
+        "markSent": "Tandai terkirim",
+        "markPaid": "Tandai lunas",
+        "unmarkPaid": "Batalkan lunas",
+        "duplicate": "Duplikat",
+        "void": "Void",
+        "viewPublic": "Lihat halaman klien"
+      },
+      "toast": {
+        "linkCopied": "Link disalin",
+        "copyFailed": "Link tidak bisa disalin otomatis: {url}",
+        "markedSent": "Ditandai terkirim",
+        "markedPaid": "Ditandai lunas",
+        "unmarkedPaid": "Pembayaran dibatalkan",
+        "voided": "Invoice di-void",
+        "claimAccepted": "Klaim diterima, invoice lunas",
+        "claimRejected": "Klaim ditolak"
+      },
+      "markPaid": {
+        "title": "Tandai lunas",
+        "description": "Catat pembayaran untuk invoice {number}.",
+        "paidOn": "Tanggal bayar",
+        "note": "Catatan",
+        "notePlaceholder": "Contoh: transfer BCA (opsional)"
+      },
+      "void": {
+        "title": "Void invoice ini?",
+        "description": "Invoice {number} akan dibatalkan. Halaman publiknya menampilkan bahwa invoice ini dibatalkan dan klaim pembayaran yang menunggu akan ditolak. Tindakan ini tidak bisa dibatalkan.",
+        "confirm": "Void invoice"
+      },
+      "claims": {
+        "title": "Klaim pembayaran",
+        "description": "Klien melaporkan sudah membayar. Periksa rekening Anda sebelum mengonfirmasi.",
+        "paidOn": "Dibayar {date}",
+        "viewProof": "Lihat bukti",
+        "accept": "Konfirmasi lunas",
+        "reject": "Tolak"
+      },
+      "activity": {
+        "title": "Aktivitas",
+        "empty": "Belum ada aktivitas.",
+        "events": {
+          "created": "Invoice dibuat",
+          "edited_after_send": "Diubah setelah dikirim",
+          "sent": {
+            "manual": "Ditandai terkirim",
+            "link": "Link disalin",
+            "whatsapp": "Dikirim lewat WhatsApp",
+            "email": "Dikirim lewat email",
+            "other": "Dikirim"
+          },
+          "sent_email": "Dikirim lewat email",
+          "shared_whatsapp": "Dibagikan lewat WhatsApp",
+          "link_copied": "Link disalin",
+          "viewed": "Dilihat klien",
+          "payment_claimed": "{name} melaporkan pembayaran",
+          "payment_claimed_anonymous": "Klien melaporkan pembayaran",
+          "claim_rejected": "Klaim pembayaran ditolak",
+          "marked_paid": "Ditandai lunas",
+          "marked_paid_claim": "Klaim diterima, ditandai lunas",
+          "unmarked_paid": "Lunas dibatalkan",
+          "voided": "Invoice di-void",
+          "duplicated": "Dibuat dari duplikat invoice lain",
+          "recurring_generated": "Dibuat otomatis dari invoice berulang",
+          "email_failed": "Pengiriman email gagal",
+          "unknown": "Aktivitas lain"
+        },
+        "paidOnDetail": "Tanggal bayar {date}"
       }
     }
   },

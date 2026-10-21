@@ -1,49 +1,10 @@
-import { expect, test, type Browser, type Page } from "@playwright/test";
-import { createInvoiceViaUi, markSentViaDb, publicTokenViaDb, registerUser, setStatusViaDb } from "./helpers";
+import { expect, test, type Browser } from "@playwright/test";
+import { createInvoiceDraft, markSentViaDb, publicTokenViaDb, setStatusViaDb } from "./helpers";
 
 const PNG_1X1 = Buffer.from(
   "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
   "base64",
 );
-
-/** Owner side: a user with a BCA account and a client, and a draft of Rp 1.500.000 for that client. */
-async function createInvoiceDraft(page: Page, opts: { english?: boolean } = {}): Promise<string> {
-  await registerUser(page);
-
-  await page.goto("/settings/payment-accounts");
-  await page.getByRole("button", { name: "Tambah rekening" }).first().click();
-  const dialog = page.getByRole("dialog");
-  await dialog.getByLabel("Nama bank").fill("BCA");
-  await dialog.getByLabel("Nama pemilik rekening").fill("Donny");
-  await dialog.getByLabel("Nomor rekening").fill("1234567890");
-  await dialog.getByLabel("Jadikan default").check();
-  await dialog.getByRole("button", { name: "Simpan" }).click();
-  await expect(page.getByRole("listitem").filter({ hasText: "BCA" })).toContainText("Default");
-
-  await page.goto("/clients/new");
-  await page.getByLabel("Nama", { exact: true }).fill("Acme Inc");
-  await page.getByRole("button", { name: "Simpan" }).click();
-  await expect(page).toHaveURL(/\/clients$/);
-
-  const id = await createInvoiceViaUi(page);
-  await page.getByRole("combobox", { name: "Klien" }).click();
-  await page.getByRole("option", { name: /Acme Inc/ }).click();
-  const row = page.getByRole("group", { name: "Item 1" });
-  await row.getByLabel("Nama item").fill("Desain logo");
-  await row.getByLabel("Qty", { exact: true }).fill("1");
-  await row.getByLabel("Harga", { exact: true }).fill("1.500.000");
-  if (opts.english) {
-    await page.getByLabel("Bahasa invoice").click();
-    await page.getByRole("option", { name: "English" }).click();
-  }
-  await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
-
-  // Autosave is done once a reload shows the values.
-  await page.reload();
-  await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Harga", { exact: true })).toHaveValue("1.500.000");
-  if (opts.english) await expect(page.getByRole("region", { name: "Preview invoice" })).toContainText("Bill to");
-  return id;
-}
 
 /** A browser context without any login: the client. */
 async function newClient(browser: Browser, baseURL: string | undefined) {

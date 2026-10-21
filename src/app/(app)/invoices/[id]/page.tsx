@@ -1,0 +1,80 @@
+import Link from "next/link";
+import { notFound, redirect } from "next/navigation";
+import { ArrowLeft } from "lucide-react";
+import { getTranslations } from "next-intl/server";
+import { buildInvoiceDocument } from "@/documents/build-document";
+import { InvoiceDocumentView } from "@/documents/invoice-document-view";
+import { ScaledDocument } from "@/documents/scaled-document";
+import { DetailPanel } from "@/features/invoices/detail/detail-panel";
+import { documentSourceFromInvoice } from "@/features/invoices/document-source";
+import { listEvents } from "@/features/invoices/events";
+import { getInvoice } from "@/features/invoices/queries";
+import { listClaims } from "@/features/payment-claims/queries";
+import { isCurrencyCode } from "@/lib/currencies";
+import { todayInJakarta } from "@/lib/dates";
+import { NotFoundError } from "@/lib/errors";
+import { requireUser } from "@/lib/session";
+
+/** Owner's view of an invoice that has left draft: the document, its status, actions, claims and activity. */
+export default async function InvoiceDetailPage({ params }: PageProps<"/invoices/[id]">) {
+  const user = await requireUser();
+  const { id } = await params;
+  const t = await getTranslations("invoices.detail");
+
+  const loaded = await Promise.all([getInvoice(user.id, id), listEvents(user.id, id), listClaims(user.id, id)]).catch(
+    (error) => {
+      if (error instanceof NotFoundError) notFound();
+      throw error;
+    },
+  );
+  const [invoice, events, claims] = loaded;
+  // A draft has no status to manage yet: it is edited.
+  if (invoice.status === "draft") redirect(`/invoices/${invoice.id}/edit`);
+
+  const currency = isCurrencyCode(invoice.currency) ? invoice.currency : "IDR";
+  const pending = claims.filter((claim) => claim.status === "pending");
+  const payerNames = Object.fromEntries(claims.map((claim) => [claim.id, claim.payerName]));
+
+  return (
+    <>
+      <div className="mb-6 flex items-center gap-3">
+        <Link
+          href="/invoices"
+          aria-label={t("back")}
+          className="-ml-1.5 inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <ArrowLeft className="size-4" />
+        </Link>
+        <h1 className="min-w-0 truncate text-2xl font-semibold tracking-tight text-fg">{invoice.number}</h1>
+      </div>
+
+      <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
+        <section aria-label={t("documentLabel")} className="min-w-0 rounded-lg bg-subtle p-3 sm:p-5 xl:flex-1">
+          <div className="mx-auto max-w-[794px] overflow-hidden rounded-sm bg-white shadow-[0_1px_3px_rgba(26,31,54,0.12),0_0_0_1px_rgba(26,31,54,0.04)]">
+            <ScaledDocument>
+              <InvoiceDocumentView doc={buildInvoiceDocument(documentSourceFromInvoice(invoice))} />
+            </ScaledDocument>
+          </div>
+        </section>
+        <aside className="xl:w-[360px] xl:shrink-0">
+          <DetailPanel
+            invoice={invoice}
+            currency={currency}
+            today={todayInJakarta()}
+            now={new Date()}
+            events={events}
+            pendingClaims={pending.map((claim) => ({
+              id: claim.id,
+              payerName: claim.payerName,
+              paidOn: claim.paidOn,
+              amountMinor: claim.amountMinor,
+              note: claim.note,
+              proofUrl: claim.proofUrl,
+            }))}
+            payerNames={payerNames}
+          />
+        </aside>
+      </div>
+    </>
+  );
+}

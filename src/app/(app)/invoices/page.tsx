@@ -6,6 +6,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { InvoiceTable } from "@/features/invoices/invoice-table";
 import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { listInvoices } from "@/features/invoices/queries";
+import { todayInJakarta } from "@/lib/dates";
 import { firstParam } from "@/lib/search-params";
 import { requireUser } from "@/lib/session";
 
@@ -34,7 +35,7 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/invoice
       </form>
 
       {invoices.length > 0 ? (
-        <InvoiceTable invoices={invoices} />
+        <InvoiceTable invoices={invoices} today={todayInJakarta()} />
       ) : q ? (
         <EmptyState title={t("noResultsTitle")} description={t("noResultsDescription")} />
       ) : (

@@ -5,10 +5,12 @@ import { isCurrencyCode } from "@/lib/currencies";
 import { formatDocDate } from "@/lib/dates";
 import { resolveLocale } from "@/i18n/config";
 import { formatMoney } from "@/lib/money";
+import { displayStatus } from "./display-status";
 import type { Invoice } from "./queries";
 import { StatusBadge } from "./status-badge";
 
-export function InvoiceTable({ invoices }: { invoices: Invoice[] }) {
+/** `today` is the Asia/Jakarta date (YYYY-MM-DD) the derived status is computed on. */
+export function InvoiceTable({ invoices, today }: { invoices: Invoice[]; today: string }) {
   const t = useTranslations("invoices");
   const locale = resolveLocale(useLocale());
 
@@ -32,7 +34,7 @@ export function InvoiceTable({ invoices }: { invoices: Invoice[] }) {
             <TableRow key={invoice.id} className="relative">
               <TableCell>
                 <Link
-                  href={`/invoices/${invoice.id}/edit`}
+                  href={invoice.status === "draft" ? `/invoices/${invoice.id}/edit` : `/invoices/${invoice.id}`}
                   className="font-medium text-fg after:absolute after:inset-0 hover:text-accent"
                 >
                   {invoice.number}
@@ -47,7 +49,7 @@ export function InvoiceTable({ invoices }: { invoices: Invoice[] }) {
                 {formatMoney(invoice.totalMinor, currency, locale)}
               </TableCell>
               <TableCell>
-                <StatusBadge status={invoice.status} />
+                <StatusBadge status={displayStatus(invoice, today)} />
               </TableCell>
             </TableRow>
           );

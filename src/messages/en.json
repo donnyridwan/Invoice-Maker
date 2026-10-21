@@ -95,9 +95,11 @@
     "status": {
       "draft": "Draft",
       "sent": "Sent",
-      "paymentClaimed": "Awaiting confirmation",
       "paid": "Paid",
-      "void": "Void"
+      "void": "Void",
+      "viewed": "Viewed",
+      "overdue": "Overdue",
+      "awaitingConfirmation": "Awaiting confirmation"
     },
     "editor": {
       "backToList": "Back to invoices",
@@ -207,6 +209,99 @@
         "deleteTitle": "Delete this draft?",
         "deleteDescription": "Draft {number} will be permanently deleted and cannot be restored.",
         "confirmDelete": "Delete"
+      },
+      "view": "View"
+    },
+    "detail": {
+      "back": "Back to invoices",
+      "documentLabel": "Invoice document",
+      "status": {
+        "label": "Invoice status",
+        "total": "Total",
+        "client": "Client",
+        "dueOn": "Due {date}",
+        "paidOn": "Paid on {date}",
+        "voidedOn": "Voided on {date}",
+        "note": "Note: {note}"
+      },
+      "due": {
+        "today": "today",
+        "inDays": "{days, plural, one {in # day} other {in # days}}",
+        "overdueDays": "{days, plural, one {# day overdue} other {# days overdue}}"
+      },
+      "actions": {
+        "title": "Actions",
+        "label": "Invoice actions",
+        "edit": "Edit",
+        "send": "Send",
+        "copyLink": "Copy link",
+        "markSent": "Mark as sent",
+        "markPaid": "Mark as paid",
+        "unmarkPaid": "Undo paid",
+        "duplicate": "Duplicate",
+        "void": "Void",
+        "viewPublic": "View client page"
+      },
+      "toast": {
+        "linkCopied": "Link copied",
+        "copyFailed": "Could not copy the link automatically: {url}",
+        "markedSent": "Marked as sent",
+        "markedPaid": "Marked as paid",
+        "unmarkedPaid": "Payment undone",
+        "voided": "Invoice voided",
+        "claimAccepted": "Claim accepted, invoice paid",
+        "claimRejected": "Claim rejected"
+      },
+      "markPaid": {
+        "title": "Mark as paid",
+        "description": "Record the payment for invoice {number}.",
+        "paidOn": "Payment date",
+        "note": "Note",
+        "notePlaceholder": "e.g. BCA transfer (optional)"
+      },
+      "void": {
+        "title": "Void this invoice?",
+        "description": "Invoice {number} will be cancelled. Its public page will say the invoice was cancelled and pending payment claims will be rejected. This cannot be undone.",
+        "confirm": "Void invoice"
+      },
+      "claims": {
+        "title": "Payment claims",
+        "description": "The client says they have paid. Check your account before confirming.",
+        "paidOn": "Paid {date}",
+        "viewProof": "View proof",
+        "accept": "Confirm paid",
+        "reject": "Reject"
+      },
+      "activity": {
+        "title": "Activity",
+        "empty": "No activity yet.",
+        "events": {
+          "created": "Invoice created",
+          "edited_after_send": "Edited after sending",
+          "sent": {
+            "manual": "Marked as sent",
+            "link": "Link copied",
+            "whatsapp": "Sent via WhatsApp",
+            "email": "Sent by email",
+            "other": "Sent"
+          },
+          "sent_email": "Sent by email",
+          "shared_whatsapp": "Shared via WhatsApp",
+          "link_copied": "Link copied",
+          "viewed": "Viewed by client",
+          "payment_claimed": "{name} reported a payment",
+          "payment_claimed_anonymous": "The client reported a payment",
+          "claim_rejected": "Payment claim rejected",
+          "marked_paid": "Marked as paid",
+          "marked_paid_claim": "Claim accepted, marked as paid",
+          "unmarked_paid": "Paid status undone",
+          "voided": "Invoice voided",
+          "duplicated": "Created as a copy of another invoice",
+          "recurring_generated": "Created automatically from a recurring invoice",
+          "email_failed": "Email delivery failed",
+          "unknown": "Other activity"
+        },
+        "paidOnDetail": "Payment date {date}"
       }
     }
   },

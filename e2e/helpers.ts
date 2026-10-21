@@ -105,3 +105,51 @@ export async function publicTokenViaDb(invoiceId: string): Promise<string> {
     await sql.end();
   }
 }
+
+/** A new user with a default BCA payment account and a client "Acme Inc". */
+export async function setupOwner(page: Page): Promise<void> {
+  await registerUser(page);
+
+  await page.goto("/settings/payment-accounts");
+  await page.getByRole("button", { name: "Tambah rekening" }).first().click();
+  const dialog = page.getByRole("dialog");
+  await dialog.getByLabel("Nama bank").fill("BCA");
+  await dialog.getByLabel("Nama pemilik rekening").fill("Donny");
+  await dialog.getByLabel("Nomor rekening").fill("1234567890");
+  await dialog.getByLabel("Jadikan default").check();
+  await dialog.getByRole("button", { name: "Simpan" }).click();
+  await expect(page.getByRole("listitem").filter({ hasText: "BCA" })).toContainText("Default");
+
+  await page.goto("/clients/new");
+  await page.getByLabel("Nama", { exact: true }).fill("Acme Inc");
+  await page.getByRole("button", { name: "Simpan" }).click();
+  await expect(page).toHaveURL(/\/clients$/);
+}
+
+/** Creates a draft of Rp 1.500.000 for "Acme Inc" through the editor, waits for autosave and returns its id. */
+export async function fillNewInvoice(page: Page, opts: { english?: boolean } = {}): Promise<string> {
+  const id = await createInvoiceViaUi(page);
+  await page.getByRole("combobox", { name: "Klien" }).click();
+  await page.getByRole("option", { name: /Acme Inc/ }).click();
+  const row = page.getByRole("group", { name: "Item 1" });
+  await row.getByLabel("Nama item").fill("Desain logo");
+  await row.getByLabel("Qty", { exact: true }).fill("1");
+  await row.getByLabel("Harga", { exact: true }).fill("1.500.000");
+  if (opts.english) {
+    await page.getByLabel("Bahasa invoice").click();
+    await page.getByRole("option", { name: "English" }).click();
+  }
+  await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
+
+  // Autosave is done once a reload shows the values.
+  await page.reload();
+  await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Harga", { exact: true })).toHaveValue("1.500.000");
+  if (opts.english) await expect(page.getByRole("region", { name: "Preview invoice" })).toContainText("Bill to");
+  return id;
+}
+
+/** Owner side: a user with a BCA account and a client, and a draft of Rp 1.500.000 for that client. */
+export async function createInvoiceDraft(page: Page, opts: { english?: boolean } = {}): Promise<string> {
+  await setupOwner(page);
+  return fillNewInvoice(page, opts);
+}

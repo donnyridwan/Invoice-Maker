@@ -1,13 +1,34 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { headers } from "next/headers";
 import { notFound, redirect } from "next/navigation";
 import { toActionError, type ActionResult } from "@/lib/action-result";
+import { getAppUrl } from "@/lib/app-url";
 import { NotFoundError } from "@/lib/errors";
 import { runUserAction } from "@/lib/run-user-action";
 import { requireUser } from "@/lib/session";
+import { markPaid, markSent, unmarkPaid, voidInvoice } from "./lifecycle";
 import { createDraftInvoice, deleteDraftInvoice, duplicateInvoice, saveInvoiceDraft } from "./queries";
 import type { InvoiceDraftInput } from "./schema";
+
+/** Pages that show an invoice's status: the list, the detail page, the editor and the dashboard. */
+function revalidateInvoicePages(): void {
+  revalidatePath("/invoices", "layout");
+  revalidatePath("/dashboard");
+}
+
+/** Runs a lifecycle change for the signed-in user and revalidates the pages that show the status. */
+async function runLifecycle<T>(action: (userId: string) => Promise<T>): Promise<ActionResult<T>> {
+  const user = await requireUser();
+  try {
+    const data = await action(user.id);
+    revalidateInvoicePages();
+    return { ok: true, data };
+  } catch (e) {
+    return toActionError(e);
+  }
+}
 
 const PATH = "/invoices";
 
@@ -56,4 +77,44 @@ export async function duplicateInvoiceAction(id: string): Promise<ActionResult<{
 
 export async function deleteDraftInvoiceAction(id: string): Promise<ActionResult> {
   return runUserAction(PATH, (userId) => deleteDraftInvoice(userId, id));
+}
+
+/** The user hands the invoice over by other means: draft → sent, no link is produced. */
+export async function markSentAction(id: string): Promise<ActionResult> {
+  return runLifecycle(async (userId) => {
+    await markSent(userId, id, "manual");
+  });
+}
+
+/**
+ * "Salin link": sends a draft (it must be sendable), logs the share and returns the absolute
+ * public URL for the browser to put on the clipboard.
+ */
+export async function copyLinkAction(id: string): Promise<ActionResult<{ url: string }>> {
+  const base = getAppUrl(await headers());
+  return runLifecycle(async (userId) => {
+    const invoice = await markSent(userId, id, "link");
+    return { url: `${base}/i/${invoice.publicToken}` };
+  });
+}
+
+export async function markPaidAction(
+  id: string,
+  input: { paidOn: string; note?: string },
+): Promise<ActionResult> {
+  return runLifecycle(async (userId) => {
+    await markPaid(userId, id, input);
+  });
+}
+
+export async function unmarkPaidAction(id: string): Promise<ActionResult> {
+  return runLifecycle(async (userId) => {
+    await unmarkPaid(userId, id);
+  });
+}
+
+export async function voidInvoiceAction(id: string): Promise<ActionResult> {
+  return runLifecycle(async (userId) => {
+    await voidInvoice(userId, id);
+  });
 }

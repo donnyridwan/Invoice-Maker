@@ -1,9 +1,10 @@
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 import { getLocale } from "next-intl/server";
 import { listCatalogItems } from "@/features/catalog/queries";
 import { getClient, listClients, type Client } from "@/features/clients/queries";
 import { editorStateFromInvoice, type AccountOption, type CatalogOption, type ClientOption } from "@/features/invoices/editor-state";
 import { InvoiceEditor } from "@/features/invoices/editor/invoice-editor";
+import { displayStatus } from "@/features/invoices/display-status";
 import { getInvoice } from "@/features/invoices/queries";
 import {
   businessSnapshotFrom,
@@ -14,6 +15,7 @@ import { listPaymentAccounts } from "@/features/payment-accounts/queries";
 import { summarizePaymentAccount } from "@/features/payment-accounts/summary";
 import { getProfile } from "@/features/profile/queries";
 import { resolveLocale } from "@/i18n/config";
+import { todayInJakarta } from "@/lib/dates";
 import { NotFoundError } from "@/lib/errors";
 import { requireUser } from "@/lib/session";
 
@@ -36,6 +38,9 @@ export default async function EditInvoicePage({ params }: PageProps<"/invoices/[
     if (error instanceof NotFoundError) notFound();
     throw error;
   });
+
+  // Paid and void invoices are locked: their page is the detail view.
+  if (invoice.status === "paid" || invoice.status === "void") redirect(`/invoices/${invoice.id}`);
 
   const [profile, activeClients, allAccounts, catalogItems] = await Promise.all([
     getProfile(user.id),
@@ -79,6 +84,7 @@ export default async function EditInvoicePage({ params }: PageProps<"/invoices/[
       key={locale}
       invoiceId={invoice.id}
       status={invoice.status}
+      displayStatus={displayStatus(invoice, todayInJakarta())}
       initial={initial}
       business={businessSnapshotFrom(profile)}
       clients={clients}

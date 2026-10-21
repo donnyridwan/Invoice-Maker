@@ -6,7 +6,7 @@ import { AlertCircle, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { AutosaveStatus } from "../autosave";
-import type { Invoice } from "../queries";
+import type { DisplayStatus } from "../display-status";
 import { StatusBadge } from "../status-badge";
 
 function AutosaveIndicator({ status, onRetry }: { status: AutosaveStatus; onRetry: () => void }) {
@@ -67,7 +67,7 @@ export function EditorHeader({
   actions,
 }: {
   number: string;
-  status: Invoice["status"];
+  status: DisplayStatus;
   autosave: AutosaveStatus;
   onRetry: () => void;
   actions?: ReactNode;

@@ -1,6 +1,7 @@
 "use client";
 
 import { useDeferredValue, useMemo, useRef, useState } from "react";
+import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
 import { buildInvoiceDocument } from "@/documents/build-document";
 import { resolveLocale } from "@/i18n/config";
@@ -21,10 +22,12 @@ import {
 } from "../editor-state";
 import type { InvoiceDraftInput } from "../schema";
 import type { BusinessSnapshot } from "../snapshots";
+import type { DisplayStatus } from "../display-status";
 import type { Invoice } from "../queries";
 import { AppearanceSection } from "./appearance-section";
 import { ClientSection } from "./client-section";
 import { DetailsSection } from "./details-section";
+import { ShareMenu } from "../detail/share-menu";
 import { EditorHeader } from "./editor-header";
 import { EditorMenu } from "./editor-menu";
 import type { EditorSectionProps } from "./editor-section";
@@ -44,6 +47,7 @@ type Tab = "form" | "preview";
 export function InvoiceEditor({
   invoiceId,
   status,
+  displayStatus,
   initial,
   business,
   clients: initialClients,
@@ -52,6 +56,8 @@ export function InvoiceEditor({
 }: {
   invoiceId: string;
   status: Invoice["status"];
+  /** The label for the header: the stored status refined by views and the due date. */
+  displayStatus: DisplayStatus;
   initial: EditorState;
   business: BusinessSnapshot;
   clients: ClientOption[];
@@ -119,17 +125,28 @@ export function InvoiceEditor({
     <div>
       <EditorHeader
         number={state.number}
-        status={status}
+        status={displayStatus}
         autosave={autosave.status}
         onRetry={autosave.retry}
         actions={
-          <EditorMenu
+          <>
+            {status !== "draft" ? (
+              <Link
+                href={`/invoices/${invoiceId}`}
+                className="text-sm font-medium text-accent hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+              >
+                {t("view")}
+              </Link>
+            ) : null}
+            {locked ? null : <ShareMenu invoiceId={invoiceId} flush={autosave.flush} />}
+            <EditorMenu
             invoiceId={invoiceId}
             number={state.number}
             status={status}
             flush={autosave.flush}
             cancel={autosave.cancel}
           />
+          </>
         }
       />
 

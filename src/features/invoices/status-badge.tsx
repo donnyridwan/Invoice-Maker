@@ -1,19 +1,19 @@
 import { useTranslations } from "next-intl";
 import { Badge, type BadgeProps } from "@/components/ui/badge";
-import type { Invoice } from "./queries";
+import type { DisplayStatus } from "./display-status";
 
-type Status = Invoice["status"];
-
-const STATUS_BADGES: Record<Status, { variant: NonNullable<BadgeProps["variant"]>; labelKey: string }> = {
+const STATUS_BADGES: Record<DisplayStatus, { variant: NonNullable<BadgeProps["variant"]>; labelKey: string }> = {
   draft: { variant: "neutral", labelKey: "draft" },
   sent: { variant: "info", labelKey: "sent" },
-  payment_claimed: { variant: "warning", labelKey: "paymentClaimed" },
+  viewed: { variant: "info", labelKey: "viewed" },
+  awaiting_confirmation: { variant: "warning", labelKey: "awaitingConfirmation" },
+  overdue: { variant: "danger", labelKey: "overdue" },
   paid: { variant: "success", labelKey: "paid" },
   void: { variant: "neutral", labelKey: "void" },
 };
 
-/** Pastel status pill. Plan 3 adds derived labels (overdue, viewed) on top of the stored status. */
-export function StatusBadge({ status, className }: { status: Status; className?: string }) {
+/** Pastel status pill for the derived status (stored status refined by views and the due date). */
+export function StatusBadge({ status, className }: { status: DisplayStatus; className?: string }) {
   const t = useTranslations("invoices.status");
   const { variant, labelKey } = STATUS_BADGES[status];
   return (
