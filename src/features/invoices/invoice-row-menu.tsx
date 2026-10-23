@@ -38,7 +38,7 @@ import {
 import { actionErrorMessage } from "@/lib/validation-message";
 import {
   copyLinkAction,
-  deleteDraftInvoiceAction,
+  deleteInvoiceAction,
   duplicateInvoiceAction,
   unmarkPaidAction,
   voidInvoiceAction,
@@ -52,7 +52,7 @@ type Busy = "copy" | "duplicate" | "unmark" | "void" | "delete" | null;
  * The ⋯ menu at the end of an invoice row: the same actions as the detail page and the editor menu,
  * by stored status. draft: edit, PDF, duplicate, delete. sent / payment_claimed: view, edit, PDF,
  * copy link, client page, mark paid, duplicate, void. paid: view, PDF, copy link, client page, undo
- * paid, duplicate. void: view, PDF, duplicate.
+ * paid, duplicate. void: view, PDF, duplicate, delete.
  */
 export function InvoiceRowMenu({
   invoice,
@@ -74,6 +74,8 @@ export function InvoiceRowMenu({
   const open = status === "sent" || status === "payment_claimed";
   const editable = draft || open;
   const shared = open || status === "paid";
+  // Drafts and voided invoices can be deleted for good.
+  const deletable = draft || status === "void";
 
   async function run(kind: Exclude<Busy, null>, work: () => Promise<void>) {
     setBusy(kind);
@@ -126,13 +128,14 @@ export function InvoiceRowMenu({
 
   const confirmed = () =>
     run(confirm === "void" ? "void" : "delete", async () => {
-      const result = confirm === "void" ? await voidInvoiceAction(id) : await deleteDraftInvoiceAction(id);
+      const result = confirm === "void" ? await voidInvoiceAction(id) : await deleteInvoiceAction(id);
       setConfirm(null);
       if (!result.ok) {
         toast.error(actionErrorMessage(tAll, result));
         return;
       }
       if (confirm === "void") toast.success(t("detail.toast.voided"));
+      else if (!draft) toast.success(t("detail.delete.toast"));
       router.refresh();
     });
 
@@ -205,17 +208,17 @@ export function InvoiceRowMenu({
             <Copy className="size-4 text-muted" />
             {t("detail.actions.duplicate")}
           </DropdownMenuItem>
-          {open || draft ? <DropdownMenuSeparator /> : null}
+          {open || deletable ? <DropdownMenuSeparator /> : null}
           {open ? (
             <DropdownMenuItem onSelect={() => setConfirm("void")} className="text-danger">
               <Ban className="size-4" />
               {t("detail.actions.void")}
             </DropdownMenuItem>
           ) : null}
-          {draft ? (
+          {deletable ? (
             <DropdownMenuItem onSelect={() => setConfirm("delete")} className="text-danger">
               <Trash2 className="size-4" />
-              {t("editor.menu.delete")}
+              {draft ? t("editor.menu.delete") : t("detail.delete.action")}
             </DropdownMenuItem>
           ) : null}
         </DropdownMenuContent>
@@ -228,11 +231,15 @@ export function InvoiceRowMenu({
       <Dialog open={confirm !== null} onOpenChange={(next) => (busy ? undefined : !next && setConfirm(null))}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>{confirm === "void" ? t("detail.void.title") : t("editor.menu.deleteTitle")}</DialogTitle>
+            <DialogTitle>
+              {confirm === "void" ? t("detail.void.title") : draft ? t("editor.menu.deleteTitle") : t("detail.delete.title")}
+            </DialogTitle>
             <DialogDescription>
               {confirm === "void"
                 ? t("detail.void.description", { number })
-                : t("editor.menu.deleteDescription", { number })}
+                : draft
+                  ? t("editor.menu.deleteDescription", { number })
+                  : t("detail.delete.description", { number })}
             </DialogDescription>
           </DialogHeader>
           <DialogFooter>
@@ -240,7 +247,7 @@ export function InvoiceRowMenu({
               {tAll("common.cancel")}
             </Button>
             <Button type="button" variant="destructive" disabled={busy !== null} onClick={() => void confirmed()}>
-              {confirm === "void" ? t("detail.void.confirm") : t("editor.menu.confirmDelete")}
+              {confirm === "void" ? t("detail.void.confirm") : draft ? t("editor.menu.confirmDelete") : t("detail.delete.confirm")}
             </Button>
           </DialogFooter>
         </DialogContent>

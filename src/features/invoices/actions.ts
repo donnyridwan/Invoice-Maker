@@ -11,7 +11,7 @@ import { requireUser } from "@/lib/session";
 import { markPaid, markSent, unmarkPaid, voidInvoice } from "./lifecycle";
 import { shareWhatsApp } from "./share-whatsapp";
 import { getInvoiceEmailDefaults, sendInvoiceEmail, type SendInvoiceEmailInput } from "./send-email";
-import { createDraftInvoice, deleteDraftInvoice, duplicateInvoice, saveInvoiceDraft } from "./queries";
+import { createDraftInvoice, deleteInvoice, duplicateInvoice, saveInvoiceDraft } from "./queries";
 import type { InvoiceDraftInput } from "./schema";
 
 /** Pages that show an invoice's status: the list, the detail page, the editor and the dashboard. */
@@ -77,8 +77,8 @@ export async function duplicateInvoiceAction(id: string): Promise<ActionResult<{
   }
 }
 
-export async function deleteDraftInvoiceAction(id: string): Promise<ActionResult> {
-  return runUserAction(PATH, (userId) => deleteDraftInvoice(userId, id));
+export async function deleteInvoiceAction(id: string): Promise<ActionResult> {
+  return runUserAction(PATH, (userId) => deleteInvoice(userId, id));
 }
 
 /** The user hands the invoice over by other means: draft → sent, no link is produced. */

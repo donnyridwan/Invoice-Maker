@@ -4,7 +4,7 @@ import { businessProfiles, invoiceEvents, invoices } from "@/db/schema";
 import { createClient } from "@/features/clients/queries";
 import {
   createDraftInvoice,
-  deleteDraftInvoice,
+  deleteInvoice,
   duplicateInvoice,
   getInvoice,
   listInvoices,
@@ -316,18 +316,27 @@ describe("invoice domain", () => {
     });
   });
 
-  describe("deleteDraftInvoice", () => {
-    it("deletes drafts but not other statuses", async () => {
+  describe("deleteInvoice", () => {
+    it("deletes drafts and voided invoices but not sent or paid ones", async () => {
       const u = await setupUser();
       const sent = await createDraftInvoice(u.id);
       await testDb.update(invoices).set({ status: "sent" }).where(eq(invoices.id, sent.id));
-      const err = await deleteDraftInvoice(u.id, sent.id).catch((e) => e);
+      const err = await deleteInvoice(u.id, sent.id).catch((e) => e);
       expect(err).toBeInstanceOf(ValidationError);
       expect(err.fieldErrors._form).toEqual(["onlyDraftDeletable"]);
 
+      const paid = await createDraftInvoice(u.id);
+      await testDb.update(invoices).set({ status: "paid" }).where(eq(invoices.id, paid.id));
+      await expect(deleteInvoice(u.id, paid.id)).rejects.toBeInstanceOf(ValidationError);
+
       const draft = await createDraftInvoice(u.id);
-      await deleteDraftInvoice(u.id, draft.id);
+      await deleteInvoice(u.id, draft.id);
       await expect(getInvoice(u.id, draft.id)).rejects.toBeInstanceOf(NotFoundError);
+
+      const voided = await createDraftInvoice(u.id);
+      await testDb.update(invoices).set({ status: "void" }).where(eq(invoices.id, voided.id));
+      await deleteInvoice(u.id, voided.id);
+      await expect(getInvoice(u.id, voided.id)).rejects.toBeInstanceOf(NotFoundError);
     });
   });
 
@@ -341,7 +350,7 @@ describe("invoice domain", () => {
         NotFoundError,
       );
       await expect(duplicateInvoice(u.id, inv.id)).rejects.toBeInstanceOf(NotFoundError);
-      await expect(deleteDraftInvoice(u.id, inv.id)).rejects.toBeInstanceOf(NotFoundError);
+      await expect(deleteInvoice(u.id, inv.id)).rejects.toBeInstanceOf(NotFoundError);
       await expect(getInvoice(u.id, "not-a-uuid")).rejects.toBeInstanceOf(NotFoundError);
       expect(await getInvoice(other.id, inv.id)).toMatchObject({ id: inv.id });
     });

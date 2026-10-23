@@ -349,6 +349,13 @@
         "unverifiedDescription": "To send invoices by email, verify {email} first. We will send a verification link there.",
         "sendVerification": "Send verification link",
         "verificationSent": "Verification link sent to {email}. Open it, then come back here."
+      },
+      "delete": {
+        "action": "Delete invoice",
+        "title": "Delete this invoice?",
+        "description": "Void invoice {number} will be deleted for good, with its activity. This cannot be undone.",
+        "confirm": "Delete",
+        "toast": "Invoice deleted"
       }
     },
     "tabs": {
@@ -632,7 +639,7 @@
     "dueBeforeIssue": "Due date cannot be before the issue date",
     "duplicateNumber": "This invoice number is already in use",
     "invoiceLocked": "This invoice is locked",
-    "onlyDraftDeletable": "Only drafts can be deleted",
+    "onlyDraftDeletable": "Only drafts and void invoices can be deleted",
     "invalidDate": "Invalid date",
     "fileType": "Unsupported file format",
     "fileTooLarge": "File is too large",

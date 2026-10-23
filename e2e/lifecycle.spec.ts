@@ -319,5 +319,26 @@ test.describe("invoice list row menu", () => {
     await page.getByRole("menuitem", { name: "Void" }).click();
     await page.getByRole("dialog").getByRole("button", { name: "Void invoice" }).click();
     await expect(secondRow).toContainText("Void");
+
+    // A voided invoice can then be deleted for good.
+    await secondRow.getByRole("button", { name: /^Aksi untuk/ }).click();
+    await page.getByRole("menuitem", { name: "Hapus invoice" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Hapus", exact: true }).click();
+    await expect(page.getByText("Invoice dihapus")).toBeVisible();
+    await expect(secondRow).toHaveCount(0);
+  });
+
+  test("deletes a voided invoice from its detail page", async ({ page }) => {
+    const id = await createInvoiceDraft(page);
+    await markSentViaDb(id);
+    await page.goto(`/invoices/${id}`);
+    await page.getByRole("button", { name: "Void" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Void invoice" }).click();
+    await expect(statusCard(page)).toContainText("Void");
+
+    await page.getByRole("button", { name: "Hapus invoice" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Hapus", exact: true }).click();
+    await expect(page).toHaveURL(/\/invoices$/);
+    await expect(page.locator(`a[href="/invoices/${id}"]`)).toHaveCount(0);
   });
 });

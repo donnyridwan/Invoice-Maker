@@ -15,7 +15,7 @@ import {
 } from "@/components/ui/dialog";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { RecurringDialog } from "@/features/recurring/recurring-dialog";
-import { deleteDraftInvoiceAction, duplicateInvoiceAction } from "../actions";
+import { deleteInvoiceAction, duplicateInvoiceAction } from "../actions";
 import type { Invoice } from "../queries";
 
 /**
@@ -69,7 +69,7 @@ export function EditorMenu({
   async function remove() {
     setBusy("delete");
     try {
-      const result = await deleteDraftInvoiceAction(invoiceId);
+      const result = await deleteInvoiceAction(invoiceId);
       if (result.ok) {
         // Only now drop pending edits (so the deleted draft is not written again); if the delete
         // fails they stay scheduled and are saved as usual.

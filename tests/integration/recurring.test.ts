@@ -2,7 +2,7 @@ import { asc, eq } from "drizzle-orm";
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { businessProfiles, clients, invoiceEvents, invoices, recurringSchedules, user } from "@/db/schema";
 import { createClient } from "@/features/clients/queries";
-import { deleteDraftInvoice, getInvoice, createDraftInvoice, saveInvoiceDraft } from "@/features/invoices/queries";
+import { deleteInvoice, getInvoice, createDraftInvoice, saveInvoiceDraft } from "@/features/invoices/queries";
 import { markSent, voidInvoice } from "@/features/invoices/lifecycle";
 import { ensureProfile } from "@/features/profile/queries";
 import {
@@ -300,7 +300,7 @@ describe("runDueSchedules", () => {
     const second = await newSchedule(owner);
     // Void a source (it must be sent first? a draft can be voided too).
     await voidInvoice(owner.id, first.source.id);
-    await deleteDraftInvoice(owner.id, second.source.id);
+    await deleteInvoice(owner.id, second.source.id);
 
     const result = await runDueSchedules(today, {});
     expect(result).toEqual({ processed: 2, created: 0, failed: 0, skipped: 0 });

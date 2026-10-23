@@ -349,6 +349,13 @@
         "unverifiedDescription": "Untuk mengirim invoice lewat email, verifikasi dulu alamat {email}. Kami akan mengirim link verifikasi ke sana.",
         "sendVerification": "Kirim link verifikasi",
         "verificationSent": "Link verifikasi dikirim ke {email}. Buka link itu, lalu kembali ke sini."
+      },
+      "delete": {
+        "action": "Hapus invoice",
+        "title": "Hapus invoice ini?",
+        "description": "Invoice {number} yang sudah di-void akan dihapus permanen beserta aktivitasnya. Tindakan ini tidak bisa dibatalkan.",
+        "confirm": "Hapus",
+        "toast": "Invoice dihapus"
       }
     },
     "tabs": {
@@ -632,7 +639,7 @@
     "dueBeforeIssue": "Jatuh tempo tidak boleh sebelum tanggal terbit",
     "duplicateNumber": "Nomor invoice sudah dipakai",
     "invoiceLocked": "Invoice ini sudah terkunci",
-    "onlyDraftDeletable": "Hanya draft yang bisa dihapus",
+    "onlyDraftDeletable": "Hanya draft dan invoice void yang bisa dihapus",
     "invalidDate": "Tanggal tidak valid",
     "fileType": "Format file tidak didukung",
     "fileTooLarge": "Ukuran file terlalu besar",

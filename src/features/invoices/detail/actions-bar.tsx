@@ -3,7 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Copy, Download, ExternalLink, Loader2, Pencil, Undo2, Ban } from "lucide-react";
+import { Copy, Download, ExternalLink, Loader2, Pencil, Trash2, Undo2, Ban } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -16,16 +16,16 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { actionErrorMessage } from "@/lib/validation-message";
-import { duplicateInvoiceAction, unmarkPaidAction, voidInvoiceAction } from "../actions";
+import { deleteInvoiceAction, duplicateInvoiceAction, unmarkPaidAction, voidInvoiceAction } from "../actions";
 import type { Invoice } from "../queries";
 import { SendMenu } from "../send-menu";
 import { MarkPaidDialog } from "./mark-paid-dialog";
 
-type Busy = "duplicate" | "unmark" | "void" | null;
+type Busy = "duplicate" | "unmark" | "void" | "delete" | null;
 
 /**
  * The buttons of the detail page, by stored status. sent / payment_claimed: edit, send, mark paid,
- * duplicate, void. paid: undo paid, duplicate. void: duplicate only.
+ * duplicate, void. paid: undo paid, duplicate. void: duplicate and delete.
  */
 export function ActionsBar({
   invoiceId,
@@ -48,6 +48,7 @@ export function ActionsBar({
   const router = useRouter();
   const [busy, setBusy] = useState<Busy>(null);
   const [voidOpen, setVoidOpen] = useState(false);
+  const [deleteOpen, setDeleteOpen] = useState(false);
   const open = status === "sent" || status === "payment_claimed";
 
   async function run(kind: Exclude<Busy, null>, work: () => Promise<void>) {
@@ -93,6 +94,20 @@ export function ActionsBar({
       }
       toast.success(t("toast.voided"));
       router.refresh();
+    });
+
+  const remove = () =>
+    run("delete", async () => {
+      const result = await deleteInvoiceAction(invoiceId);
+      setDeleteOpen(false);
+      if (!result.ok) {
+        toast.error(actionErrorMessage(tAll, result));
+        return;
+      }
+      toast.success(t("delete.toast"));
+      // Full navigation: nothing of the deleted invoice stays in the client router cache.
+      // eslint-disable-next-line @next/next/no-location-assign-relative-destination
+      window.location.assign("/invoices");
     });
 
   const working = busy !== null;
@@ -147,6 +162,36 @@ export function ActionsBar({
           {t("actions.void")}
         </Button>
       ) : null}
+
+      {status === "void" ? (
+        <Button
+          variant="secondary"
+          size="sm"
+          disabled={working}
+          onClick={() => setDeleteOpen(true)}
+          className="text-danger hover:text-danger"
+        >
+          <Trash2 className="size-4" />
+          {t("delete.action")}
+        </Button>
+      ) : null}
+
+      <Dialog open={deleteOpen} onOpenChange={(next) => (busy === "delete" ? undefined : setDeleteOpen(next))}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{t("delete.title")}</DialogTitle>
+            <DialogDescription>{t("delete.description", { number })}</DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button type="button" variant="secondary" disabled={busy === "delete"} onClick={() => setDeleteOpen(false)}>
+              {tAll("common.cancel")}
+            </Button>
+            <Button type="button" variant="destructive" disabled={busy === "delete"} onClick={() => void remove()}>
+              {t("delete.confirm")}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       <Dialog open={voidOpen} onOpenChange={(next) => (busy === "void" ? undefined : setVoidOpen(next))}>
         <DialogContent>

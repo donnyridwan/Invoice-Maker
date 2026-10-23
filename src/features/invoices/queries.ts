@@ -423,10 +423,16 @@ export async function duplicateInvoice(userId: string, id: string): Promise<Invo
   });
 }
 
-export async function deleteDraftInvoice(userId: string, id: string): Promise<void> {
+/**
+ * Deletes a draft or a voided invoice for good (its items, events and claims cascade; a recurring
+ * schedule made from it keeps running without its source). Sent and paid invoices are kept.
+ */
+export async function deleteInvoice(userId: string, id: string): Promise<void> {
   await db.transaction(async (tx) => {
     const invoice = await findOwned(tx, userId, id, true);
-    if (invoice.status !== "draft") throw new ValidationError({ _form: ["onlyDraftDeletable"] });
+    if (invoice.status !== "draft" && invoice.status !== "void") {
+      throw new ValidationError({ _form: ["onlyDraftDeletable"] });
+    }
     await tx.delete(invoices).where(ownedBy(userId, id));
   });
 }
