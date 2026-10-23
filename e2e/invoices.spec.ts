@@ -319,6 +319,8 @@ test.describe("editor extras", () => {
     await page.keyboard.type("Kedua");
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
 
+    // Bring both rows to the middle of the form panel, clear of the sticky total bar at its bottom.
+    await page.getByRole("group", { name: "Item 2" }).evaluate((el) => el.scrollIntoView({ block: "center" }));
     const handle = page.getByRole("group", { name: "Item 2" }).getByRole("button", { name: /Geser item 2/ });
     const target = await page.getByRole("group", { name: "Item 1" }).boundingBox();
     const from = await handle.boundingBox();

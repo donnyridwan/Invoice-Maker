@@ -39,60 +39,21 @@ export function DetailsSection({ state, errors, update }: EditorSectionProps) {
 
   return (
     <EditorSection title={t("sections.details")}>
-      <FormField label={t("details.number")} htmlFor="invoice-number" error={errorText("number")}>
-        <Input
-          id="invoice-number"
-          value={state.number}
-          onChange={(event) => update({ number: event.target.value })}
-          autoComplete="off"
-          aria-invalid={Boolean(errors.number) || undefined}
-        />
-      </FormField>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-        <FormField label={t("details.issueDate")} htmlFor="invoice-issue-date" error={errorText("issueDate")}>
+      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+        <FormField
+          label={t("details.number")}
+          htmlFor="invoice-number"
+          error={errorText("number")}
+          className="col-span-2 sm:col-span-1"
+        >
           <Input
-            id="invoice-issue-date"
-            type="date"
-            value={state.issueDate}
-            onChange={(event) => changeIssueDate(event.target.value)}
-            aria-invalid={Boolean(errors.issueDate) || undefined}
+            id="invoice-number"
+            value={state.number}
+            onChange={(event) => update({ number: event.target.value })}
+            autoComplete="off"
+            aria-invalid={Boolean(errors.number) || undefined}
           />
         </FormField>
-        <FormField label={t("details.dueDate")} htmlFor="invoice-due-date" error={errorText("dueDate")}>
-          <Input
-            id="invoice-due-date"
-            type="date"
-            value={state.dueDate}
-            onChange={(event) => update({ dueDate: event.target.value })}
-            aria-invalid={Boolean(errors.dueDate) || undefined}
-          />
-        </FormField>
-      </div>
-
-      <div role="group" aria-label={t("details.termsLabel")} className="-mt-2 flex flex-wrap gap-1.5">
-        {TERMS.map((days) => {
-          const active = term === days;
-          return (
-            <button
-              key={days}
-              type="button"
-              aria-pressed={active}
-              onClick={() => chooseTerm(days)}
-              className={cn(
-                "h-7 border px-2.5 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-                active
-                  ? "border-accent bg-tint text-tint-fg"
-                  : "border-border bg-white text-fg hover:bg-subtle",
-              )}
-            >
-              {days === 0 ? t("details.onReceipt") : t("details.days", { count: days })}
-            </button>
-          );
-        })}
-      </div>
-
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField label={t("details.currency")} htmlFor="invoice-currency" error={errorText("currency")}>
           <CurrencySelect
             id="invoice-currency"
@@ -114,6 +75,49 @@ export function DetailsSection({ state, errors, update }: EditorSectionProps) {
             </SelectContent>
           </Select>
         </FormField>
+      </div>
+
+      <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <FormField label={t("details.issueDate")} htmlFor="invoice-issue-date" error={errorText("issueDate")}>
+          <Input
+            id="invoice-issue-date"
+            type="date"
+            value={state.issueDate}
+            onChange={(event) => changeIssueDate(event.target.value)}
+            aria-invalid={Boolean(errors.issueDate) || undefined}
+          />
+        </FormField>
+        <div className="flex flex-col gap-2">
+          <FormField label={t("details.dueDate")} htmlFor="invoice-due-date" error={errorText("dueDate")}>
+            <Input
+              id="invoice-due-date"
+              type="date"
+              value={state.dueDate}
+              onChange={(event) => update({ dueDate: event.target.value })}
+              aria-invalid={Boolean(errors.dueDate) || undefined}
+            />
+          </FormField>
+          {/* Quick terms right under the due date they set, as one joined row. */}
+          <div role="group" aria-label={t("details.termsLabel")} className="flex divide-x divide-border border border-border">
+            {TERMS.map((days) => {
+              const active = term === days;
+              return (
+                <button
+                  key={days}
+                  type="button"
+                  aria-pressed={active}
+                  onClick={() => chooseTerm(days)}
+                  className={cn(
+                    "h-7 flex-1 whitespace-nowrap px-2 text-xs transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent",
+                    active ? "bg-fg text-white" : "bg-white text-muted hover:bg-subtle hover:text-fg",
+                  )}
+                >
+                  {days === 0 ? t("details.onReceipt") : t("details.days", { count: days })}
+                </button>
+              );
+            })}
+          </div>
+        </div>
       </div>
     </EditorSection>
   );

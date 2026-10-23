@@ -214,7 +214,7 @@ export function InvoiceEditor({
           aria-labelledby="editor-tab-form"
           className={cn("flex min-w-0 flex-1 flex-col xl:flex xl:overflow-y-auto", tab !== "form" && "hidden")}
         >
-          <div className="mx-auto w-full max-w-[680px] flex-1 px-4 py-6 md:px-8 md:py-8">
+          <div className="mx-auto w-full max-w-[760px] flex-1 px-4 py-6 md:px-8 md:py-8">
             <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col border-0 p-0">
               {locked ? <p className="mb-6 rounded-card bg-subtle px-4 py-3 text-sm text-muted">{t("locked")}</p> : null}
               {formError ? (

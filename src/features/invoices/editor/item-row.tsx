@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, type KeyboardEvent, type ReactNode } from "react";
+import { useState, type KeyboardEvent } from "react";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { BookmarkPlus, GripVertical, Trash2 } from "lucide-react";
@@ -16,30 +16,19 @@ import { applyCatalogItem, type CatalogOption, type EditorItem, type EditorItemE
 import { CatalogAutocomplete } from "./catalog-autocomplete";
 import { useErrorText } from "./editor-section";
 
-function MiniField({
-  label,
-  htmlFor,
-  error,
-  children,
-}: {
-  label: string;
-  htmlFor: string;
-  error?: string;
-  children: ReactNode;
-}) {
-  return (
-    <div className="flex min-w-0 flex-col gap-1">
-      <label htmlFor={htmlFor} className="text-xs font-medium text-muted">
-        {label}
-      </label>
-      {children}
-      {error ? <p className="text-xs text-danger">{error}</p> : null}
-    </div>
-  );
-}
+/** Column widths shared by the rows and the header of the items table (from sm up). */
+export const ITEM_COLUMNS = {
+  grip: "w-5",
+  quantity: "sm:w-[4.5rem]",
+  price: "sm:w-32",
+  amount: "sm:w-28",
+  actions: "w-[4.25rem]",
+} as const;
 
 /**
- * One invoice line: name, optional description, quantity, unit, price and the (read-only) amount.
+ * One invoice line, laid out as a table row: name, quantity, price and the (read-only) amount on
+ * the first line, the optional description and unit under the name. On a phone the figures wrap
+ * onto their own line.
  * Enter in the price field moves on to the next line (adding one after the last), so a list of
  * items can be typed without the mouse. The name input carries `data-item-name` so the section
  * can move focus to it, suggests catalog items while typing and the line can be saved to the
@@ -102,6 +91,9 @@ export function ItemRow({
       ? formatMoney(evaluation.amountMinor, currency, locale)
       : "—";
 
+  const errorFor = (name: string) =>
+    errors[field(name)] ? <p className="mt-1 text-xs text-danger">{errorText(field(name))}</p> : null;
+
   return (
     <div
       ref={setNodeRef}
@@ -109,18 +101,21 @@ export function ItemRow({
       role="group"
       aria-label={t("itemN", { n })}
       className={cn(
-        "relative flex flex-col gap-2 bg-white py-3 first:pt-0 last:pb-0",
-        isDragging && "z-20 rounded-card shadow-md ring-1 ring-border",
+        "relative flex flex-col gap-2 bg-white py-3",
+        isDragging && "z-20 shadow-md ring-1 ring-border",
       )}
     >
-      <div className="flex items-start gap-1">
+      <div className="flex flex-wrap items-start gap-x-2 gap-y-2">
         <button
           type="button"
           ref={setActivatorNodeRef}
           {...attributes}
           {...listeners}
           aria-label={t("dragHandle", { n })}
-          className="inline-flex size-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:cursor-grabbing disabled:cursor-default"
+          className={cn(
+            ITEM_COLUMNS.grip,
+            "inline-flex h-9 shrink-0 cursor-grab touch-none items-center justify-center text-muted hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:cursor-grabbing disabled:cursor-default",
+          )}
         >
           <GripVertical className="size-4" />
         </button>
@@ -141,95 +136,116 @@ export function ItemRow({
             }}
             onPick={pickCatalogItem}
           />
-          {errors[field("name")] ? <p className="mt-1 text-xs text-danger">{errorText(field("name"))}</p> : null}
+          {errorFor("name")}
           {catalogCurrency ? (
             <p className="mt-1 text-xs text-muted">{t("catalogCurrencyHint", { currency: catalogCurrency })}</p>
           ) : null}
         </div>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-label={t("saveToCatalog")}
-          title={t("saveToCatalog")}
-          disabled={item.name.trim() === "" || savingToCatalog}
-          onClick={onSaveToCatalog}
-          className="size-9 shrink-0 px-0 text-muted hover:text-fg"
-        >
-          <BookmarkPlus className="size-4" />
-        </Button>
-        <Button
-          type="button"
-          variant="ghost"
-          size="sm"
-          aria-label={t("remove", { n })}
-          onClick={onRemove}
-          className="size-9 shrink-0 px-0 text-muted hover:text-danger"
-        >
-          <Trash2 className="size-4" />
-        </Button>
+
+        {/* The figures: beside the name from sm up, on their own line on a phone. */}
+        <div className="order-last flex w-full items-start gap-2 pl-7 sm:order-none sm:w-auto sm:pl-0">
+          <div className={cn("w-20 shrink-0", ITEM_COLUMNS.quantity)}>
+            <label htmlFor={id("quantity")} className="sr-only">
+              {t("quantity")}
+            </label>
+            <Input
+              id={id("quantity")}
+              inputMode="decimal"
+              value={item.quantity}
+              placeholder={t("quantity")}
+              onChange={(event) => onChange({ quantity: event.target.value })}
+              aria-invalid={Boolean(errors[field("quantity")]) || undefined}
+              className="text-right tabular-nums"
+            />
+            {errorFor("quantity")}
+          </div>
+          <div className={cn("min-w-0 flex-1 sm:flex-none", ITEM_COLUMNS.price)}>
+            <label htmlFor={id("unitPrice")} className="sr-only">
+              {t("unitPrice")}
+            </label>
+            <Input
+              id={id("unitPrice")}
+              inputMode="decimal"
+              value={item.unitPrice}
+              placeholder={t("unitPrice")}
+              onChange={(event) => {
+                setCatalogCurrency(null);
+                onChange({ unitPrice: event.target.value });
+              }}
+              onKeyDown={onPriceKeyDown}
+              aria-invalid={Boolean(errors[field("unitPrice")]) || undefined}
+              className="text-right tabular-nums"
+            />
+            {errorFor("unitPrice")}
+          </div>
+          <output
+            aria-label={t("amount")}
+            className={cn(
+              "flex h-9 w-28 shrink-0 items-center justify-end truncate text-sm font-medium tabular-nums text-fg",
+              ITEM_COLUMNS.amount,
+            )}
+          >
+            {amount}
+          </output>
+        </div>
+
+        <div className={cn("flex shrink-0 justify-end", ITEM_COLUMNS.actions)}>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-label={t("saveToCatalog")}
+            title={t("saveToCatalog")}
+            disabled={item.name.trim() === "" || savingToCatalog}
+            onClick={onSaveToCatalog}
+            className="size-9 shrink-0 px-0 text-muted hover:text-fg"
+          >
+            <BookmarkPlus className="size-4" />
+          </Button>
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            aria-label={t("remove", { n })}
+            onClick={onRemove}
+            className="size-9 shrink-0 px-0 text-muted hover:text-danger"
+          >
+            <Trash2 className="size-4" />
+          </Button>
+        </div>
       </div>
 
-      <div>
-        <label htmlFor={id("description")} className="sr-only">
-          {t("description")}
-        </label>
-        <Textarea
-          id={id("description")}
-          rows={1}
-          value={item.description}
-          placeholder={t("descriptionPlaceholder")}
-          onChange={(event) => onChange({ description: event.target.value })}
-          aria-invalid={Boolean(errors[field("description")]) || undefined}
-          className="field-sizing-content min-h-9 resize-none py-1.5 text-sm"
-        />
-        {errors[field("description")] ? (
-          <p className="mt-1 text-xs text-danger">{errorText(field("description"))}</p>
-        ) : null}
-      </div>
-
-      <div className="grid grid-cols-2 gap-2 sm:grid-cols-[4.5rem_5.5rem_minmax(0,1fr)_minmax(0,1fr)]">
-        <MiniField label={t("quantity")} htmlFor={id("quantity")} error={errorText(field("quantity"))}>
-          <Input
-            id={id("quantity")}
-            inputMode="decimal"
-            value={item.quantity}
-            onChange={(event) => onChange({ quantity: event.target.value })}
-            aria-invalid={Boolean(errors[field("quantity")]) || undefined}
-            className="text-right tabular-nums"
+      {/* Second line, under the name: the optional description and unit. */}
+      <div className="flex items-start gap-2 pl-7 sm:pr-[4.75rem]">
+        <div className="min-w-0 flex-1">
+          <label htmlFor={id("description")} className="sr-only">
+            {t("description")}
+          </label>
+          <Textarea
+            id={id("description")}
+            rows={1}
+            value={item.description}
+            placeholder={t("descriptionPlaceholder")}
+            onChange={(event) => onChange({ description: event.target.value })}
+            aria-invalid={Boolean(errors[field("description")]) || undefined}
+            className="field-sizing-content min-h-8 resize-none py-1.5 text-[13px]"
           />
-        </MiniField>
-        <MiniField label={t("unit")} htmlFor={id("unit")} error={errorText(field("unit"))}>
+          {errorFor("description")}
+        </div>
+        <div className="w-24 shrink-0">
+          <label htmlFor={id("unit")} className="sr-only">
+            {t("unit")}
+          </label>
           <Input
             id={id("unit")}
             value={item.unit}
             autoComplete="off"
+            placeholder={t("unit")}
             onChange={(event) => onChange({ unit: event.target.value })}
             aria-invalid={Boolean(errors[field("unit")]) || undefined}
+            className="h-8 text-[13px]"
           />
-        </MiniField>
-        <MiniField label={t("unitPrice")} htmlFor={id("unitPrice")} error={errorText(field("unitPrice"))}>
-          <Input
-            id={id("unitPrice")}
-            inputMode="decimal"
-            value={item.unitPrice}
-            onChange={(event) => {
-              setCatalogCurrency(null);
-              onChange({ unitPrice: event.target.value });
-            }}
-            onKeyDown={onPriceKeyDown}
-            aria-invalid={Boolean(errors[field("unitPrice")]) || undefined}
-            className="text-right tabular-nums"
-          />
-        </MiniField>
-        <div className="flex min-w-0 flex-col gap-1">
-          <span className="text-xs font-medium text-muted">{t("amount")}</span>
-          <output
-            aria-label={t("amount")}
-            className="flex h-9 items-center justify-end truncate text-sm font-medium tabular-nums text-fg"
-          >
-            {amount}
-          </output>
+          {errorFor("unit")}
         </div>
       </div>
     </div>

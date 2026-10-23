@@ -30,65 +30,66 @@ export function TotalsSection({
   const discountError = errorText("discountValue");
 
   return (
-    <EditorSection title={t("sections.totals")}>
-      <dl className="flex flex-col gap-3 text-sm tabular-nums">
+    // Reads as the foot of the items table: right-aligned, like the totals on the invoice itself.
+    <EditorSection title={t("sections.totals")} hideTitle className="border-t-0 pt-0">
+      <dl className="ml-auto flex w-full max-w-sm flex-col gap-2.5 text-sm tabular-nums">
         <div className="flex items-center justify-between gap-4">
           <dt className="text-muted">{t("totals.subtotal")}</dt>
-          <dd className="font-medium text-fg">{money(evaluation.subtotalMinor)}</dd>
+          <dd className="text-fg">{money(evaluation.subtotalMinor)}</dd>
         </div>
 
         <div className="flex flex-col gap-1.5">
-          <div className="flex items-center justify-between gap-4">
-            <dt className="text-muted">{t("totals.discount")}</dt>
-            <dd className="font-medium text-fg">
+          <div className="flex items-center justify-between gap-3">
+            <dt className="flex items-center gap-2 text-muted">
+              {t("totals.discount")}
+              <Select
+                value={state.discountType}
+                onValueChange={(value) =>
+                  update({ discountType: value as DiscountType, ...(value === "none" ? { discountValue: "" } : {}) })
+                }
+              >
+                <SelectTrigger aria-label={t("totals.discountType")} className="h-8 w-32 text-[13px]">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {DISCOUNT_TYPES.map(({ value, labelKey }) => (
+                    <SelectItem key={value} value={value}>
+                      {t(`totals.${labelKey}`)}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </dt>
+            <dd className="text-fg">
               {evaluation.discountMinor > 0 ? `−${money(evaluation.discountMinor)}` : money(0)}
             </dd>
           </div>
-          <div className="flex items-start gap-2">
-            <Select
-              value={state.discountType}
-              onValueChange={(value) =>
-                update({ discountType: value as DiscountType, ...(value === "none" ? { discountValue: "" } : {}) })
-              }
-            >
-              <SelectTrigger aria-label={t("totals.discountType")} className="w-40">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                {DISCOUNT_TYPES.map(({ value, labelKey }) => (
-                  <SelectItem key={value} value={value}>
-                    {t(`totals.${labelKey}`)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            {state.discountType !== "none" ? (
-              <div className="min-w-0 flex-1">
-                <div className="relative">
-                  <Input
-                    aria-label={t("totals.discountValue")}
-                    inputMode="decimal"
-                    value={state.discountValue}
-                    onChange={(event) => update({ discountValue: event.target.value })}
-                    aria-invalid={Boolean(discountError) || undefined}
-                    className="pr-11 text-right tabular-nums"
-                  />
-                  <span
-                    aria-hidden
-                    className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted"
-                  >
-                    {state.discountType === "percent" ? "%" : currency}
-                  </span>
-                </div>
-                {discountError ? <p className="mt-1 text-xs text-danger">{discountError}</p> : null}
+          {state.discountType !== "none" ? (
+            <div className="ml-auto w-40">
+              <div className="relative">
+                <Input
+                  aria-label={t("totals.discountValue")}
+                  inputMode="decimal"
+                  value={state.discountValue}
+                  onChange={(event) => update({ discountValue: event.target.value })}
+                  aria-invalid={Boolean(discountError) || undefined}
+                  className="h-8 pr-11 text-right text-[13px] tabular-nums"
+                />
+                <span
+                  aria-hidden
+                  className="pointer-events-none absolute inset-y-0 right-3 flex items-center text-xs text-muted"
+                >
+                  {state.discountType === "percent" ? "%" : currency}
+                </span>
               </div>
-            ) : null}
-          </div>
+              {discountError ? <p className="mt-1 text-xs text-danger">{discountError}</p> : null}
+            </div>
+          ) : null}
         </div>
 
-        <div className="flex items-center justify-between gap-4 border-t border-border pt-3 text-lg">
-          <dt className="font-bold text-fg">{t("totals.total")}</dt>
-          <dd className="font-semibold tracking-tight text-fg">{money(evaluation.totalMinor)}</dd>
+        <div className="mt-1 flex items-baseline justify-between gap-4 border-t border-border pt-3">
+          <dt className="font-medium text-fg">{t("totals.total")}</dt>
+          <dd className="font-serif text-2xl tracking-tight text-fg">{money(evaluation.totalMinor)}</dd>
         </div>
       </dl>
     </EditorSection>

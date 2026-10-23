@@ -19,6 +19,7 @@ import { Button } from "@/components/ui/button";
 import { saveItemToCatalogAction } from "@/features/catalog/actions";
 import type { Locale } from "@/i18n/config";
 import { isCurrencyCode } from "@/lib/currencies";
+import { cn } from "@/lib/utils";
 import { translateValidation } from "@/lib/validation-message";
 import {
   isBlankItem,
@@ -28,7 +29,7 @@ import {
   type EditorItem,
 } from "../editor-state";
 import { EditorSection, type EditorSectionProps } from "./editor-section";
-import { ItemRow } from "./item-row";
+import { ITEM_COLUMNS, ItemRow } from "./item-row";
 
 const NO_EVALUATION = { quantityMilli: null, unitPriceMinor: null, amountMinor: null };
 
@@ -136,38 +137,47 @@ export function ItemsSection({
 
   return (
     <EditorSection title={t("sections.items")}>
-      <div ref={containerRef} className="flex flex-col divide-y divide-border">
-        {items.length === 0 ? <p className="pb-3 text-sm text-muted">{t("items.empty")}</p> : null}
-        <DndContext
-          id={dndId}
-          sensors={sensors}
-          collisionDetection={closestCenter}
-          onDragEnd={onDragEnd}
-          accessibility={{ announcements, screenReaderInstructions: { draggable: t("items.dnd.instructions") } }}
-        >
-          <SortableContext items={items.map((item) => item.key)} strategy={verticalListSortingStrategy}>
-            {items.map((item, index) => (
-              <ItemRow
-                key={item.key}
-                item={item}
-                index={index}
-                currency={state.currency}
-                locale={locale}
-                evaluation={evaluation.rows[index] ?? NO_EVALUATION}
-                errors={errors}
-                catalog={catalog}
-                savingToCatalog={savingKey === item.key}
-                onChange={(patch) => changeItem(item.key, patch)}
-                onRemove={() => removeItem(item.key)}
-                onEnterPrice={() => onEnterPrice(index)}
-                onSaveToCatalog={() => void saveToCatalog(index)}
-              />
-            ))}
-          </SortableContext>
-        </DndContext>
-      </div>
       <div>
-        <Button type="button" variant="secondary" size="sm" onClick={addItem}>
+        {/* Column headings (the inputs carry their own labels for assistive technology). */}
+        <div aria-hidden className="hidden items-end gap-2 border-b border-border pb-2 text-xs text-muted sm:flex">
+          <span className={ITEM_COLUMNS.grip} />
+          <span className="flex-1">{t("items.name")}</span>
+          <span className={cn("text-right", ITEM_COLUMNS.quantity)}>{t("items.quantity")}</span>
+          <span className={cn("text-right", ITEM_COLUMNS.price)}>{t("items.unitPrice")}</span>
+          <span className={cn("text-right", ITEM_COLUMNS.amount)}>{t("items.amount")}</span>
+          <span className={ITEM_COLUMNS.actions} />
+        </div>
+        <div ref={containerRef} className="flex flex-col divide-y divide-border border-b border-border">
+          {items.length === 0 ? <p className="py-3 text-sm text-muted">{t("items.empty")}</p> : null}
+          <DndContext
+            id={dndId}
+            sensors={sensors}
+            collisionDetection={closestCenter}
+            onDragEnd={onDragEnd}
+            accessibility={{ announcements, screenReaderInstructions: { draggable: t("items.dnd.instructions") } }}
+          >
+            <SortableContext items={items.map((item) => item.key)} strategy={verticalListSortingStrategy}>
+              {items.map((item, index) => (
+                <ItemRow
+                  key={item.key}
+                  item={item}
+                  index={index}
+                  currency={state.currency}
+                  locale={locale}
+                  evaluation={evaluation.rows[index] ?? NO_EVALUATION}
+                  errors={errors}
+                  catalog={catalog}
+                  savingToCatalog={savingKey === item.key}
+                  onChange={(patch) => changeItem(item.key, patch)}
+                  onRemove={() => removeItem(item.key)}
+                  onEnterPrice={() => onEnterPrice(index)}
+                  onSaveToCatalog={() => void saveToCatalog(index)}
+                />
+              ))}
+            </SortableContext>
+          </DndContext>
+        </div>
+        <Button type="button" variant="ghost" size="sm" onClick={addItem} className="mt-2 text-muted hover:text-fg">
           <Plus className="size-4" />
           {t("items.add")}
         </Button>

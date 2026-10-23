@@ -186,9 +186,10 @@ function ClientCombobox({
   );
 }
 
-/** The chosen client as a recipient row: initials avatar, name and contact line. */
+/** The chosen client as a recipient row: initials avatar, name and contact line (only when there is one: the name alone is already in the picker). */
 function ClientSummary({ client }: { client: ClientOption }) {
   const details = [client.company, client.email, client.address?.split("\n")[0]].filter(Boolean).join(" · ");
+  if (!details) return null;
   return (
     <div className="flex items-center gap-3 border border-border px-3 py-2.5">
       <Avatar name={client.name} className="size-9 text-xs" />

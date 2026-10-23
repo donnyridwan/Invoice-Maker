@@ -19,28 +19,40 @@ export function useErrorText(errors: EditorErrors): (key: string) => string | un
   return (key) => (errors[key] ? translateValidation(t, errors[key]) : undefined);
 }
 
-/** A flat form section: a small semibold title, then the fields; sections are divided by a hairline. */
+/**
+ * A flat form section: a small label-like title, then the fields; sections are divided by a
+ * hairline. `hideTitle` keeps the title for assistive technology only (the totals, which read as
+ * the end of the items).
+ */
 export function EditorSection({
   title,
   action,
+  hideTitle = false,
   className,
   children,
 }: {
   title: string;
   action?: ReactNode;
+  hideTitle?: boolean;
   className?: string;
   children: ReactNode;
 }) {
   const headingId = useId();
   return (
     <section aria-labelledby={headingId} className={cn("border-t border-border py-6 first:border-t-0 first:pt-0", className)}>
-      <div className="flex min-h-8 items-center justify-between gap-3">
-        <h2 id={headingId} className="font-serif text-lg text-fg">
+      {hideTitle ? (
+        <h2 id={headingId} className="sr-only">
           {title}
         </h2>
-        {action}
-      </div>
-      <div className="mt-3 flex flex-col gap-4">{children}</div>
+      ) : (
+        <div className="mb-4 flex min-h-6 items-center justify-between gap-3">
+          <h2 id={headingId} className="text-[13px] font-medium text-fg">
+            {title}
+          </h2>
+          {action}
+        </div>
+      )}
+      <div className="flex flex-col gap-4">{children}</div>
     </section>
   );
 }

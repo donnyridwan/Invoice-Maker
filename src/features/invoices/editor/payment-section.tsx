@@ -32,7 +32,7 @@ export function PaymentSection({
       href="/settings/payment-accounts"
       target="_blank"
       rel="noopener noreferrer"
-      className="text-xs font-medium text-accent hover:underline"
+      className="text-xs text-muted underline-offset-4 hover:text-fg hover:underline"
     >
       {t("payment.manage")}
     </a>
@@ -59,7 +59,7 @@ export function PaymentSection({
             const checked = selected.has(id);
             return (
               <li key={id}>
-                <label className="flex cursor-pointer items-start gap-3 rounded-card border border-border p-4 text-sm has-[:checked]:border-accent has-[:checked]:bg-subtle has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+                <label className="flex cursor-pointer items-start gap-3 border border-border px-3.5 py-3 text-sm transition-colors hover:bg-subtle has-[:checked]:border-fg has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
                   <input
                     type="checkbox"
                     checked={checked}
