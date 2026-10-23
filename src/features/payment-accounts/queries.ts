@@ -60,15 +60,6 @@ export async function getPaymentAccount(userId: string, id: string): Promise<Pay
   return findOwned(db, userId, id);
 }
 
-export async function hasActivePaymentAccount(userId: string): Promise<boolean> {
-  const [row] = await db
-    .select({ id: paymentAccounts.id })
-    .from(paymentAccounts)
-    .where(and(eq(paymentAccounts.userId, userId), isNull(paymentAccounts.archivedAt)))
-    .limit(1);
-  return Boolean(row);
-}
-
 export async function createPaymentAccount(userId: string, input: unknown): Promise<PaymentAccount> {
   const row = toRow(parseInput(paymentAccountSchema, input));
   return db.transaction(async (tx) => {

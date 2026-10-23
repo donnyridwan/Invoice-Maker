@@ -7,8 +7,6 @@ import { RecentInvoices } from "@/features/dashboard/recent-invoices";
 import { SummaryCards } from "@/features/dashboard/summary-cards";
 import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { listInvoices } from "@/features/invoices/queries";
-import { Checklist } from "@/features/profile/checklist";
-import { getChecklist } from "@/features/profile/queries";
 import { todayInJakarta } from "@/lib/dates";
 import { requireUser } from "@/lib/session";
 
@@ -16,13 +14,11 @@ export default async function DashboardPage() {
   const user = await requireUser();
   const t = await getTranslations("dashboard");
   const today = todayInJakarta();
-  const [checklist, summary, recent] = await Promise.all([
-    getChecklist(user.id),
+  const [summary, recent] = await Promise.all([
     getDashboardSummary(user.id, today),
     listInvoices(user.id, { limit: 5 }),
   ]);
   const firstName = user.name.trim().split(/\s+/)[0] || user.email;
-  const checklistDone = checklist.profileComplete && checklist.hasPaymentAccount && checklist.hasSentInvoice;
 
   return (
     <div className="flex flex-col gap-8">
@@ -62,10 +58,7 @@ export default async function DashboardPage() {
         </div>
       ) : null}
       <SummaryCards summary={summary} />
-      <div className={checklistDone ? "grid gap-8" : "grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]"}>
-        <RecentInvoices invoices={recent} today={today} />
-        <Checklist state={checklist} />
-      </div>
+      <RecentInvoices invoices={recent} today={today} />
     </div>
   );
 }

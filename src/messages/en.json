@@ -68,15 +68,6 @@
     "emptyTitle": "No invoices yet",
     "emptyDescription": "Create your first invoice to start billing your clients.",
     "greeting": "Hello, {name}",
-    "checklist": {
-      "title": "Get started with Invoice Maker",
-      "progress": "{done} of {total} steps done",
-      "profile": "Complete your business profile",
-      "paymentAccount": "Add a payment account",
-      "done": "Done",
-      "todo": "Not done",
-      "sendInvoice": "Send your first invoice"
-    },
     "summary": {
       "label": "Summary",
       "unpaid": "Unpaid",

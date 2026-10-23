@@ -1,7 +1,6 @@
-import { and, eq, isNotNull, sql } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { businessProfiles, invoices } from "@/db/schema";
-import { hasActivePaymentAccount } from "@/features/payment-accounts/queries";
+import { businessProfiles } from "@/db/schema";
 import type { Locale } from "@/i18n/config";
 import { NotFoundError } from "@/lib/errors";
 import { parseInput } from "@/lib/validate";
@@ -117,27 +116,6 @@ export async function isOnboardingComplete(user: { id: string; name: string; ema
     [row] = await select();
   }
   return Boolean(row?.completedAt);
-}
-
-/** Whether the user ever sent an invoice (it may have been paid or voided since). */
-export async function hasSentInvoice(userId: string): Promise<boolean> {
-  const [row] = await db
-    .select({ id: invoices.id })
-    .from(invoices)
-    .where(and(eq(invoices.userId, userId), isNotNull(invoices.sentAt)))
-    .limit(1);
-  return Boolean(row);
-}
-
-export async function getChecklist(
-  userId: string,
-): Promise<{ profileComplete: boolean; hasPaymentAccount: boolean; hasSentInvoice: boolean }> {
-  const profile = await getProfile(userId);
-  return {
-    profileComplete: Boolean(profile.businessName?.trim()) && Boolean(profile.address?.trim()),
-    hasPaymentAccount: await hasActivePaymentAccount(userId),
-    hasSentInvoice: await hasSentInvoice(userId),
-  };
 }
 
 /** Remembers the UI language chosen by the user. A user without a profile row is ignored. */

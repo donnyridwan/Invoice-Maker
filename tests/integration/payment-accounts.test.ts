@@ -5,7 +5,6 @@ import {
   archivePaymentAccount,
   createPaymentAccount,
   getPaymentAccount,
-  hasActivePaymentAccount,
   listPaymentAccounts,
   restorePaymentAccount,
   setDefaultPaymentAccount,
@@ -126,11 +125,9 @@ describe("payment accounts", () => {
   it("hides archived accounts unless asked, and restores them", async () => {
     const u = await createTestUser();
     const a = await createPaymentAccount(u.id, bank({ isDefault: true }));
-    expect(await hasActivePaymentAccount(u.id)).toBe(true);
 
     await archivePaymentAccount(u.id, a.id);
     expect(await listPaymentAccounts(u.id)).toEqual([]);
-    expect(await hasActivePaymentAccount(u.id)).toBe(false);
     const all = await listPaymentAccounts(u.id, { includeArchived: true });
     expect(all).toHaveLength(1);
     expect(all[0].archivedAt).toBeInstanceOf(Date);
@@ -138,7 +135,6 @@ describe("payment accounts", () => {
 
     await restorePaymentAccount(u.id, a.id);
     expect(await listPaymentAccounts(u.id)).toHaveLength(1);
-    expect(await hasActivePaymentAccount(u.id)).toBe(true);
   });
 
   it("updates an account", async () => {

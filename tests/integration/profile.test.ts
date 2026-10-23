@@ -1,11 +1,9 @@
 import { eq } from "drizzle-orm";
 import { beforeEach, describe, expect, it } from "vitest";
 import { businessProfiles } from "@/db/schema";
-import { createPaymentAccount } from "@/features/payment-accounts/queries";
 import {
   completeOnboarding,
   ensureProfile,
-  getChecklist,
   getProfile,
   setLogoUrl,
   updateInvoiceDefaults,
@@ -108,24 +106,6 @@ describe("business profile", () => {
     });
   });
 
-  it("getChecklist tracks profile completeness and payment accounts", async () => {
-    const u = await createTestUser();
-    await ensureProfile(u.id, { businessName: "Donny", email: u.email });
-    expect(await getChecklist(u.id)).toEqual({ profileComplete: false, hasPaymentAccount: false, hasSentInvoice: false });
-
-    await updateProfile(u.id, profileInput({ address: "Jl. Sudirman 1" }));
-    expect(await getChecklist(u.id)).toEqual({ profileComplete: true, hasPaymentAccount: false, hasSentInvoice: false });
-
-    await createPaymentAccount(u.id, {
-      type: "bank",
-      bankName: "BCA",
-      accountName: "Donny",
-      accountNumber: "123",
-      isDefault: true,
-    });
-    expect(await getChecklist(u.id)).toEqual({ profileComplete: true, hasPaymentAccount: true, hasSentInvoice: false });
-  });
-
   it("completeOnboarding stamps the time once", async () => {
     const u = await createTestUser();
     await ensureProfile(u.id, { businessName: "Donny", email: u.email });
@@ -148,7 +128,6 @@ describe("business profile", () => {
     await expect(updateProfile(b.id, profileInput())).rejects.toBeInstanceOf(NotFoundError);
     await expect(updateInvoiceDefaults(b.id, defaultsInput())).rejects.toBeInstanceOf(NotFoundError);
     await expect(completeOnboarding(b.id)).rejects.toBeInstanceOf(NotFoundError);
-    await expect(getChecklist(b.id)).rejects.toBeInstanceOf(NotFoundError);
     await expect(setLogoUrl(b.id, "/uploads/logo/x.png")).rejects.toBeInstanceOf(NotFoundError);
 
     expect(await getProfile(a.id)).toMatchObject({ businessName: "A", onboardingCompletedAt: null });

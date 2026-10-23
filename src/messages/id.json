@@ -68,15 +68,6 @@
     "emptyTitle": "Belum ada invoice",
     "emptyDescription": "Buat invoice pertama Anda untuk mulai menagih klien.",
     "greeting": "Halo, {name}",
-    "checklist": {
-      "title": "Mulai menggunakan Invoice Maker",
-      "progress": "{done} dari {total} langkah selesai",
-      "profile": "Lengkapi profil bisnis",
-      "paymentAccount": "Tambah rekening pembayaran",
-      "done": "Selesai",
-      "todo": "Belum selesai",
-      "sendInvoice": "Kirim invoice pertama"
-    },
     "summary": {
       "label": "Ringkasan",
       "unpaid": "Belum dibayar",

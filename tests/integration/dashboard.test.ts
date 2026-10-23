@@ -4,7 +4,7 @@ import { businessProfiles, invoices, paymentClaims, recurringSchedules } from "@
 import { countRecurringDrafts, getDashboardSummary } from "@/features/dashboard/queries";
 import { saveRates } from "@/features/fx/queries";
 import { countInvoicesByTab, createDraftInvoice, listInvoices } from "@/features/invoices/queries";
-import { ensureProfile, getChecklist, hasSentInvoice } from "@/features/profile/queries";
+import { ensureProfile } from "@/features/profile/queries";
 import { createTestUser, resetDb, testDb } from "./helpers";
 
 const TODAY = "2026-10-21";
@@ -339,28 +339,5 @@ describe("invoice tabs", () => {
     const [first] = await listInvoices(u.id, { tab: "paid" });
     expect(await listInvoices(u.id, { tab: "paid", search: first.number })).toHaveLength(1);
     expect(await listInvoices(u.id, { tab: "draft", search: first.number })).toHaveLength(0);
-  });
-});
-
-describe("checklist", () => {
-  beforeEach(resetDb);
-
-  it("tracks whether a first invoice was ever sent", async () => {
-    const u = await setupUser();
-    expect(await hasSentInvoice(u.id)).toBe(false);
-    await makeInvoice(u.id, { status: "draft", total: 1 });
-    expect(await hasSentInvoice(u.id)).toBe(false);
-    expect((await getChecklist(u.id)).hasSentInvoice).toBe(false);
-
-    await makeInvoice(u.id, { status: "sent", total: 1 });
-    expect(await hasSentInvoice(u.id)).toBe(true);
-    expect((await getChecklist(u.id)).hasSentInvoice).toBe(true);
-  });
-
-  it("does not count another user's sent invoice", async () => {
-    const u = await setupUser();
-    const other = await setupUser();
-    await makeInvoice(other.id, { status: "sent", total: 1 });
-    expect(await hasSentInvoice(u.id)).toBe(false);
   });
 });

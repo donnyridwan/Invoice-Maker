@@ -131,7 +131,7 @@ test.describe("shell", () => {
 });
 
 test.describe("onboarding", () => {
-  test("saves the business name, then completes the checklist from settings", async ({ page }) => {
+  test("saves the business name, then completes the profile from settings", async ({ page }) => {
     await registerUser(page, { onboarding: "stay" });
     await expect(page).toHaveURL(/\/onboarding$/);
     await expect(page.getByRole("link", { name: "Klien" })).toHaveCount(0);
@@ -139,10 +139,6 @@ test.describe("onboarding", () => {
     await page.getByLabel("Nama bisnis").fill("Studio Donny");
     await page.getByRole("button", { name: "Lanjut" }).click();
     await expect(page).toHaveURL(EDITOR_URL_RE);
-    await page.goto("/dashboard");
-
-    const profileItem = page.getByRole("listitem").filter({ hasText: "Lengkapi profil bisnis" });
-    await expect(profileItem).toHaveAttribute("data-done", "false");
 
     await page.goto("/settings");
     await expect(page.getByLabel("Nama bisnis")).toHaveValue("Studio Donny");
@@ -151,11 +147,9 @@ test.describe("onboarding", () => {
     await profileCard.getByRole("button", { name: "Simpan" }).click();
     await expect(page.getByText("Tersimpan")).toBeVisible();
 
-    await page.goto("/dashboard");
-    await expect(profileItem).toHaveAttribute("data-done", "true");
-    await expect(page.getByRole("listitem").filter({ hasText: "Tambah rekening pembayaran" })).toHaveAttribute(
-      "data-done",
-      "false",
+    await page.reload();
+    await expect(page.getByRole("region", { name: "Profil bisnis" }).getByLabel("Alamat")).toHaveValue(
+      "Jl. Sudirman No. 1, Jakarta",
     );
   });
 
@@ -168,11 +162,8 @@ test.describe("onboarding", () => {
     await page.getByLabel("Nomor rekening").fill("1234567890");
     await page.getByRole("button", { name: "Lanjut" }).click();
     await expect(page).toHaveURL(EDITOR_URL_RE);
-    await page.goto("/dashboard");
-    await expect(page.getByRole("listitem").filter({ hasText: "Tambah rekening pembayaran" })).toHaveAttribute(
-      "data-done",
-      "true",
-    );
+    await page.goto("/settings/payment-accounts");
+    await expect(page.getByText("BCA").first()).toBeVisible();
 
     await page.goto("/settings/payment-accounts");
     await expect(page.getByRole("listitem").filter({ hasText: "BCA" })).toContainText("Default");
