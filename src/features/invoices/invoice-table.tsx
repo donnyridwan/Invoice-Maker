@@ -9,12 +9,14 @@ import { formatMoney } from "@/lib/money";
 import { Badge } from "@/components/ui/badge";
 import { cn } from "@/lib/utils";
 import { displayStatus, dueRelative } from "./display-status";
+import { InvoiceRowMenu } from "./invoice-row-menu";
 import type { Invoice } from "./queries";
 import { StatusBadge } from "./status-badge";
 
 /** `today` is the Asia/Jakarta date (YYYY-MM-DD) the derived status is computed on. */
 export function InvoiceTable({ invoices, today }: { invoices: Invoice[]; today: string }) {
   const t = useTranslations("invoices");
+  const tAll = useTranslations();
   const tDue = useTranslations("invoices.detail.due");
   const locale = resolveLocale(useLocale());
 
@@ -28,6 +30,9 @@ export function InvoiceTable({ invoices, today }: { invoices: Invoice[]; today: 
           <TableHead>{t("colDueDate")}</TableHead>
           <TableHead className="text-right">{t("colAmount")}</TableHead>
           <TableHead>{t("colStatus")}</TableHead>
+          <TableHead className="w-12">
+            <span className="sr-only">{tAll("common.actions")}</span>
+          </TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -82,6 +87,9 @@ export function InvoiceTable({ invoices, today }: { invoices: Invoice[]; today: 
               </TableCell>
               <TableCell>
                 <StatusBadge status={status} />
+              </TableCell>
+              <TableCell className="px-2 text-center">
+                <InvoiceRowMenu invoice={invoice} today={today} />
               </TableCell>
             </TableRow>
           );

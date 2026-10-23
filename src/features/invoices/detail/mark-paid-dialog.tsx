@@ -22,23 +22,33 @@ import { Textarea } from "@/components/ui/textarea";
 import { useServerForm } from "@/lib/use-server-form";
 import { markPaidAction } from "../actions";
 
-/** "Tandai lunas": the button and a dialog asking for the payment date (default today) and a note. */
+/**
+ * "Tandai lunas": the button and a dialog asking for the payment date (default today) and a note.
+ * With `open` / `onOpenChange` the dialog is opened from elsewhere (a row menu) and has no button.
+ */
 export function MarkPaidDialog({
   invoiceId,
   number,
   today,
   variant = "primary",
+  open: controlledOpen,
+  onOpenChange,
 }: {
   invoiceId: string;
   number: string;
   /** Today in Asia/Jakarta (YYYY-MM-DD): the default and the latest payment date. */
   today: string;
   variant?: ButtonProps["variant"];
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
 }) {
   const t = useTranslations("invoices.detail");
   const tAll = useTranslations();
   const router = useRouter();
-  const [open, setOpen] = useState(false);
+  const [ownOpen, setOwnOpen] = useState(false);
+  const controlled = controlledOpen !== undefined;
+  const open = controlled ? controlledOpen : ownOpen;
+  const setOpen = (next: boolean) => (controlled ? onOpenChange?.(next) : setOwnOpen(next));
   const form = useServerForm<{ paidOn: string; note: string }>((values) => markPaidAction(invoiceId, values));
 
   async function onSubmit(event: FormEvent<HTMLFormElement>) {
@@ -54,12 +64,14 @@ export function MarkPaidDialog({
 
   return (
     <Dialog open={open} onOpenChange={(next) => (form.pending ? undefined : setOpen(next))}>
-      <DialogTrigger asChild>
-        <Button variant={variant} size="sm">
-          <CircleCheck className="size-4" />
-          {t("actions.markPaid")}
-        </Button>
-      </DialogTrigger>
+      {controlled ? null : (
+        <DialogTrigger asChild>
+          <Button variant={variant} size="sm">
+            <CircleCheck className="size-4" />
+            {t("actions.markPaid")}
+          </Button>
+        </DialogTrigger>
+      )}
       <DialogContent>
         <form onSubmit={onSubmit} className="grid gap-4" noValidate>
           <DialogHeader>

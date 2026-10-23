@@ -285,3 +285,39 @@ test.describe("dashboard", () => {
     await expect(unpaid).toContainText("1 invoice");
   });
 });
+
+test.describe("invoice list row menu", () => {
+  test("deletes a draft from the ⋯ menu of its row", async ({ page }) => {
+    await registerUser(page);
+    await createInvoiceViaUi(page);
+    await page.goto("/invoices");
+
+    await page.getByRole("button", { name: /^Aksi untuk INV-\d{4}-001$/ }).click();
+    await expect(page.getByRole("menuitem", { name: "Tandai lunas" })).toHaveCount(0);
+    await page.getByRole("menuitem", { name: "Hapus draft" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Hapus", exact: true }).click();
+
+    await expect(page.getByRole("link", { name: /^INV-\d{4}-001$/ })).toHaveCount(0);
+    await expect(page.getByRole("link", { name: /^INV-\d{4}-002$/ })).toBeVisible();
+  });
+
+  test("marks a sent invoice paid and voids another from the row menus", async ({ page }) => {
+    const first = await createInvoiceDraft(page);
+    await markSentViaDb(first);
+    const second = await createInvoiceViaUi(page);
+    await markSentViaDb(second);
+    await page.goto("/invoices");
+
+    const firstNumber = (await page.getByRole("row").filter({ has: page.locator(`a[href="/invoices/${first}"]`) }).getByRole("link").first().textContent())!.trim();
+    await page.getByRole("button", { name: `Aksi untuk ${firstNumber}` }).click();
+    await page.getByRole("menuitem", { name: "Tandai lunas" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Simpan" }).click();
+    await expect(page.getByRole("row").filter({ hasText: firstNumber })).toContainText("Lunas");
+
+    const secondRow = page.getByRole("row").filter({ has: page.locator(`a[href="/invoices/${second}"]`) });
+    await secondRow.getByRole("button", { name: /^Aksi untuk/ }).click();
+    await page.getByRole("menuitem", { name: "Void" }).click();
+    await page.getByRole("dialog").getByRole("button", { name: "Void invoice" }).click();
+    await expect(secondRow).toContainText("Void");
+  });
+});

@@ -361,7 +361,8 @@
     },
     "emptyTabTitle": "No invoices here",
     "emptyTabDescription": "There are no invoices with this status yet.",
-    "needsConfirmation": "Needs confirmation"
+    "needsConfirmation": "Needs confirmation",
+    "rowActions": "Actions for {number}"
   },
   "recurring": {
     "makeRecurring": "Make recurring",

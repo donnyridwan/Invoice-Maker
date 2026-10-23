@@ -361,7 +361,8 @@
     },
     "emptyTabTitle": "Tidak ada invoice di sini",
     "emptyTabDescription": "Belum ada invoice dengan status ini.",
-    "needsConfirmation": "Perlu konfirmasi"
+    "needsConfirmation": "Perlu konfirmasi",
+    "rowActions": "Aksi untuk {number}"
   },
   "recurring": {
     "makeRecurring": "Jadikan berulang",
