@@ -243,14 +243,10 @@ test.describe("editor", () => {
     await expect(page).toHaveURL(/#payment$/);
     await expect(page.getByRole("textbox", { name: "Catatan" })).toBeVisible();
     await expect(page.getByRole("button", { name: /^Lanjut ke/ })).toHaveCount(0);
-    // The earlier steps are summed up, each with a way back.
-    const recap = page.getByRole("list", { name: "Ringkasan langkah sebelumnya" });
-    await expect(recap).toContainText("Acme Inc");
-    await expect(recap).toContainText("Hosting");
 
     await page.getByRole("button", { name: "Kembali ke Item" }).click();
     await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Nama item")).toHaveValue("Hosting");
-    await recap.getByRole("button", { name: "Ubah Klien & detail" }).click();
+    await page.getByRole("button", { name: "Kembali ke Klien & detail" }).click();
     await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Acme Inc");
     await expect(page).not.toHaveURL(/#/);
 

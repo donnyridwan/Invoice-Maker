@@ -89,36 +89,3 @@ export function EditorStepper({
     </nav>
   );
 }
-
-/**
- * What the earlier steps hold, one line each with "Ubah" to go back to it — so a later step never
- * hides what was filled in before.
- */
-export function StepRecap({
-  rows,
-  onEdit,
-}: {
-  rows: { step: EditorStep; summary: string }[];
-  onEdit: (step: EditorStep) => void;
-}) {
-  const t = useTranslations("invoices.editor.steps");
-  if (rows.length === 0) return null;
-  return (
-    <ul aria-label={t("recap")} className="mb-6 flex flex-col divide-y divide-border border border-border">
-      {rows.map(({ step, summary }) => (
-        <li key={step} className="flex min-h-11 items-center gap-3 px-3.5 py-2 text-[13px]">
-          <span className="w-24 shrink-0 text-muted">{t(step)}</span>
-          <span className="min-w-0 flex-1 truncate text-fg">{summary}</span>
-          <button
-            type="button"
-            onClick={() => onEdit(step)}
-            aria-label={t("editStep", { step: t(step) })}
-            className="shrink-0 text-muted underline-offset-4 hover:text-fg hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-          >
-            {t("edit")}
-          </button>
-        </li>
-      ))}
-    </ul>
-  );
-}

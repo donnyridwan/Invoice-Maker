@@ -227,16 +227,10 @@
         "items": "Item",
         "payment": "Pembayaran",
         "hasErrors": "(ada isian yang perlu diperbaiki)",
-        "recap": "Ringkasan langkah sebelumnya",
-        "edit": "Ubah",
-        "editStep": "Ubah {step}",
         "back": "Kembali",
         "next": "Lanjut",
         "backTo": "Kembali ke {step}",
-        "nextTo": "Lanjut ke {step}",
-        "noClient": "Belum ada klien",
-        "noItems": "Belum ada item",
-        "due": "Jatuh tempo {date}"
+        "nextTo": "Lanjut ke {step}"
       }
     },
     "detail": {

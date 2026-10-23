@@ -227,16 +227,10 @@
         "items": "Items",
         "payment": "Payment",
         "hasErrors": "(has fields to fix)",
-        "recap": "Earlier steps",
-        "edit": "Edit",
-        "editStep": "Edit {step}",
         "back": "Back",
         "next": "Next",
         "backTo": "Back to {step}",
-        "nextTo": "Next: {step}",
-        "noClient": "No client yet",
-        "noItems": "No items yet",
-        "due": "Due {date}"
+        "nextTo": "Next: {step}"
       }
     },
     "detail": {

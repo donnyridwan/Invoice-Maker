@@ -9,9 +9,6 @@ import { resolveLocale } from "@/i18n/config";
 import { translateValidation } from "@/lib/validation-message";
 import { cn } from "@/lib/utils";
 import { Button, buttonVariants } from "@/components/ui/button";
-import { formatDocDate, isIsoDate } from "@/lib/dates";
-import { formatMoney } from "@/lib/money";
-import { isCurrencyCode } from "@/lib/currencies";
 import { saveInvoiceDraftAction } from "../actions";
 import { useAutosave, type SaveOutcome } from "../autosave";
 import {
@@ -38,7 +35,7 @@ import { StepBar } from "./step-bar";
 import { ScheduleCard } from "@/features/recurring/schedule-card";
 import type { ScheduleView } from "@/features/recurring/schedule-summary";
 import { EditorMenu } from "./editor-menu";
-import { EDITOR_STEPS, EditorStepper, isEditorStep, StepRecap, stepsWithErrors, type EditorStep } from "./editor-steps";
+import { EDITOR_STEPS, EditorStepper, isEditorStep, stepsWithErrors, type EditorStep } from "./editor-steps";
 import type { EditorSectionProps } from "./editor-section";
 import { ItemsSection } from "./items-section";
 import { NotesSection } from "./notes-section";
@@ -50,9 +47,9 @@ type Tab = "form" | "preview";
 
 /**
  * The invoice editor: a narrow form on the left, a preview panel with the live A4 document taking
- * most of the width on the right (tabs on small screens). The form is split into three steps (client & details, items, payment) that can
- * be opened in any order: from the step bar, the back / next buttons by the total, or the recap of
- * the earlier steps. The open step is kept in the URL hash, so a reload stays on it.
+ * most of the width on the right (tabs on small screens). The form is split into three steps
+ * (client & details, items, payment) that can be opened in any order, from the step bar or the
+ * back / next buttons under the form. The open step is kept in the URL hash, so a reload stays on it.
  * Every change is validated on the client; a valid form is autosaved (debounced), an invalid one
  * marks the offending fields and keeps the last saved version on the server.
  */
@@ -170,34 +167,6 @@ export function InvoiceEditor({
   const nextStep = stepIndex < EDITOR_STEPS.length - 1 ? EDITOR_STEPS[stepIndex + 1] : null;
   const invalidSteps = useMemo(() => stepsWithErrors(errors), [errors]);
 
-  // One line per earlier step, for the recap above the open one.
-  const client = clients.find((option) => option.id === state.clientId);
-  const currency = isCurrencyCode(state.currency) ? state.currency : "IDR";
-  const recap = {
-    details: [
-      client?.name ?? t("steps.noClient"),
-      state.number.trim(),
-      isIsoDate(state.dueDate) ? t("steps.due", { date: formatDocDate(state.dueDate, locale) }) : "",
-    ]
-      .filter(Boolean)
-      .join(" · "),
-    items:
-      evaluation.keptLineAmounts.length === 0
-        ? t("steps.noItems")
-        : [
-            state.items
-              .map((item) => item.name.trim())
-              .filter(Boolean)
-              .join(", "),
-            formatMoney(evaluation.totalMinor, currency, locale),
-          ]
-            .filter(Boolean)
-            .join(" · "),
-  };
-  const recapRows = EDITOR_STEPS.slice(0, stepIndex)
-    .filter((earlier): earlier is "details" | "items" => earlier !== "payment")
-    .map((earlier) => ({ step: earlier, summary: recap[earlier] }));
-
   const section: EditorSectionProps = { state, errors, update };
   const formError = errors._form ? translateValidation(tAll, errors._form) : null;
 
@@ -279,7 +248,6 @@ export function InvoiceEditor({
                 {formError}
               </p>
             ) : null}
-            <StepRecap rows={recapRows} onEdit={goTo} />
             <h2 ref={stepHeadingRef} tabIndex={-1} className="mb-8 font-serif text-2xl text-fg outline-none">
               {t(`steps.${step}`)}
             </h2>
