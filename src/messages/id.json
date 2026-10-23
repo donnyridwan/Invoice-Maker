@@ -114,10 +114,6 @@
       "awaitingConfirmation": "Menunggu konfirmasi"
     },
     "editor": {
-      "hero": {
-        "label": "Total tagihan",
-        "due": "Jatuh tempo {date}"
-      },
       "backToList": "Kembali ke daftar invoice",
       "tabs": {
         "label": "Tampilan editor",
@@ -212,7 +208,6 @@
       },
       "appearance": {
         "template": "Template",
-        "accent": "Warna aksen",
         "picker": "Pilih warna",
         "presetLabel": "Warna siap pakai"
       },
@@ -240,7 +235,8 @@
         "backTo": "Kembali ke {step}",
         "nextTo": "Lanjut ke {step}",
         "noClient": "Belum ada klien",
-        "noItems": "Belum ada item"
+        "noItems": "Belum ada item",
+        "due": "Jatuh tempo {date}"
       }
     },
     "detail": {

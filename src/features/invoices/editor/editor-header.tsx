@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { AlertCircle, ArrowLeft, Check, ChevronRight, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { AutosaveStatus } from "../autosave";
@@ -15,16 +15,16 @@ function AutosaveIndicator({ status, onRetry }: { status: AutosaveStatus; onRetr
   let content: ReactNode = null;
   if (status === "saving") {
     content = (
-      <span className="inline-flex items-center gap-1.5 text-muted">
+      <span title={t("saving")} className="inline-flex items-center gap-1.5 text-muted">
         <Loader2 className="size-3.5 animate-spin" aria-hidden />
-        <span className="sr-only sm:not-sr-only">{t("saving")}</span>
+        <span className="sr-only whitespace-nowrap sm:not-sr-only xl:sr-only 2xl:not-sr-only">{t("saving")}</span>
       </span>
     );
   } else if (status === "saved") {
     content = (
-      <span className="inline-flex items-center gap-1.5 text-muted">
+      <span title={t("saved")} className="inline-flex items-center gap-1.5 text-muted">
         <Check className="size-3.5 text-badge-success-fg" aria-hidden />
-        <span className="sr-only sm:not-sr-only">{t("saved")}</span>
+        <span className="sr-only whitespace-nowrap sm:not-sr-only xl:sr-only 2xl:not-sr-only">{t("saved")}</span>
       </span>
     );
   } else if (status === "error") {
@@ -32,17 +32,18 @@ function AutosaveIndicator({ status, onRetry }: { status: AutosaveStatus; onRetr
       <button
         type="button"
         onClick={onRetry}
+        title={t("error")}
         className="inline-flex items-center gap-1.5 rounded text-danger underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <AlertCircle className="size-3.5" aria-hidden />
-        <span className="sr-only sm:not-sr-only">{t("error")}</span>
+        <span className="sr-only whitespace-nowrap sm:not-sr-only xl:sr-only 2xl:not-sr-only">{t("error")}</span>
       </button>
     );
   } else if (status === "invalid") {
     content = (
-      <span className="inline-flex items-center gap-1.5 text-badge-warning-fg">
+      <span title={t("invalid")} className="inline-flex items-center gap-1.5 text-badge-warning-fg">
         <AlertCircle className="size-3.5" aria-hidden />
-        <span className="sr-only sm:not-sr-only">{t("invalid")}</span>
+        <span className="sr-only whitespace-nowrap sm:not-sr-only xl:sr-only 2xl:not-sr-only">{t("invalid")}</span>
       </span>
     );
   }
@@ -55,10 +56,12 @@ function AutosaveIndicator({ status, onRetry }: { status: AutosaveStatus; onRetr
   );
 }
 
+// In the narrow form column of a wide screen the autosave state shows as an icon (with its text as
+// a tooltip and for assistive technology); very wide screens and phones get the text too.
+
 /**
- * The editor's top bar, in place of the app's: back to the list, a breadcrumb ending in the invoice
- * number and its status, the autosave indicator. `actions` is where the header buttons and the ⋯
- * menu go.
+ * The editor's top bar, over the form column: back to the list, the invoice number and its status,
+ * the autosave indicator. `actions` is where the header buttons and the ⋯ menu go.
  */
 export function EditorHeader({
   number,
@@ -74,7 +77,6 @@ export function EditorHeader({
   actions?: ReactNode;
 }) {
   const t = useTranslations("invoices.editor");
-  const tNav = useTranslations("nav");
 
   return (
     <header className="sticky top-14 z-20 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-white px-3 md:top-0 md:px-6">
@@ -85,11 +87,7 @@ export function EditorHeader({
       >
         <ArrowLeft className="size-4" />
       </Link>
-      <span aria-hidden className="hidden text-[13px] text-muted sm:inline">
-        {tNav("invoices")}
-      </span>
-      <ChevronRight aria-hidden className="hidden size-3.5 shrink-0 text-muted sm:block" />
-      <h1 className="min-w-0 truncate font-serif text-lg text-fg">{number.trim() || "—"}</h1>
+      <h1 className="ml-1 min-w-0 truncate font-serif text-lg text-fg">{number.trim() || "—"}</h1>
       <StatusBadge status={status} className="shrink-0" />
       <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
         <AutosaveIndicator status={autosave} onRetry={onRetry} />

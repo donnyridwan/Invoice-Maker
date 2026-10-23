@@ -29,12 +29,12 @@ import type { InvoiceDraftInput } from "../schema";
 import type { BusinessSnapshot } from "../snapshots";
 import type { DisplayStatus } from "../display-status";
 import type { Invoice } from "../queries";
-import { AmountHero } from "./amount-hero";
 import { AppearanceBar } from "./appearance-section";
 import { ClientSection } from "./client-section";
 import { DetailsSection } from "./details-section";
 import { SendMenu } from "../send-menu";
 import { EditorHeader } from "./editor-header";
+import { StepBar } from "./step-bar";
 import { ScheduleCard } from "@/features/recurring/schedule-card";
 import type { ScheduleView } from "@/features/recurring/schedule-summary";
 import { EditorMenu } from "./editor-menu";
@@ -191,7 +191,7 @@ export function InvoiceEditor({
     details: [
       client?.name ?? t("steps.noClient"),
       state.number.trim(),
-      isIsoDate(state.dueDate) ? tAll("invoices.editor.hero.due", { date: formatDocDate(state.dueDate, locale) }) : "",
+      isIsoDate(state.dueDate) ? t("steps.due", { date: formatDocDate(state.dueDate, locale) }) : "",
     ]
       .filter(Boolean)
       .join(" · "),
@@ -216,77 +216,75 @@ export function InvoiceEditor({
   const formError = errors._form ? translateValidation(tAll, errors._form) : null;
 
   return (
-    // On wide screens the editor fills the viewport: form on the left and the preview panel on the
-    // right scroll on their own, like a workspace; below that the page scrolls and tabs switch panes.
-    <div className="flex flex-col xl:h-screen">
-      <EditorHeader
-        number={state.number}
-        status={displayStatus}
-        autosave={autosave.status}
-        onRetry={autosave.retry}
-        actions={
-          <>
-            {status !== "draft" ? (
-              <Link href={`/invoices/${invoiceId}`} className={buttonVariants({ variant: "ghost", size: "sm" })}>
-                {t("view")}
-              </Link>
-            ) : null}
-            <a
-              href={`/api/invoices/${invoiceId}/pdf`}
-              download
-              onClick={(event) => void downloadPdf(event)}
-              aria-label={t("downloadPdf")}
-              className={buttonVariants({ variant: "secondary", size: "sm" })}
-            >
-              <Download className="size-4" aria-hidden />
-              <span className="hidden sm:inline">{t("downloadPdf")}</span>
-            </a>
-            {locked ? null : <SendMenu invoice={{ id: invoiceId, status }} flush={autosave.flush} emailEnabled={emailEnabled} />}
-            <EditorMenu
-              invoiceId={invoiceId}
-              number={state.number}
-              status={status}
-              hasSchedule={recurringSchedule !== null}
-              flush={autosave.flush}
-              cancel={autosave.cancel}
-            />
-          </>
-        }
-      />
+    // On wide screens the editor fills the viewport: on the left a narrow column with the header and
+    // the form (40% of the width, 35% on very wide screens), on the right the preview, full height;
+    // each scrolls on its own, like a workspace. Below that the page scrolls and tabs switch panes.
+    <div className="flex flex-col xl:h-screen xl:flex-row">
+      <div className="flex min-w-0 flex-col xl:w-[40%] xl:flex-none 2xl:w-[35%]">
+        <EditorHeader
+          number={state.number}
+          status={displayStatus}
+          autosave={autosave.status}
+          onRetry={autosave.retry}
+          actions={
+            <>
+              {status !== "draft" ? (
+                <Link href={`/invoices/${invoiceId}`} className={buttonVariants({ variant: "ghost", size: "sm" })}>
+                  {t("view")}
+                </Link>
+              ) : null}
+              <a
+                href={`/api/invoices/${invoiceId}/pdf`}
+                download
+                onClick={(event) => void downloadPdf(event)}
+                aria-label={t("downloadPdf")}
+                className={buttonVariants({ variant: "secondary", size: "sm" })}
+              >
+                <Download className="size-4" aria-hidden />
+                {/* Icon only in the narrow column of a wide screen, labelled again on a very wide one. */}
+                <span className="hidden sm:inline xl:hidden 2xl:inline">{t("downloadPdf")}</span>
+              </a>
+              {locked ? null : <SendMenu invoice={{ id: invoiceId, status }} flush={autosave.flush} emailEnabled={emailEnabled} />}
+              <EditorMenu
+                invoiceId={invoiceId}
+                number={state.number}
+                status={status}
+                hasSchedule={recurringSchedule !== null}
+                flush={autosave.flush}
+                cancel={autosave.cancel}
+              />
+            </>
+          }
+        />
 
-      <div className="sticky top-[120px] z-10 border-b border-border bg-white px-4 py-2 md:top-16 xl:hidden">
-        <div role="tablist" aria-label={t("tabs.label")} className="flex gap-1 border border-border bg-subtle p-1">
-          {(["form", "preview"] as const).map((value) => (
-            <button
-              key={value}
-              type="button"
-              role="tab"
-              id={`editor-tab-${value}`}
-              aria-selected={tab === value}
-              aria-controls={`editor-panel-${value}`}
-              onClick={() => setTab(value)}
-              className={cn(
-                "h-7 flex-1 text-[13px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-                tab === value ? "bg-white text-fg shadow-xs" : "text-muted hover:text-fg",
-              )}
-            >
-              {t(`tabs.${value}`)}
-            </button>
-          ))}
+        <div className="sticky top-[120px] z-10 border-b border-border bg-white px-4 py-2 md:top-16 xl:hidden">
+          <div role="tablist" aria-label={t("tabs.label")} className="flex gap-1 border border-border bg-subtle p-1">
+            {(["form", "preview"] as const).map((value) => (
+              <button
+                key={value}
+                type="button"
+                role="tab"
+                id={`editor-tab-${value}`}
+                aria-selected={tab === value}
+                aria-controls={`editor-panel-${value}`}
+                onClick={() => setTab(value)}
+                className={cn(
+                  "h-7 flex-1 text-[13px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                  tab === value ? "bg-white text-fg shadow-xs" : "text-muted hover:text-fg",
+                )}
+              >
+                {t(`tabs.${value}`)}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      <div className="flex min-h-0 flex-1 flex-col xl:flex-row">
         <div
           ref={formPanelRef}
           role="tabpanel"
           id="editor-panel-form"
           aria-labelledby="editor-tab-form"
-          // The form takes 40% of a wide screen (35% of a very wide one), the preview the rest.
-          className={cn(
-            "flex min-w-0 flex-1 flex-col xl:w-[40%] xl:flex-none xl:overflow-y-auto 2xl:w-[35%]",
-            tab !== "form" && "hidden",
-          )}
+          className={cn("flex min-h-0 min-w-0 flex-1 flex-col xl:flex xl:overflow-y-auto", tab !== "form" && "hidden")}
         >
           <EditorStepper current={step} errors={invalidSteps} onSelect={goTo} />
           <div className="mx-auto w-full max-w-[640px] flex-1 px-4 py-8 md:px-8 md:py-12">
@@ -333,10 +331,7 @@ export function InvoiceEditor({
               )}
             </fieldset>
           </div>
-          <AmountHero
-            state={state}
-            evaluation={evaluation}
-            locale={locale}
+          <StepBar
             back={
               previousStep ? (
                 <Button
@@ -348,7 +343,7 @@ export function InvoiceEditor({
                   className="h-9"
                 >
                   <ArrowLeft className="size-4" aria-hidden />
-                  <span className="hidden sm:inline">{t("steps.back")}</span>
+                  {t("steps.back")}
                 </Button>
               ) : null
             }
@@ -362,22 +357,25 @@ export function InvoiceEditor({
             }
           />
         </div>
-
-        <aside
-          role="tabpanel"
-          id="editor-panel-preview"
-          aria-labelledby="editor-tab-preview"
-          className={cn(
-            "min-w-0 bg-subtle xl:flex xl:flex-1 xl:flex-col xl:border-l xl:border-border",
-            tab !== "preview" && "hidden",
-          )}
-        >
-          <AppearanceBar state={state} update={update} disabled={locked} />
-          <div className="min-h-0 flex-1 xl:overflow-y-auto">
-            <PreviewPane doc={doc} />
-          </div>
-        </aside>
       </div>
+
+      <aside
+        role="tabpanel"
+        id="editor-panel-preview"
+        aria-labelledby="editor-tab-preview"
+        className={cn(
+          "min-w-0 bg-subtle xl:flex xl:flex-1 xl:flex-col xl:border-l xl:border-border",
+          tab !== "preview" && "hidden",
+        )}
+      >
+        <div className="min-h-0 flex-1 xl:overflow-y-auto">
+          <PreviewPane doc={doc} />
+          {/* Template and accent colour float over the bottom of the preview while it scrolls. */}
+          <div className="pointer-events-none sticky bottom-0 z-10 flex justify-center px-4 pb-6">
+            <AppearanceBar state={state} update={update} disabled={locked} className="pointer-events-auto" />
+          </div>
+        </div>
+      </aside>
     </div>
   );
 }

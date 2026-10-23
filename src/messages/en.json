@@ -114,10 +114,6 @@
       "awaitingConfirmation": "Awaiting confirmation"
     },
     "editor": {
-      "hero": {
-        "label": "Invoice total",
-        "due": "Due {date}"
-      },
       "backToList": "Back to invoices",
       "tabs": {
         "label": "Editor view",
@@ -212,7 +208,6 @@
       },
       "appearance": {
         "template": "Template",
-        "accent": "Accent color",
         "picker": "Pick a color",
         "presetLabel": "Preset colors"
       },
@@ -240,7 +235,8 @@
         "backTo": "Back to {step}",
         "nextTo": "Next: {step}",
         "noClient": "No client yet",
-        "noItems": "No items yet"
+        "noItems": "No items yet",
+        "due": "Due {date}"
       }
     },
     "detail": {

@@ -14,11 +14,16 @@ const SWATCH_CLASS =
 const SWATCH_SELECTED_CLASS = "ring-2 ring-offset-2 ring-fg";
 
 /**
- * The bar heading the preview panel, so the form stays short: a template dropdown (new invoices
+ * The floating bar over the preview, so the form stays short: a template dropdown (new invoices
  * start with the profile's default) and the accent colour as a row of swatches, the last of which
  * opens the colour picker for any other colour.
  */
-export function AppearanceBar({ state, update, disabled }: Omit<EditorSectionProps, "errors"> & { disabled?: boolean }) {
+export function AppearanceBar({
+  state,
+  update,
+  disabled,
+  className,
+}: Omit<EditorSectionProps, "errors"> & { disabled?: boolean; className?: string }) {
   const t = useTranslations("invoices.editor");
   const tTemplates = useTranslations("settings.templates");
   const accent = state.accentColor.toUpperCase();
@@ -28,10 +33,13 @@ export function AppearanceBar({ state, update, disabled }: Omit<EditorSectionPro
     <fieldset
       disabled={disabled}
       aria-label={t("sections.appearance")}
-      className="m-0 flex min-h-12 min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-0 border-b border-solid border-border bg-white px-4 py-2"
+      className={cn(
+        "m-0 flex min-w-0 flex-wrap items-center justify-center gap-x-3 gap-y-2 border border-solid border-border bg-white px-2 py-2 shadow-[0_8px_30px_rgba(0,0,0,0.08)]",
+        className,
+      )}
     >
-      <div className="flex items-center gap-2">
-        <label htmlFor="invoice-template" className="text-[13px] text-muted">
+      <div className="flex items-center">
+        <label htmlFor="invoice-template" className="sr-only">
           {t("appearance.template")}
         </label>
         <Select value={state.template} onValueChange={(value) => update({ template: value as Template })} disabled={disabled}>
@@ -47,10 +55,8 @@ export function AppearanceBar({ state, update, disabled }: Omit<EditorSectionPro
           </SelectContent>
         </Select>
       </div>
-      <div role="group" aria-label={t("appearance.presetLabel")} className="flex flex-wrap items-center gap-2">
-        <span aria-hidden className="mr-1 text-[13px] text-muted">
-          {t("appearance.accent")}
-        </span>
+      <span aria-hidden className="hidden h-5 w-px bg-border sm:block" />
+      <div role="group" aria-label={t("appearance.presetLabel")} className="flex flex-wrap items-center gap-2 pr-1">
         {ACCENT_PRESETS.map((color) => (
           <button
             key={color}
