@@ -7,7 +7,8 @@ function Toaster(props: ToasterProps) {
     <SonnerToaster
       toastOptions={{
         classNames: {
-          toast: "!rounded-card !border !border-border !bg-white !text-fg !text-sm",
+          toast: "!rounded-card !border !border-fg !bg-fg !text-white !text-sm !shadow-lg",
+          description: "!text-white/70",
         },
       }}
       {...props}

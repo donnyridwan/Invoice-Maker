@@ -5,15 +5,14 @@ import { cn } from "@/lib/utils";
 import type { EditorSectionProps } from "./editor-section";
 
 /** Accent colours offered as one-click presets. */
-export const ACCENT_PRESETS = ["#2F4B73", "#0A2540", "#00A67E", "#111111", "#E25950", "#F5A623"] as const;
+export const ACCENT_PRESETS = ["#111111", "#2F4B73", "#0A2540", "#00A67E", "#E25950", "#F5A623"] as const;
 
 const SWATCH_CLASS =
-  "size-7 shrink-0 rounded-full border border-black/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
+  "size-6 shrink-0 rounded-full border border-black/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
 const SWATCH_SELECTED_CLASS = "ring-2 ring-offset-2 ring-fg";
 
 /**
- * The accent colour, shown as a compact row of swatches above the live preview so the form stays
- * short; the last swatch opens the colour picker for any other colour. The template comes from the
+ * The accent colour, a row of swatches heading the preview panel so the form stays short; the last swatch opens the colour picker for any other colour. The template comes from the
  * profile's default (Settings).
  */
 export function AppearanceBar({ state, update, disabled }: Omit<EditorSectionProps, "errors"> & { disabled?: boolean }) {
@@ -25,9 +24,9 @@ export function AppearanceBar({ state, update, disabled }: Omit<EditorSectionPro
     <fieldset
       disabled={disabled}
       aria-label={t("appearance.accent")}
-      className="m-0 mb-3 flex min-w-0 flex-wrap items-center gap-3 rounded-card border border-border bg-white px-4 py-2.5 sm:mb-4"
+      className="m-0 flex min-h-12 min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-0 border-b border-solid border-border bg-white px-4 py-2"
     >
-      <span aria-hidden className="text-sm font-semibold text-fg">
+      <span aria-hidden className="text-[13px] font-medium text-fg">
         {t("appearance.accent")}
       </span>
       <div role="group" aria-label={t("appearance.presetLabel")} className="flex flex-wrap items-center gap-2">

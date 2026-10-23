@@ -61,7 +61,7 @@ export function RegisterForm() {
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl font-extrabold">{t("auth.signUpTitle")}</CardTitle>
+        <CardTitle className="text-xl font-semibold">{t("auth.signUpTitle")}</CardTitle>
         <CardDescription>{t("auth.signUpDescription")}</CardDescription>
       </CardHeader>
       <CardContent>

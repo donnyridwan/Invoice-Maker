@@ -21,7 +21,7 @@ export function StatusBanner({ logoUrl, badge, title, subtitle, note, actions }:
       <div className="flex items-start justify-between gap-3">
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoUrl} alt="" className="size-11 rounded-full border border-border object-contain" />
+          <img src={logoUrl} alt="" className="size-10 rounded-lg border border-border object-contain" />
         ) : (
           <span />
         )}
@@ -30,7 +30,7 @@ export function StatusBanner({ logoUrl, badge, title, subtitle, note, actions }:
         </Badge>
       </div>
       <div className="flex flex-col gap-1">
-        <h1 className="text-2xl leading-tight font-extrabold tracking-tight text-fg sm:text-3xl">{title}</h1>
+        <h1 className="text-xl leading-tight font-semibold tracking-tight text-fg sm:text-2xl">{title}</h1>
         {subtitle ? <p className="text-sm text-muted">{subtitle}</p> : null}
       </div>
       {note ? (

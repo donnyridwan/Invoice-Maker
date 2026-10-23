@@ -19,7 +19,7 @@ export function useErrorText(errors: EditorErrors): (key: string) => string | un
   return (key) => (errors[key] ? translateValidation(t, errors[key]) : undefined);
 }
 
-/** A rounded card with a bold sentence-case title; corner radius and colours come from the page theme. */
+/** A flat form section: a small semibold title, then the fields; sections are divided by a hairline. */
 export function EditorSection({
   title,
   action,
@@ -33,14 +33,14 @@ export function EditorSection({
 }) {
   const headingId = useId();
   return (
-    <section aria-labelledby={headingId} className={cn("rounded-card border border-border bg-white", className)}>
-      <div className="flex min-h-12 items-center justify-between gap-3 px-5 pt-4">
-        <h2 id={headingId} className="text-base font-bold tracking-tight text-fg">
+    <section aria-labelledby={headingId} className={cn("border-t border-border py-6 first:border-t-0 first:pt-0", className)}>
+      <div className="flex min-h-8 items-center justify-between gap-3">
+        <h2 id={headingId} className="text-[15px] font-semibold tracking-tight text-fg">
           {title}
         </h2>
         {action}
       </div>
-      <div className="flex flex-col gap-4 p-5 pt-3">{children}</div>
+      <div className="mt-3 flex flex-col gap-4">{children}</div>
     </section>
   );
 }

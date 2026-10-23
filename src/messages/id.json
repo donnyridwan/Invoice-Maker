@@ -32,7 +32,10 @@
     "signOut": "Keluar",
     "mainMenu": "Menu utama",
     "userMenu": "Menu pengguna",
-    "openMenu": "Buka menu"
+    "openMenu": "Buka menu",
+    "business": "Bisnis",
+    "detail": "Detail",
+    "breadcrumb": "Navigasi halaman"
   },
   "auth": {
     "signIn": "Masuk",
@@ -90,7 +93,8 @@
     "recent": {
       "title": "Invoice terbaru",
       "viewAll": "Lihat semua"
-    }
+    },
+    "workspace": "Ruang kerja saya"
   },
   "invoices": {
     "title": "Invoice",
@@ -120,7 +124,12 @@
       "awaitingConfirmation": "Menunggu konfirmasi"
     },
     "editor": {
-      "hero": {"label": "Total tagihan", "items": "{count} item", "due": "Jatuh tempo {date}", "dueOnReceipt": "Jatuh tempo saat diterima"},
+      "hero": {
+        "label": "Total tagihan",
+        "items": "{count} item",
+        "due": "Jatuh tempo {date}",
+        "dueOnReceipt": "Jatuh tempo saat diterima"
+      },
       "backToList": "Kembali ke daftar invoice",
       "tabs": {
         "label": "Tampilan editor",

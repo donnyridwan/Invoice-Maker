@@ -113,7 +113,7 @@ export function PaymentAccountList({ accounts }: { accounts: PaymentAccount[] })
             return (
               <li key={account.id}>
                 <Card className={`flex items-center gap-4 p-4 ${archived ? "opacity-60" : ""}`}>
-                  <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-subtle text-fg">
+                  <span className="flex size-10 shrink-0 items-center justify-center rounded-lg bg-tile text-fg">
                     <Icon className="size-5" />
                   </span>
                   <div className="min-w-0 flex-1">

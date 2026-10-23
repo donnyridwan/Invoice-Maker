@@ -32,7 +32,10 @@
     "signOut": "Sign out",
     "mainMenu": "Main menu",
     "userMenu": "User menu",
-    "openMenu": "Open menu"
+    "openMenu": "Open menu",
+    "business": "Business",
+    "detail": "Details",
+    "breadcrumb": "Breadcrumb"
   },
   "auth": {
     "signIn": "Sign in",
@@ -90,7 +93,8 @@
     "recent": {
       "title": "Recent invoices",
       "viewAll": "View all"
-    }
+    },
+    "workspace": "My workspace"
   },
   "invoices": {
     "title": "Invoices",
@@ -120,7 +124,12 @@
       "awaitingConfirmation": "Awaiting confirmation"
     },
     "editor": {
-      "hero": {"label": "Invoice total", "items": "{count, plural, one {# item} other {# items}}", "due": "Due {date}", "dueOnReceipt": "Due on receipt"},
+      "hero": {
+        "label": "Invoice total",
+        "items": "{count, plural, one {# item} other {# items}}",
+        "due": "Due {date}",
+        "dueOnReceipt": "Due on receipt"
+      },
       "backToList": "Back to invoices",
       "tabs": {
         "label": "Editor view",

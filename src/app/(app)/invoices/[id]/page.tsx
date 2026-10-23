@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, ChevronRight } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { buildInvoiceDocument } from "@/documents/build-document";
 import { InvoiceDocumentView } from "@/documents/invoice-document-view";
@@ -26,6 +26,7 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
   const user = await requireUser();
   const { id } = await params;
   const t = await getTranslations("invoices.detail");
+  const tNav = await getTranslations("nav");
 
   const loaded = await Promise.all([
     getInvoice(user.id, id),
@@ -45,27 +46,33 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
   const payerNames = Object.fromEntries(claims.map((claim) => [claim.id, claim.payerName]));
 
   return (
-    <>
-      <div className="mb-6 flex items-center gap-3">
+    // A workspace like the editor: the document on the left, status, actions and activity in a
+    // panel on the right; each scrolls on its own on wide screens.
+    <div className="flex flex-col xl:h-screen">
+      <header className="sticky top-12 z-20 flex h-12 shrink-0 items-center gap-2 border-b border-border bg-white px-3 md:top-0 md:px-4">
         <Link
           href="/invoices"
           aria-label={t("back")}
-          className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-subtle text-fg hover:bg-border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           <ArrowLeft className="size-4" />
         </Link>
-        <h1 className="min-w-0 truncate text-2xl font-semibold tracking-tight text-fg">{invoice.number}</h1>
-      </div>
+        <span aria-hidden className="hidden text-[13px] text-muted sm:inline">
+          {tNav("invoices")}
+        </span>
+        <ChevronRight aria-hidden className="hidden size-3.5 shrink-0 text-muted sm:block" />
+        <h1 className="min-w-0 truncate text-[13px] font-semibold text-fg">{invoice.number}</h1>
+      </header>
 
-      <div className="flex flex-col gap-6 xl:flex-row xl:items-start">
-        <section aria-label={t("documentLabel")} className="min-w-0 rounded-panel bg-subtle p-3 sm:p-6 xl:flex-1">
-          <div className="mx-auto max-w-[794px] overflow-hidden rounded-md bg-white shadow-[0_2px_8px_rgba(14,14,14,0.08),0_0_0_1px_rgba(14,14,14,0.04)]">
+      <div className="flex min-h-0 flex-1 flex-col xl:flex-row">
+        <section aria-label={t("documentLabel")} className="min-w-0 bg-sidebar p-4 sm:p-6 xl:flex-1 xl:overflow-y-auto">
+          <div className="mx-auto max-w-[794px] overflow-hidden rounded-md bg-white shadow-[0_1px_3px_rgba(10,10,10,0.08),0_0_0_1px_rgba(10,10,10,0.05)]">
             <ScaledDocument>
               <InvoiceDocumentView doc={buildInvoiceDocument(documentSourceFromInvoice(invoice))} />
             </ScaledDocument>
           </div>
         </section>
-        <aside className="xl:w-[360px] xl:shrink-0">
+        <aside className="border-t border-border bg-white xl:w-[400px] xl:shrink-0 xl:overflow-y-auto xl:border-l xl:border-t-0">
           <DetailPanel
             invoice={invoice}
             currency={currency}
@@ -86,6 +93,6 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
           />
         </aside>
       </div>
-    </>
+    </div>
   );
 }

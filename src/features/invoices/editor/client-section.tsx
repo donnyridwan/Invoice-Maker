@@ -194,10 +194,10 @@ function initials(name: string): string {
 function ClientSummary({ client }: { client: ClientOption }) {
   const details = [client.company, client.email, client.address?.split("\n")[0]].filter(Boolean).join(" · ");
   return (
-    <div className="flex items-center gap-3 rounded-card bg-subtle px-3 py-2.5">
+    <div className="flex items-center gap-3 rounded-card border border-border bg-sidebar px-3 py-2.5">
       <span
         aria-hidden
-        className="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-sm font-extrabold text-accent"
+        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-fg shadow-xs"
       >
         {initials(client.name)}
       </span>

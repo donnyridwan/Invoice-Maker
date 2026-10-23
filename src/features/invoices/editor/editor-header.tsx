@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import Link from "next/link";
-import { AlertCircle, ArrowLeft, Check, Loader2 } from "lucide-react";
+import { AlertCircle, ArrowLeft, Check, ChevronRight, Loader2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 import type { AutosaveStatus } from "../autosave";
@@ -49,15 +49,16 @@ function AutosaveIndicator({ status, onRetry }: { status: AutosaveStatus; onRetr
 
   // A polite live region that is always mounted, so changes are announced.
   return (
-    <div role="status" aria-live="polite" className={cn("min-w-0 text-sm", status === "idle" && "min-h-5")}>
+    <div role="status" aria-live="polite" className={cn("min-w-0 text-[13px]", status === "idle" && "min-h-5")}>
       {content}
     </div>
   );
 }
 
 /**
- * Sticky bar above the editor: back to the list, the invoice number, its status and the autosave
- * indicator. `actions` is where the header buttons and the ⋯ menu go.
+ * The editor's top bar, in place of the app's: back to the list, a breadcrumb ending in the invoice
+ * number and its status, the autosave indicator. `actions` is where the header buttons and the ⋯
+ * menu go.
  */
 export function EditorHeader({
   number,
@@ -73,17 +74,22 @@ export function EditorHeader({
   actions?: ReactNode;
 }) {
   const t = useTranslations("invoices.editor");
+  const tNav = useTranslations("nav");
 
   return (
-    <header className="sticky top-14 z-20 -mx-4 flex h-16 items-center gap-3 border-b border-border bg-white px-4 md:top-0 md:-mx-6 md:px-6">
+    <header className="sticky top-12 z-20 flex h-12 shrink-0 items-center gap-2 border-b border-border bg-white px-3 md:top-0 md:px-4">
       <Link
         href="/invoices"
         aria-label={t("backToList")}
-        className="inline-flex size-10 shrink-0 items-center justify-center rounded-full bg-subtle text-fg transition-colors hover:bg-border focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <ArrowLeft className="size-4" />
       </Link>
-      <h1 className="min-w-0 truncate text-lg font-extrabold tracking-tight text-fg">{number.trim() || "—"}</h1>
+      <span aria-hidden className="hidden text-[13px] text-muted sm:inline">
+        {tNav("invoices")}
+      </span>
+      <ChevronRight aria-hidden className="hidden size-3.5 shrink-0 text-muted sm:block" />
+      <h1 className="min-w-0 truncate text-[13px] font-semibold text-fg">{number.trim() || "—"}</h1>
       <StatusBadge status={status} className="shrink-0" />
       <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
         <AutosaveIndicator status={autosave} onRetry={onRetry} />

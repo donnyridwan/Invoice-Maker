@@ -57,7 +57,7 @@ export function LoginForm({ next, expired = false }: { next?: string; expired?: 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-2xl font-extrabold">{t("auth.signInTitle")}</CardTitle>
+        <CardTitle className="text-xl font-semibold">{t("auth.signInTitle")}</CardTitle>
         <CardDescription>{t("auth.signInDescription")}</CardDescription>
       </CardHeader>
       <CardContent>

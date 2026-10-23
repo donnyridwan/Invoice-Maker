@@ -261,7 +261,7 @@ function RecurringBody({
               role="radiogroup"
               aria-labelledby="recurring-frequency-label"
               onKeyDown={onFrequencyKeyDown}
-              className="inline-flex w-full rounded-button bg-subtle p-1"
+              className="inline-flex w-full rounded-lg bg-subtle p-1"
             >
               {RECURRING_FREQUENCIES.map((frequency) => {
                 const selected = values.frequency === frequency;
@@ -275,8 +275,8 @@ function RecurringBody({
                     data-value={frequency}
                     onClick={() => change({ frequency })}
                     className={cn(
-                      "h-8 flex-1 rounded-button text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-                      selected ? "bg-white text-fg shadow-sm" : "text-muted hover:text-fg",
+                      "h-7 flex-1 rounded-md text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                      selected ? "bg-white text-fg shadow-xs" : "text-muted hover:text-fg",
                     )}
                   >
                     {t(`dialog.frequencies.${frequency}`)}

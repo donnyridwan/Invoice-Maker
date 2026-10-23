@@ -33,7 +33,7 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/invoice
 
       <InvoiceTabs active={tab} counts={counts} q={q} recurringCount={recurringCount} />
 
-      <form action="/invoices" method="get" role="search" className="relative mb-4 w-full sm:w-72">
+      <form action="/invoices" method="get" role="search" className="relative mb-2 w-full">
         {tab !== "all" ? <input type="hidden" name="tab" value={tab} /> : null}
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
         <Input

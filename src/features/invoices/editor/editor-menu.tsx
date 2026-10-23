@@ -90,7 +90,7 @@ export function EditorMenu({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" aria-label={t("actions")} disabled={busy !== null} className="size-9 rounded-full bg-subtle px-0 hover:bg-border">
+          <Button variant="ghost" size="sm" aria-label={t("actions")} disabled={busy !== null} className="size-8 border border-border px-0 shadow-xs">
             {busy ? <Loader2 className="size-4 animate-spin" /> : <MoreHorizontal className="size-4" />}
           </Button>
         </DropdownMenuTrigger>

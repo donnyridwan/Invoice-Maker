@@ -120,7 +120,7 @@ export function ItemRow({
           {...attributes}
           {...listeners}
           aria-label={t("dragHandle", { n })}
-          className="inline-flex size-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-full text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:cursor-grabbing disabled:cursor-default"
+          className="inline-flex size-9 shrink-0 cursor-grab touch-none items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent active:cursor-grabbing disabled:cursor-default"
         >
           <GripVertical className="size-4" />
         </button>

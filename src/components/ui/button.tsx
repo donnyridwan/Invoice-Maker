@@ -9,13 +9,13 @@ const buttonVariants = cva(
     variants: {
       variant: {
         primary: "bg-primary text-primary-fg hover:bg-primary-hover",
-        secondary: "border border-border bg-white text-fg hover:bg-subtle",
+        secondary: "border border-border bg-white text-fg shadow-xs hover:bg-subtle",
         ghost: "text-fg hover:bg-subtle",
         destructive: "bg-danger text-white hover:bg-danger-hover",
       },
       size: {
-        sm: "h-8 px-3 text-sm",
-        md: "h-9 px-4 text-sm",
+        sm: "h-8 px-3 text-[13px]",
+        md: "h-9 px-3.5 text-sm",
       },
     },
     defaultVariants: { variant: "primary", size: "md" },

@@ -45,7 +45,8 @@ import { TotalsSection } from "./totals-section";
 type Tab = "form" | "preview";
 
 /**
- * The invoice editor: form on the left, live A4 preview on the right (tabs on small screens).
+ * The invoice editor: form on the left, a preview panel with the live A4 document on the right (tabs
+ * on small screens).
  * Every change is validated on the client; a valid form is autosaved (debounced), an invalid one
  * marks the offending fields and keeps the last saved version on the server.
  */
@@ -146,7 +147,9 @@ export function InvoiceEditor({
   const formError = errors._form ? translateValidation(tAll, errors._form) : null;
 
   return (
-    <div>
+    // On wide screens the editor fills the viewport: form on the left and the preview panel on the
+    // right scroll on their own, like a workspace; below that the page scrolls and tabs switch panes.
+    <div className="flex flex-col xl:h-screen">
       <EditorHeader
         number={state.number}
         status={displayStatus}
@@ -171,19 +174,19 @@ export function InvoiceEditor({
             </a>
             {locked ? null : <SendMenu invoice={{ id: invoiceId, status }} flush={autosave.flush} emailEnabled={emailEnabled} />}
             <EditorMenu
-            invoiceId={invoiceId}
-            number={state.number}
-            status={status}
-            hasSchedule={recurringSchedule !== null}
-            flush={autosave.flush}
-            cancel={autosave.cancel}
-          />
+              invoiceId={invoiceId}
+              number={state.number}
+              status={status}
+              hasSchedule={recurringSchedule !== null}
+              flush={autosave.flush}
+              cancel={autosave.cancel}
+            />
           </>
         }
       />
 
-      <div className="sticky top-[112px] z-10 -mx-4 border-b border-border bg-white px-4 py-2 md:top-14 md:-mx-6 md:px-6 xl:hidden">
-        <div role="tablist" aria-label={t("tabs.label")} className="flex gap-1 rounded-button bg-subtle p-1">
+      <div className="sticky top-24 z-10 border-b border-border bg-white px-4 py-2 md:top-12 xl:hidden">
+        <div role="tablist" aria-label={t("tabs.label")} className="flex gap-1 rounded-lg bg-subtle p-1">
           {(["form", "preview"] as const).map((value) => (
             <button
               key={value}
@@ -194,8 +197,8 @@ export function InvoiceEditor({
               aria-controls={`editor-panel-${value}`}
               onClick={() => setTab(value)}
               className={cn(
-                "h-8 flex-1 rounded-button text-sm font-semibold focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
-                tab === value ? "bg-white text-fg shadow-sm" : "text-muted hover:text-fg",
+                "h-7 flex-1 rounded-md text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                tab === value ? "bg-white text-fg shadow-xs" : "text-muted hover:text-fg",
               )}
             >
               {t(`tabs.${value}`)}
@@ -204,56 +207,60 @@ export function InvoiceEditor({
         </div>
       </div>
 
-      <div className="mt-6 flex flex-col gap-6 xl:flex-row xl:items-start xl:gap-10">
+      <div className="flex min-h-0 flex-1 flex-col xl:flex-row">
         <div
           role="tabpanel"
           id="editor-panel-form"
           aria-labelledby="editor-tab-form"
-          className={cn("min-w-0 xl:block xl:flex-[0_1_520px]", tab !== "form" && "hidden")}
+          className={cn("flex min-w-0 flex-1 flex-col xl:flex xl:overflow-y-auto", tab !== "form" && "hidden")}
         >
-          <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col gap-4 border-0 p-0">
-            {locked ? <p className="rounded-card bg-subtle px-4 py-3 text-sm text-muted">{t("locked")}</p> : null}
-            {formError ? (
-              <p role="alert" className="rounded-card bg-badge-danger-bg px-4 py-3 text-sm text-badge-danger-fg">
-                {formError}
-              </p>
-            ) : null}
-            <AmountHero state={state} evaluation={evaluation} locale={locale} />
-            <ClientSection
-              {...section}
-              clients={clients}
-              onClientAdded={(client) => setClients((current) => [...current, client])}
-            />
-            <DetailsSection {...section} />
-            <ItemsSection {...section} evaluation={evaluation} locale={locale} catalog={catalog} />
-            <TotalsSection {...section} evaluation={evaluation} locale={locale} />
-            <PaymentSection {...section} accounts={accounts} />
-            <NotesSection {...section} />
-          </fieldset>
-          {recurringSchedule ? (
-            <div className="mt-4">
-              <ScheduleCard
-                invoiceId={invoiceId}
-                number={state.number}
-                schedule={recurringSchedule}
-                flush={autosave.flush}
+          <div className="mx-auto w-full max-w-[680px] flex-1 px-4 py-6 md:px-8 md:py-8">
+            <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col border-0 p-0">
+              {locked ? <p className="mb-6 rounded-card bg-subtle px-4 py-3 text-sm text-muted">{t("locked")}</p> : null}
+              {formError ? (
+                <p role="alert" className="mb-6 rounded-card bg-badge-danger-bg px-4 py-3 text-sm text-badge-danger-fg">
+                  {formError}
+                </p>
+              ) : null}
+              <ClientSection
+                {...section}
+                clients={clients}
+                onClientAdded={(client) => setClients((current) => [...current, client])}
               />
-            </div>
-          ) : null}
+              <DetailsSection {...section} />
+              <ItemsSection {...section} evaluation={evaluation} locale={locale} catalog={catalog} />
+              <TotalsSection {...section} evaluation={evaluation} locale={locale} />
+              <PaymentSection {...section} accounts={accounts} />
+              <NotesSection {...section} />
+            </fieldset>
+            {recurringSchedule ? (
+              <div className="mt-2">
+                <ScheduleCard
+                  invoiceId={invoiceId}
+                  number={state.number}
+                  schedule={recurringSchedule}
+                  flush={autosave.flush}
+                />
+              </div>
+            ) : null}
+          </div>
+          <AmountHero state={state} evaluation={evaluation} locale={locale} />
         </div>
 
-        <div
+        <aside
           role="tabpanel"
           id="editor-panel-preview"
           aria-labelledby="editor-tab-preview"
           className={cn(
-            "min-w-0 xl:block xl:min-w-[440px] xl:flex-[1_1_0] xl:sticky xl:top-[72px] xl:max-h-[calc(100vh-88px)] xl:overflow-y-auto",
+            "min-w-0 bg-sidebar xl:flex xl:w-[46%] xl:max-w-[720px] xl:flex-col xl:border-l xl:border-border",
             tab !== "preview" && "hidden",
           )}
         >
           <AppearanceBar state={state} update={update} disabled={locked} />
-          <PreviewPane doc={doc} />
-        </div>
+          <div className="min-h-0 flex-1 xl:overflow-y-auto">
+            <PreviewPane doc={doc} />
+          </div>
+        </aside>
       </div>
     </div>
   );

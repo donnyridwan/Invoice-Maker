@@ -55,27 +55,32 @@ laporan lanjutan, aplikasi mobile native, custom domain, paket berbayar.
 
 ## 2a. Gaya Visual
 
-Gaya Wise
-([Wise home](https://mobbin.com/screens/ede78e65-ca02-449f-96c0-f36420fe9281),
-[Wise send](https://mobbin.com/screens/ebc6f8fd-a5eb-44be-b881-1f023bc32f88)):
+Gaya ElevenLabs
+([ElevenLabs web](https://mobbin.com/apps/eleven-labs-web-a715a54a-7922-40d8-8250-3e43735682e8/7c321fea-483d-4fe6-8fc4-aa3899ddc93e/screens)):
+ruang kerja netral yang tenang.
 
-- Biru tua yang soft: tombol utama dan tinta aksen navy kalem `#2F4B73` (teks
-  tombol putih), teks `#111827`, teks sekunder `#5B6577`, kanvas `#F2F5F9`,
-  border `#E1E7EF`. Merah (`#C4271C`) untuk error, aksi hapus, dan status Jatuh
-  tempo.
-- Tombol berbentuk pil: utama biru, sekunder bergaris. Input setinggi 44px
-  dengan radius 10px.
-- Kartu dan panel membulat (20–24px), sebagian di atas kanvas tanpa border.
-  Tab dan filter berupa pil; pil aktif biru.
-- Font Inter, ukuran dasar 14px, judul halaman 30px extrabold, angka nominal
-  utama (total tagihan, kartu ringkasan) black weight `tabular-nums`. Wordmark
-  "Invoice Maker" black weight biru.
-- Badge status: Lunas hijau muda, Terkirim/Dilihat biru muda, Menunggu
-  konfirmasi kuning, Draft/Void abu, Jatuh tempo merah muda.
-- Tabel padat dengan baris setinggi ±44px dalam kartu membulat. Empty state
-  memakai kotak bergaris putus-putus.
+- Warna: tinta dan tombol utama hampir hitam `#0A0A0A` (teks putih), teks
+  sekunder `#6B6B6B`, border tipis `#EBEBEB`, sidebar dan kanvas `#FAFAFA`,
+  kotak abu `#F3F3F3`. Warna hanya untuk badge status (Lunas hijau, Terkirim/
+  Dilihat biru, Menunggu konfirmasi kuning, Draft/Void abu, Jatuh tempo merah),
+  error, aksi hapus, dan status Jatuh tempo.
+- Sudut kecil: tombol dan input 8px, kartu 12px, dialog 16px. Tombol dan input
+  setinggi 32–36px dengan bayangan tipis; badge kotak membulat kecil.
+- Layout: sidebar abu terang 240px (logo, menu utama, grup "Bisnis", kartu
+  pengguna di bawah) dan top bar 48px berisi breadcrumb. Judul halaman 24px
+  semibold; tab bergaris bawah; tabel datar tanpa kartu; pencarian selebar
+  halaman.
+- Dasbor: sapaan dengan label "Ruang kerja saya", kotak pintasan (Invoice baru,
+  Klien baru, Katalog, Rekening), satu kartu statistik terbagi tiga kolom, lalu
+  Invoice terbaru dan checklist berdampingan.
+- Editor dan detail invoice memenuhi layar: top bar sendiri (kembali,
+  breadcrumb, status, aksi), form atau dokumen di kiri, panel di kanan (preview
+  dengan warna aksen di editor; status, aksi, jadwal berulang, dan aktivitas di
+  detail). Total editor ada di bar bawah form.
+- Pengaturan memakai navigasi bagian di kiri. Toast gelap.
+- Font Inter, ukuran dasar 14px, label 13px.
 - Template dokumen invoice tetap bersih dan minimal; warna aksen default
-  dokumen `#2F4B73` (pengguna bisa memilih warna lain). Template default:
+  dokumen `#111111` (pengguna bisa memilih warna lain). Template default:
   **Minimal**.
 
 ## 3. Arsitektur

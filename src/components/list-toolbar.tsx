@@ -35,8 +35,8 @@ export function ListToolbar({
   };
 
   return (
-    <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
-      <nav aria-label={tabsLabel} className="flex gap-1 rounded-button bg-subtle p-1">
+    <div className="mb-2 flex flex-col gap-4">
+      <nav aria-label={tabsLabel} className="flex border-b border-border">
         {(["active", "archived"] as const).map((tab) => {
           const current = (tab === "archived") === archived;
           return (
@@ -45,8 +45,8 @@ export function ListToolbar({
               href={tabHref(tab)}
               aria-current={current ? "page" : undefined}
               className={cn(
-                "rounded-button px-4 py-1.5 text-sm font-semibold",
-                current ? "bg-white text-fg shadow-sm" : "text-muted hover:text-fg",
+                "-mb-px inline-flex h-10 items-center border-b-2 px-3 text-[13px] font-medium focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent",
+                current ? "border-fg text-fg" : "border-transparent text-muted hover:text-fg",
               )}
             >
               {tab === "active" ? activeLabel : archivedLabel}
@@ -54,7 +54,7 @@ export function ListToolbar({
           );
         })}
       </nav>
-      <form action={basePath} method="get" role="search" className="relative w-full sm:w-72">
+      <form action={basePath} method="get" role="search" className="relative w-full">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
         {archived ? <input type="hidden" name="tab" value="archived" /> : null}
         <Input

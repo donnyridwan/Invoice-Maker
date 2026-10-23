@@ -8,8 +8,8 @@ import { formatMoney } from "@/lib/money";
 import type { EditorEvaluation, EditorState } from "../editor-state";
 
 /**
- * The invoice total as the page's headline figure, with its currency and due date underneath —
- * the first thing to check before sending.
+ * The bar pinned to the bottom of the form: the invoice total with its currency, item count and due
+ * date — the first thing to check before sending, always in view while editing.
  */
 export function AmountHero({
   state,
@@ -32,17 +32,17 @@ export function AmountHero({
         : null;
 
   return (
-    <section aria-label={t("label")} className="rounded-card bg-subtle px-5 py-5 sm:px-6">
-      <div className="flex items-center justify-between gap-3">
-        <p className="text-sm font-semibold text-fg">{t("label")}</p>
-        <span className="inline-flex h-8 items-center gap-1.5 rounded-full bg-white px-3 text-xs font-bold text-fg">
-          <span aria-hidden className="size-2 rounded-full bg-primary" />
-          {currency}
-        </span>
-      </div>
-      <p className="mt-2 break-all text-4xl font-black tracking-tight text-accent tabular-nums sm:text-5xl">{total}</p>
-      <p className="mt-2 text-sm text-muted">
+    <section
+      aria-label={t("label")}
+      className="sticky bottom-0 z-10 flex flex-wrap items-center justify-between gap-x-4 gap-y-1 border-t border-border bg-white/95 px-4 py-3 backdrop-blur md:px-8"
+    >
+      <p className="text-[13px] text-muted">
         {[t("items", { count: itemCount }), due].filter(Boolean).join(" · ")}
+      </p>
+      <p className="flex items-baseline gap-2">
+        <span className="text-[13px] text-muted">{t("label")}</span>
+        <span className="rounded-md bg-subtle px-1.5 text-[11px] font-semibold text-muted">{currency}</span>
+        <span className="break-all text-lg font-semibold tracking-tight text-fg tabular-nums">{total}</span>
       </p>
     </section>
   );

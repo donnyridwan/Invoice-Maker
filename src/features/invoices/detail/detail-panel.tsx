@@ -1,5 +1,4 @@
 import { useLocale, useTranslations } from "next-intl";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { ScheduleCard } from "@/features/recurring/schedule-card";
 import type { ScheduleView } from "@/features/recurring/schedule-summary";
 import { ClaimList, type ClaimListItem } from "@/features/payment-claims/claim-list";
@@ -45,11 +44,11 @@ export function DetailPanel({ invoice, currency, today, now, events, pendingClai
   }
 
   return (
-    <div className="flex flex-col gap-4">
-      <Card role="region" aria-label={t("status.label")} className="p-5">
+    <div className="flex flex-col divide-y divide-border">
+      <section aria-label={t("status.label")} className="p-5">
         <StatusBadge status={status} />
         <p className="mt-3 text-xs text-muted">{t("status.total")}</p>
-        <p className="text-3xl font-black tabular-nums tracking-tight text-fg">
+        <p className="text-2xl font-semibold tabular-nums tracking-tight text-fg">
           {formatMoney(invoice.totalMinor, currency, locale)}
         </p>
         {open ? (
@@ -80,9 +79,9 @@ export function DetailPanel({ invoice, currency, today, now, events, pendingClai
             {invoice.clientSnapshot.name}
           </p>
         ) : null}
-      </Card>
+      </section>
 
-      <Card className="p-5">
+      <div className="p-5">
         <ActionsBar
           invoiceId={invoice.id}
           number={invoice.number}
@@ -91,32 +90,26 @@ export function DetailPanel({ invoice, currency, today, now, events, pendingClai
           publicPath={`/i/${invoice.publicToken}`}
           emailEnabled={emailEnabled}
         />
-      </Card>
+      </div>
 
       {schedule || invoice.status !== "void" ? (
-        <ScheduleCard invoiceId={invoice.id} number={invoice.number} schedule={schedule} />
+        <ScheduleCard invoiceId={invoice.id} number={invoice.number} schedule={schedule} flat />
       ) : null}
 
       {pendingClaims.length > 0 ? (
-        <Card role="region" aria-labelledby="claims-title">
-          <CardHeader>
-            <CardTitle id="claims-title">{t("claims.title")}</CardTitle>
+        <section aria-labelledby="claims-title" className="flex flex-col gap-3 bg-badge-warning-bg/50 p-5">
+          <div>
+            <h2 id="claims-title" className="text-[15px] font-semibold text-fg">{t("claims.title")}</h2>
             <p className="text-sm text-muted">{t("claims.description")}</p>
-          </CardHeader>
-          <CardContent>
-            <ClaimList claims={pendingClaims} currency={currency} />
-          </CardContent>
-        </Card>
+          </div>
+          <ClaimList claims={pendingClaims} currency={currency} />
+        </section>
       ) : null}
 
-      <Card role="region" aria-labelledby="activity-title">
-        <CardHeader>
-          <CardTitle id="activity-title">{t("activity.title")}</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <Timeline events={events} payerNames={payerNames} now={now} />
-        </CardContent>
-      </Card>
+      <section aria-labelledby="activity-title" className="flex flex-col gap-3 p-5">
+        <h2 id="activity-title" className="text-[15px] font-semibold text-fg">{t("activity.title")}</h2>
+        <Timeline events={events} payerNames={payerNames} now={now} />
+      </section>
     </div>
   );
 }

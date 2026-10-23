@@ -42,11 +42,14 @@ export function ScheduleCard({
   number,
   schedule,
   flush,
+  flat = false,
 }: {
   invoiceId: string;
   number: string;
   schedule: ScheduleView | null;
   flush?: () => Promise<void>;
+  /** Drop the card frame, for a section inside a panel that already draws its own dividers. */
+  flat?: boolean;
 }) {
   const t = useTranslations("recurring");
   const tAll = useTranslations();
@@ -80,8 +83,8 @@ export function ScheduleCard({
 
   if (!schedule) {
     return (
-      <Card role="region" aria-labelledby="schedule-title" className="p-5">
-        <h2 id="schedule-title" className="text-base font-semibold text-fg">
+      <Card role="region" aria-labelledby="schedule-title" className={flat ? "rounded-none border-0 p-5" : "p-5"}>
+        <h2 id="schedule-title" className="text-[15px] font-semibold text-fg">
           {t("card.title")}
         </h2>
         <p className="mt-1 text-sm text-muted">{t("card.empty")}</p>
@@ -102,9 +105,9 @@ export function ScheduleCard({
   const canResume = schedule.lastError !== "sourceUnavailable";
 
   return (
-    <Card role="region" aria-labelledby="schedule-title" className="p-5">
+    <Card role="region" aria-labelledby="schedule-title" className={flat ? "rounded-none border-0 p-5" : "p-5"}>
       <div className="flex items-center justify-between gap-3">
-        <h2 id="schedule-title" className="text-base font-semibold text-fg">
+        <h2 id="schedule-title" className="text-[15px] font-semibold text-fg">
           {t("card.title")}
         </h2>
         <Badge variant={STATUS_VARIANT[status]}>{t(`status.${status}`)}</Badge>
