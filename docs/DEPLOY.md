@@ -43,10 +43,11 @@ secret values: generate them as shown and paste them straight into Vercel.
 | `RESEND_API_KEY` | Resend API key (see section 3). Optional until email is wanted. |
 | `EMAIL_FROM_DOMAIN` | The domain verified in Resend, e.g. `mail.example.com`. Mail is sent as `"<Business name>" <invoice@EMAIL_FROM_DOMAIN>`. |
 | `VERCEL_AUTOMATION_BYPASS_SECRET` | Only when Deployment Protection is on: the project's "Protection Bypass for Automation" secret, so the PDF renderer can open its own print page. |
+| `CHROMIUM_PACK_URL` | Optional. Where the PDF renderer downloads its compressed Chromium on a cold start (default: the `chromium-v153.0.0-pack.x64.tar` release of Sparticuz/chromium on GitHub). Set it to serve the same file from your own storage; the version must match `@sparticuz/chromium-min`. |
 
 Do **not** set these in production: `EMAIL_TRANSPORT` and `ALLOW_FILE_EMAIL_TRANSPORT` (local/e2e only; the
 file transport is refused in production anyway), `AUTH_RATE_LIMIT_DISABLED` (it switches the sign-in
-limiter off), `CHROMIUM_PATH` (Vercel uses `@sparticuz/chromium`).
+limiter off), `CHROMIUM_PATH` (Vercel uses `@sparticuz/chromium-min`, which downloads Chromium at runtime).
 
 Without `RESEND_API_KEY` and `EMAIL_FROM_DOMAIN` the app runs normally but hides every email feature
 (send by email, email verification, owner notifications, automatic recurring emails). Recurring

@@ -5,15 +5,8 @@ const withNextIntl = createNextIntlPlugin("./src/i18n/request.ts");
 
 const nextConfig: NextConfig = {
   // Headless Chromium for PDFs: native binaries / dynamic requires that must not be bundled.
-  serverExternalPackages: ["@sparticuz/chromium", "puppeteer-core"],
-  // @sparticuz/chromium reads its compressed browser from bin/ at runtime, which file tracing
-  // cannot see. Ship it with every route that renders a PDF (downloads, email sends, cron).
-  outputFileTracingIncludes: {
-    "/api/invoices/**": ["./node_modules/@sparticuz/chromium/bin/**/*"],
-    "/api/cron/**": ["./node_modules/@sparticuz/chromium/bin/**/*"],
-    "/i/**": ["./node_modules/@sparticuz/chromium/bin/**/*"],
-    "/invoices/**": ["./node_modules/@sparticuz/chromium/bin/**/*"],
-  },
+  // The browser itself is not shipped: @sparticuz/chromium-min downloads it at runtime (lib/pdf/browser.ts).
+  serverExternalPackages: ["@sparticuz/chromium-min", "puppeteer-core"],
   // Uploads (logo 2 MB, payment proof 5 MB) travel through server actions.
   experimental: { serverActions: { bodySizeLimit: "6mb" } },
   turbopack: {

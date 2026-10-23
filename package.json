@@ -28,7 +28,7 @@
     "@radix-ui/react-select": "^2.4.1",
     "@radix-ui/react-slot": "^1.5.0",
     "@react-email/components": "^1.0.12",
-    "@sparticuz/chromium": "^153.0.0",
+    "@sparticuz/chromium-min": "153.0.0",
     "@vercel/blob": "^2.8.2",
     "better-auth": "1.7",
     "class-variance-authority": "^0.7.1",
