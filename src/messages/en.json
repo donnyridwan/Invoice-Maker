@@ -94,7 +94,11 @@
       "title": "Recent invoices",
       "viewAll": "View all"
     },
-    "workspace": "My workspace"
+    "workspace": "My workspace",
+    "announcement": {
+      "badge": "New",
+      "text": "Bill regular clients automatically with recurring invoices"
+    }
   },
   "invoices": {
     "title": "Invoices",

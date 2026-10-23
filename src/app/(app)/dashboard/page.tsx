@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Clock, Repeat } from "lucide-react";
+import { ChevronRight, Clock, Repeat } from "lucide-react";
 import { getTranslations } from "next-intl/server";
 import { getDashboardSummary } from "@/features/dashboard/queries";
 import { QuickActions } from "@/features/dashboard/quick-actions";
@@ -25,9 +25,21 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div>
-        <p className="text-[13px] text-muted">{t("workspace")}</p>
-        <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-fg">{t("greeting", { name: firstName })}</h1>
+      <div className="flex flex-col items-start gap-6">
+        <Link
+          href="/invoices/recurring"
+          className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-white py-1 pl-1 pr-3 text-[13px] font-medium text-fg shadow-xs hover:bg-subtle"
+        >
+          <span className="rounded-full bg-fg px-2 py-0.5 text-[11px] font-semibold text-white">{t("announcement.badge")}</span>
+          <span className="truncate">{t("announcement.text")}</span>
+          <ChevronRight aria-hidden className="size-3.5 shrink-0 text-muted" />
+        </Link>
+        <div>
+          <p className="text-[13px] text-muted">{t("workspace")}</p>
+          <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-fg">
+            {t("greeting", { name: firstName })}
+          </h1>
+        </div>
       </div>
       {summary.pendingClaims > 0 || summary.recurringDrafts > 0 ? (
         <div className="flex flex-col gap-2">

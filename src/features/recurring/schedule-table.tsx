@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { Repeat } from "lucide-react";
+import { Avatar, IconTile } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { resolveLocale } from "@/i18n/config";
@@ -34,19 +36,31 @@ export function ScheduleTable({ schedules }: { schedules: ScheduleRow[] }) {
           return (
             // The source link stretches over the whole row, so the entire row is clickable.
             <TableRow key={schedule.id} className="relative">
-              <TableCell>
-                {schedule.sourceInvoiceId ? (
-                  <Link
-                    href={`/invoices/${schedule.sourceInvoiceId}`}
-                    className="font-medium text-fg after:absolute after:inset-0 hover:text-accent"
-                  >
-                    {schedule.sourceNumber}
-                  </Link>
+              <TableCell className="py-1.5">
+                <span className="inline-flex items-center gap-3">
+                  <IconTile icon={Repeat} />
+                  {schedule.sourceInvoiceId ? (
+                    <Link
+                      href={`/invoices/${schedule.sourceInvoiceId}`}
+                      className="whitespace-nowrap font-medium text-fg after:absolute after:inset-0 hover:text-accent"
+                    >
+                      {schedule.sourceNumber}
+                    </Link>
+                  ) : (
+                    <span className="text-muted">{t("list.sourceGone")}</span>
+                  )}
+                </span>
+              </TableCell>
+              <TableCell className={schedule.clientName ? undefined : "text-muted"}>
+                {schedule.clientName ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Avatar name={schedule.clientName} className="size-6 text-[10px]" />
+                    {schedule.clientName}
+                  </span>
                 ) : (
-                  <span className="text-muted">{t("list.sourceGone")}</span>
+                  "—"
                 )}
               </TableCell>
-              <TableCell className={schedule.clientName ? undefined : "text-muted"}>{schedule.clientName ?? "—"}</TableCell>
               <TableCell className="whitespace-nowrap text-right font-medium tabular-nums">
                 {currency && schedule.totalMinor !== null ? formatMoney(schedule.totalMinor, currency, locale) : "—"}
               </TableCell>

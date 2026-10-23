@@ -32,9 +32,9 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
   }
 
   return (
-    <div className="min-h-screen bg-white">
+    <div className="min-h-screen bg-white md:bg-sidebar">
       {/* Desktop sidebar */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col border-r border-border bg-sidebar md:flex">
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-60 flex-col bg-sidebar md:flex">
         <div className="min-h-0 flex-1 overflow-y-auto">
           <Sidebar />
         </div>
@@ -74,18 +74,22 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
         </DialogPortal>
       </Dialog>
 
-      <main className="md:pl-60">
-        {wide ? (
-          children
-        ) : (
-          <>
-            <div className="sticky top-0 z-20 hidden h-12 items-center justify-between gap-4 border-b border-border bg-white px-6 md:flex">
-              <Breadcrumbs />
-              <LocaleSwitcher />
-            </div>
-            <div className="mx-auto w-full max-w-6xl px-4 py-6 md:px-8 md:py-8">{children}</div>
-          </>
-        )}
+      {/* On larger screens the page sits in a rounded white panel inset from the grey frame, and the
+          panel (not the window) scrolls, so its top bar stays put. */}
+      <main className="md:py-2 md:pl-60 md:pr-2">
+        <div className="bg-white md:h-[calc(100vh-1rem)] md:overflow-y-auto md:rounded-xl md:border md:border-border md:shadow-xs">
+          {wide ? (
+            children
+          ) : (
+            <>
+              <div className="sticky top-0 z-20 hidden h-12 items-center justify-between gap-4 border-b border-border bg-white/95 px-6 backdrop-blur md:flex">
+                <Breadcrumbs />
+                <LocaleSwitcher />
+              </div>
+              <div className="mx-auto w-full max-w-6xl px-4 py-6 md:px-8 md:py-8">{children}</div>
+            </>
+          )}
+        </div>
       </main>
     </div>
   );

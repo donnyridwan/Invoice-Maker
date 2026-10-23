@@ -48,7 +48,7 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
   return (
     // A workspace like the editor: the document on the left, status, actions and activity in a
     // panel on the right; each scrolls on its own on wide screens.
-    <div className="flex flex-col xl:h-screen">
+    <div className="flex flex-col xl:h-full">
       <header className="sticky top-12 z-20 flex h-12 shrink-0 items-center gap-2 border-b border-border bg-white px-3 md:top-0 md:px-4">
         <Link
           href="/invoices"

@@ -94,7 +94,11 @@
       "title": "Invoice terbaru",
       "viewAll": "Lihat semua"
     },
-    "workspace": "Ruang kerja saya"
+    "workspace": "Ruang kerja saya",
+    "announcement": {
+      "badge": "Baru",
+      "text": "Tagih klien rutin otomatis dengan invoice berulang"
+    }
   },
   "invoices": {
     "title": "Invoice",

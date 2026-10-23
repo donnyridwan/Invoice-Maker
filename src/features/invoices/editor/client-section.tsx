@@ -3,6 +3,7 @@
 import { useId, useMemo, useState, type KeyboardEvent } from "react";
 import { Check, ChevronDown, X } from "lucide-react";
 import { useTranslations } from "next-intl";
+import { Avatar } from "@/components/ui/avatar";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { INVOICE_LANGUAGES } from "@/features/profile/schema";
@@ -185,22 +186,12 @@ function ClientCombobox({
   );
 }
 
-function initials(name: string): string {
-  const words = name.trim().split(/\s+/).filter(Boolean);
-  return (words.length > 1 ? words[0][0] + words[1][0] : (words[0] ?? "?").slice(0, 2)).toUpperCase();
-}
-
 /** The chosen client as a recipient row: initials avatar, name and contact line. */
 function ClientSummary({ client }: { client: ClientOption }) {
   const details = [client.company, client.email, client.address?.split("\n")[0]].filter(Boolean).join(" · ");
   return (
     <div className="flex items-center gap-3 rounded-card border border-border bg-sidebar px-3 py-2.5">
-      <span
-        aria-hidden
-        className="flex size-9 shrink-0 items-center justify-center rounded-full bg-white text-xs font-semibold text-fg shadow-xs"
-      >
-        {initials(client.name)}
-      </span>
+      <Avatar name={client.name} className="size-9 text-xs" />
       <span className="min-w-0">
         <span className="block truncate font-semibold text-fg">{client.name}</span>
         {details ? <span className="block truncate text-xs text-muted">{details}</span> : null}

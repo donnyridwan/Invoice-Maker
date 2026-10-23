@@ -1,5 +1,7 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
+import { FileText } from "lucide-react";
+import { Avatar, IconTile } from "@/components/ui/avatar";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { isCurrencyCode } from "@/lib/currencies";
 import { formatDocDate } from "@/lib/dates";
@@ -38,13 +40,16 @@ export function InvoiceTable({ invoices, today }: { invoices: Invoice[]; today: 
           return (
             // The number link stretches over the whole row, so the entire row is clickable.
             <TableRow key={invoice.id} className="relative">
-              <TableCell>
-                <Link
-                  href={invoice.status === "draft" ? `/invoices/${invoice.id}/edit` : `/invoices/${invoice.id}`}
-                  className="font-medium text-fg after:absolute after:inset-0 hover:text-accent"
-                >
-                  {invoice.number}
-                </Link>
+              <TableCell className="py-1.5">
+                <span className="inline-flex items-center gap-3">
+                  <IconTile icon={FileText} />
+                  <Link
+                    href={invoice.status === "draft" ? `/invoices/${invoice.id}/edit` : `/invoices/${invoice.id}`}
+                    className="whitespace-nowrap font-medium text-fg after:absolute after:inset-0 hover:text-accent"
+                  >
+                    {invoice.number}
+                  </Link>
+                </span>
                 {invoice.status === "payment_claimed" ? (
                   <Badge variant="warning" className="ml-2 px-1.5 py-0 text-[11px]">
                     {t("needsConfirmation")}
@@ -52,7 +57,14 @@ export function InvoiceTable({ invoices, today }: { invoices: Invoice[]; today: 
                 ) : null}
               </TableCell>
               <TableCell className={invoice.clientSnapshot ? undefined : "text-muted"}>
-                {invoice.clientSnapshot?.name ?? "—"}
+                {invoice.clientSnapshot ? (
+                  <span className="inline-flex items-center gap-2">
+                    <Avatar name={invoice.clientSnapshot.name} className="size-6 text-[10px]" />
+                    {invoice.clientSnapshot.name}
+                  </span>
+                ) : (
+                  "—"
+                )}
               </TableCell>
               <TableCell className="whitespace-nowrap text-muted">{formatDocDate(invoice.issueDate, locale)}</TableCell>
               <TableCell className="whitespace-nowrap text-muted">

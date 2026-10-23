@@ -149,7 +149,7 @@ export function InvoiceEditor({
   return (
     // On wide screens the editor fills the viewport: form on the left and the preview panel on the
     // right scroll on their own, like a workspace; below that the page scrolls and tabs switch panes.
-    <div className="flex flex-col xl:h-screen">
+    <div className="flex flex-col xl:h-full">
       <EditorHeader
         number={state.number}
         status={displayStatus}
