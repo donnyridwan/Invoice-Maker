@@ -17,11 +17,11 @@ export type StatusBannerProps = {
 /** The header card of the public page: who asks for how much, when, and the status. */
 export function StatusBanner({ logoUrl, badge, title, subtitle, note, actions }: StatusBannerProps) {
   return (
-    <Card className="flex flex-col gap-4 p-5 sm:p-7">
+    <Card className="flex flex-col gap-4 bg-white p-5 sm:p-6">
       <div className="flex items-start justify-between gap-3">
         {logoUrl ? (
           // eslint-disable-next-line @next/next/no-img-element
-          <img src={logoUrl} alt="" className="size-10 rounded-lg border border-border object-contain" />
+          <img src={logoUrl} alt="" className="size-10 border border-border object-contain" />
         ) : (
           <span />
         )}
@@ -30,13 +30,13 @@ export function StatusBanner({ logoUrl, badge, title, subtitle, note, actions }:
         </Badge>
       </div>
       <div className="flex flex-col gap-1">
-        <h1 className="text-xl leading-tight font-semibold tracking-tight text-fg sm:text-2xl">{title}</h1>
+        <h1 className="font-serif text-2xl leading-tight tracking-tight text-fg">{title}</h1>
         {subtitle ? <p className="text-sm text-muted">{subtitle}</p> : null}
       </div>
       {note ? (
-        <p className="rounded-card bg-subtle px-4 py-3 text-sm text-fg">{note}</p>
+        <p className="border border-border bg-subtle px-4 py-3 text-sm text-fg">{note}</p>
       ) : null}
-      {actions ? <div className="flex flex-wrap items-center gap-2">{actions}</div> : null}
+      {actions ? <div className="flex flex-col gap-2 [&>*]:w-full">{actions}</div> : null}
     </Card>
   );
 }

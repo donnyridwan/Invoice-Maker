@@ -30,7 +30,10 @@ type Props = {
   token: string;
 };
 
-/** The client-facing page of an invoice: banner, the document, how to pay and a quiet footer. */
+/**
+ * The client-facing page of an invoice: the document on the left, and on the right a panel with who
+ * asks for how much, the actions and how to pay (stacked on small screens); a quiet footer.
+ */
 export function PublicInvoiceView({ invoice, language, pendingClaims, token }: Props) {
   // Not `getTranslations({ locale })`: that formats for `language` but still reads the messages of
   // the viewer's UI locale. The invoice's own language must pick the messages too.
@@ -98,40 +101,48 @@ export function PublicInvoiceView({ invoice, language, pendingClaims, token }: P
   const canClaim = status !== "paid";
 
   return (
-    <PublicShell footer={t("footer")} language={language}>
-      <StatusBanner
-        logoUrl={invoice.businessSnapshot.logoUrl}
-        badge={{ label: t(`status.${status}`), variant: badgeVariant[status] }}
-        title={title}
-        subtitle={subtitle}
-        note={status === "awaiting" ? t("awaitingNote", { business }) : null}
-        actions={
-          <>
-            {canClaim ? (
-              <ClaimDialog
-                token={token}
-                business={business}
-                defaultAmount={formatMoneyInput(invoice.totalMinor, currency, language)}
-                today={today}
-                maxDate={addDays(today, 1)}
-                limitReached={pendingClaims >= MAX_PENDING_CLAIMS}
-              />
-            ) : null}
-            <Button asChild variant="secondary">
-              <a href={`/i/${token}/pdf`} download>
-                <Download className="size-4" aria-hidden />
-                {t("downloadPdf")}
-              </a>
-            </Button>
-          </>
-        }
-      />
-      <Card role="region" className="rounded-panel bg-subtle p-3 sm:p-6" aria-label={t("documentLabel", { number: invoice.number })}>
-        <ScaledDocument>
-          <InvoiceDocumentView doc={buildInvoiceDocument(documentSourceFromInvoice(invoice))} />
-        </ScaledDocument>
-      </Card>
-      <PaymentMethodsCard methods={methods} business={business} />
+    <PublicShell footer={t("footer")} language={language} wide>
+      <div className="grid grid-cols-[minmax(0,1fr)] items-start gap-4 lg:grid-cols-[minmax(0,1fr)_380px] lg:gap-6">
+        <Card
+          role="region"
+          className="order-2 min-w-0 bg-white p-3 sm:p-6 lg:order-1"
+          aria-label={t("documentLabel", { number: invoice.number })}
+        >
+          <ScaledDocument>
+            <InvoiceDocumentView doc={buildInvoiceDocument(documentSourceFromInvoice(invoice))} />
+          </ScaledDocument>
+        </Card>
+        <div className="order-1 flex min-w-0 flex-col gap-4 lg:sticky lg:top-6 lg:order-2">
+          <StatusBanner
+            logoUrl={invoice.businessSnapshot.logoUrl}
+            badge={{ label: t(`status.${status}`), variant: badgeVariant[status] }}
+            title={title}
+            subtitle={subtitle}
+            note={status === "awaiting" ? t("awaitingNote", { business }) : null}
+            actions={
+              <>
+                {canClaim ? (
+                  <ClaimDialog
+                    token={token}
+                    business={business}
+                    defaultAmount={formatMoneyInput(invoice.totalMinor, currency, language)}
+                    today={today}
+                    maxDate={addDays(today, 1)}
+                    limitReached={pendingClaims >= MAX_PENDING_CLAIMS}
+                  />
+                ) : null}
+                <Button asChild variant="secondary">
+                  <a href={`/i/${token}/pdf`} download>
+                    <Download className="size-4" aria-hidden />
+                    {t("downloadPdf")}
+                  </a>
+                </Button>
+              </>
+            }
+          />
+          <PaymentMethodsCard methods={methods} business={business} />
+        </div>
+      </div>
     </PublicShell>
   );
 }
@@ -140,14 +151,19 @@ function PublicShell({
   children,
   footer,
   language,
+  wide = false,
 }: {
   children: React.ReactNode;
   footer: string;
   language: Locale;
+  /** The two-column invoice layout; the narrow column is for short messages (a void invoice). */
+  wide?: boolean;
 }) {
   return (
     <div lang={language} className="min-h-screen bg-subtle">
-      <main className="mx-auto flex w-full max-w-[860px] flex-col gap-4 px-4 py-6 sm:py-10">{children}</main>
+      <main className={`mx-auto flex w-full flex-col gap-4 px-4 py-6 sm:py-10 ${wide ? "max-w-[1240px]" : "max-w-[860px]"}`}>
+        {children}
+      </main>
       <footer className="px-4 pb-8 text-center text-xs text-muted">{footer}</footer>
     </div>
   );
