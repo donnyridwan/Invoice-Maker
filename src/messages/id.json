@@ -227,7 +227,24 @@
         "confirmDelete": "Hapus"
       },
       "view": "Lihat",
-      "downloadPdf": "Unduh PDF"
+      "downloadPdf": "Unduh PDF",
+      "steps": {
+        "label": "Langkah pengisian",
+        "details": "Klien & detail",
+        "items": "Item",
+        "payment": "Pembayaran",
+        "hasErrors": "(ada isian yang perlu diperbaiki)",
+        "recap": "Ringkasan langkah sebelumnya",
+        "edit": "Ubah",
+        "editStep": "Ubah {step}",
+        "stepOf": "Langkah {n} dari {total}",
+        "back": "Kembali",
+        "next": "Lanjut",
+        "backTo": "Kembali ke {step}",
+        "nextTo": "Lanjut ke {step}",
+        "noClient": "Belum ada klien",
+        "noItems": "Belum ada item"
+      }
     },
     "detail": {
       "back": "Kembali ke daftar invoice",

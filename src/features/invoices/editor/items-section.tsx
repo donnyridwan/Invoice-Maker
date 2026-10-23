@@ -136,7 +136,8 @@ export function ItemsSection({
   }
 
   return (
-    <EditorSection title={t("sections.items")}>
+    // The step heading above already reads "Item"; the section title stays for assistive technology.
+    <EditorSection title={t("sections.items")} hideTitle>
       <div>
         {/* Column headings (the inputs carry their own labels for assistive technology). */}
         <div aria-hidden className="hidden items-end gap-2 border-b border-border pb-2 text-xs text-muted sm:flex">

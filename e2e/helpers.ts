@@ -130,16 +130,24 @@ export async function setupOwner(page: Page): Promise<{ email: string }> {
   return { email };
 }
 
+/** Opens a step of the invoice editor from its step bar (a no-op when it is already open). */
+export async function editorStep(page: Page, name: "Klien & detail" | "Item" | "Pembayaran"): Promise<void> {
+  await page.getByRole("navigation", { name: "Langkah pengisian" }).getByRole("button", { name }).click();
+  await expect(page.getByRole("heading", { level: 2, name, exact: true })).toBeVisible();
+}
+
 /** Creates a draft of Rp 1.500.000 for "Acme Inc" through the editor, waits for autosave and returns its id. */
 export async function fillNewInvoice(page: Page, opts: { english?: boolean } = {}): Promise<string> {
   const id = await createInvoiceViaUi(page);
   await page.getByRole("combobox", { name: "Klien" }).click();
   await page.getByRole("option", { name: /Acme Inc/ }).click();
+  await editorStep(page, "Item");
   const row = page.getByRole("group", { name: "Item 1" });
   await row.getByLabel("Nama item").fill("Desain logo");
   await row.getByLabel("Qty", { exact: true }).fill("1");
   await row.getByLabel("Harga", { exact: true }).fill("1.500.000");
   if (opts.english) {
+    await editorStep(page, "Klien & detail");
     await page.getByLabel("Bahasa invoice").click();
     await page.getByRole("option", { name: "English" }).click();
   }
@@ -147,6 +155,7 @@ export async function fillNewInvoice(page: Page, opts: { english?: boolean } = {
 
   // Autosave is done once a reload shows the values.
   await page.reload();
+  await editorStep(page, "Item");
   await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Harga", { exact: true })).toHaveValue("1.500.000");
   if (opts.english) await expect(page.getByRole("region", { name: "Preview invoice" })).toContainText("Bill to");
   return id;

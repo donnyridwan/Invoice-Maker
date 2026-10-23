@@ -227,7 +227,24 @@
         "confirmDelete": "Delete"
       },
       "view": "View",
-      "downloadPdf": "Download PDF"
+      "downloadPdf": "Download PDF",
+      "steps": {
+        "label": "Steps",
+        "details": "Client & details",
+        "items": "Items",
+        "payment": "Payment",
+        "hasErrors": "(has fields to fix)",
+        "recap": "Earlier steps",
+        "edit": "Edit",
+        "editStep": "Edit {step}",
+        "stepOf": "Step {n} of {total}",
+        "back": "Back",
+        "next": "Next",
+        "backTo": "Back to {step}",
+        "nextTo": "Next: {step}",
+        "noClient": "No client yet",
+        "noItems": "No items yet"
+      }
     },
     "detail": {
       "back": "Back to invoices",

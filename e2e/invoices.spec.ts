@@ -1,5 +1,5 @@
 import { expect, test, type Page } from "@playwright/test";
-import { createInvoiceViaUi, EDITOR_URL_RE, registerUser } from "./helpers";
+import { createInvoiceViaUi, EDITOR_URL_RE, editorStep, registerUser } from "./helpers";
 
 test.describe("invoices list", () => {
   test("lands in the editor after onboarding and lists the draft", async ({ page }) => {
@@ -95,6 +95,7 @@ test.describe("editor", () => {
     await page.getByRole("option", { name: /Acme Inc/ }).click();
     await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Acme Inc");
 
+    await page.getByRole("button", { name: "Lanjut ke Item" }).click();
     const first = page.getByRole("group", { name: "Item 1" });
     await first.getByLabel("Nama item").fill("Desain logo");
     await first.getByLabel("Qty", { exact: true }).fill("2");
@@ -120,14 +121,16 @@ test.describe("editor", () => {
     await expect(preview).toContainText(/Rp\s3\.300\.000/);
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
 
+    // The open step is kept across a reload.
     await page.reload();
-    await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Acme Inc");
     await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Nama item")).toHaveValue("Desain logo");
     await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Harga", { exact: true })).toHaveValue("1.500.000");
     await expect(page.getByRole("group", { name: "Item 2" }).getByLabel("Qty", { exact: true })).toHaveValue("1,5");
     await expect(page.getByRole("group", { name: "Item 2" }).getByLabel("Harga", { exact: true })).toHaveValue("200.000");
     await expect(preview).toContainText(/Rp\s3\.300\.000/);
 
+    await editorStep(page, "Klien & detail");
+    await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Acme Inc");
     await expect(preview).not.toContainText("Bill to");
     await page.getByLabel("Bahasa invoice").click();
     await page.getByRole("option", { name: "English" }).click();
@@ -172,6 +175,7 @@ test.describe("editor", () => {
 
   test("flags an invalid price and keeps the last saved value", async ({ page }) => {
     await openEditorWithClient(page);
+    await editorStep(page, "Item");
     const row = page.getByRole("group", { name: "Item 1" });
     await row.getByLabel("Nama item").fill("Hosting");
     await row.getByLabel("Harga", { exact: true }).fill("100.000");
@@ -180,6 +184,10 @@ test.describe("editor", () => {
     await row.getByLabel("Harga", { exact: true }).fill("abc");
     await expect(page.getByText("Perbaiki isian yang ditandai")).toBeVisible();
     await expect(row.getByText("Jumlah tidak valid.")).toBeVisible();
+    // The step bar marks the step with the field to fix.
+    await expect(
+      page.getByRole("navigation", { name: "Langkah pengisian" }).getByRole("button", { name: /^2?\s*Item.*perlu diperbaiki/ }),
+    ).toBeVisible();
     await expect(page.getByRole("region", { name: "Preview invoice" })).toContainText("Hosting");
 
     await page.reload();
@@ -202,6 +210,38 @@ test.describe("editor", () => {
     const box = await preview.boundingBox();
     expect(box!.width).toBeLessThanOrEqual(390);
   });
+
+  test("moves through the steps and back again", async ({ page }) => {
+    await openEditorWithClient(page);
+    const steps = page.getByRole("navigation", { name: "Langkah pengisian" });
+    await expect(steps.getByRole("button", { name: "Klien & detail" })).toHaveAttribute("aria-current", "step");
+    await expect(page.getByRole("button", { name: /^Kembali ke/ })).toHaveCount(0);
+
+    await page.getByRole("combobox", { name: "Klien" }).click();
+    await page.getByRole("option", { name: /Acme Inc/ }).click();
+    await page.getByRole("button", { name: "Lanjut ke Item" }).click();
+    await expect(page.getByRole("heading", { level: 2, name: "Item", exact: true })).toBeFocused();
+    await page.getByRole("group", { name: "Item 1" }).getByLabel("Nama item").fill("Hosting");
+
+    await page.getByRole("button", { name: "Lanjut ke Pembayaran" }).click();
+    await expect(page).toHaveURL(/#payment$/);
+    await expect(page.getByRole("textbox", { name: "Catatan" })).toBeVisible();
+    await expect(page.getByRole("button", { name: /^Lanjut ke/ })).toHaveCount(0);
+    // The earlier steps are summed up, each with a way back.
+    const recap = page.getByRole("list", { name: "Ringkasan langkah sebelumnya" });
+    await expect(recap).toContainText("Acme Inc");
+    await expect(recap).toContainText("Hosting");
+
+    await page.getByRole("button", { name: "Kembali ke Item" }).click();
+    await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Nama item")).toHaveValue("Hosting");
+    await recap.getByRole("button", { name: "Ubah Klien & detail" }).click();
+    await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Acme Inc");
+    await expect(page).not.toHaveURL(/#/);
+
+    // Any step opens straight from the step bar.
+    await steps.getByRole("button", { name: "Pembayaran" }).click();
+    await expect(steps.getByRole("button", { name: "Pembayaran" })).toHaveAttribute("aria-current", "step");
+  });
 });
 
 async function addCatalogItem(page: Page, item: { name: string; price: string; unit?: string }) {
@@ -220,6 +260,7 @@ test.describe("editor extras", () => {
     await registerUser(page);
     await addCatalogItem(page, { name: "Desain logo", price: "1.500.000", unit: "proyek" });
     await createInvoiceViaUi(page);
+    await editorStep(page, "Item");
 
     const row = page.getByRole("group", { name: "Item 1" });
     const name = row.getByLabel("Nama item");
@@ -247,6 +288,7 @@ test.describe("editor extras", () => {
   test("saves an item to the catalog", async ({ page }) => {
     await registerUser(page);
     await createInvoiceViaUi(page);
+    await editorStep(page, "Item");
     const row = page.getByRole("group", { name: "Item 1" });
     await expect(row.getByRole("button", { name: "Simpan ke katalog" })).toBeDisabled();
 
@@ -312,6 +354,7 @@ test.describe("editor extras", () => {
   test("reorders items by dragging", async ({ page }) => {
     await registerUser(page);
     await createInvoiceViaUi(page);
+    await editorStep(page, "Item");
 
     const first = page.getByRole("group", { name: "Item 1" });
     await first.getByLabel("Nama item").fill("Pertama");
@@ -341,6 +384,7 @@ test.describe("editor extras", () => {
 
   test("shows autosaved changes in the list without a server revalidation", async ({ page }) => {
     await openEditorWithClient(page);
+    await editorStep(page, "Item");
     const row = page.getByRole("group", { name: "Item 1" });
     await row.getByLabel("Nama item").fill("Hosting");
     await row.getByLabel("Harga", { exact: true }).fill("250.000");
@@ -356,6 +400,7 @@ test.describe("editor extras", () => {
     const before = page.url();
     await page.getByRole("combobox", { name: "Klien" }).click();
     await page.getByRole("option", { name: /Acme Inc/ }).click();
+    await editorStep(page, "Item");
     const row = page.getByRole("group", { name: "Item 1" });
     await row.getByLabel("Nama item").fill("Desain logo");
     await row.getByLabel("Harga", { exact: true }).fill("1.500.000");
@@ -366,9 +411,10 @@ test.describe("editor extras", () => {
     await expect(page).toHaveURL(EDITOR_URL_RE);
     await expect(page).not.toHaveURL(before);
     await expect(page.getByRole("heading", { level: 1, name: /^INV-/ })).toHaveText(/-003$/);
+    await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Acme Inc");
+    await editorStep(page, "Item");
     await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Nama item")).toHaveValue("Desain logo");
     await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Harga", { exact: true })).toHaveValue("1.500.000");
-    await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Acme Inc");
   });
 
   test("deletes a draft and shows the empty state when it was the last one", async ({ page }) => {

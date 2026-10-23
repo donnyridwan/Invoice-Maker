@@ -41,14 +41,14 @@ export function EditorSection({
   return (
     <section aria-labelledby={headingId} className={cn("border-t border-border py-6 first:border-t-0 first:pt-0", className)}>
       {hideTitle ? (
-        <h2 id={headingId} className="sr-only">
+        <h3 id={headingId} className="sr-only">
           {title}
-        </h2>
+        </h3>
       ) : (
         <div className="mb-4 flex min-h-6 items-center justify-between gap-3">
-          <h2 id={headingId} className="text-[13px] font-medium text-fg">
+          <h3 id={headingId} className="text-[13px] font-medium text-fg">
             {title}
-          </h2>
+          </h3>
           {action}
         </div>
       )}
