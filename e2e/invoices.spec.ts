@@ -283,13 +283,17 @@ test.describe("editor extras", () => {
     await expect(page.getByRole("link", { name: "Beta LLC" })).toBeVisible();
   });
 
-  test("picks an accent colour, and keeps it", async ({ page }) => {
+  test("picks a template and an accent colour, and keeps them", async ({ page }) => {
     await registerUser(page);
     await createInvoiceViaUi(page);
     const preview = page.getByRole("region", { name: "Preview invoice" });
     const document = preview.locator("[data-template]");
 
-    await expect(page.getByRole("radio", { name: "Minimal" })).toHaveCount(0);
+    await expect(page.getByRole("combobox", { name: "Template" })).toHaveText("Minimal");
+    await page.getByRole("combobox", { name: "Template" }).click();
+    await page.getByRole("option", { name: "Modern" }).click();
+    await expect(preview.locator('[data-template="modern"]')).toBeVisible();
+
     await page.getByRole("button", { name: "#00A67E" }).click();
     await expect(page.getByRole("button", { name: "#00A67E" })).toHaveAttribute("aria-pressed", "true");
     await expect(document).toHaveAttribute("style", /#00A67E/i);
@@ -300,6 +304,7 @@ test.describe("editor extras", () => {
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
 
     await page.reload();
+    await expect(page.getByRole("combobox", { name: "Template" })).toHaveText("Modern");
     await expect(page.getByRole("button", { name: "#0A2540" })).toHaveAttribute("aria-pressed", "true");
     await expect(document).toHaveAttribute("style", /#0A2540/i);
   });

@@ -1,6 +1,8 @@
 "use client";
 
 import { useTranslations } from "next-intl";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { TEMPLATES, type Template } from "@/features/profile/schema";
 import { cn } from "@/lib/utils";
 import type { EditorSectionProps } from "./editor-section";
 
@@ -12,24 +14,43 @@ const SWATCH_CLASS =
 const SWATCH_SELECTED_CLASS = "ring-2 ring-offset-2 ring-fg";
 
 /**
- * The accent colour, a row of swatches heading the preview panel so the form stays short; the last swatch opens the colour picker for any other colour. The template comes from the
- * profile's default (Settings).
+ * The bar heading the preview panel, so the form stays short: a template dropdown (new invoices
+ * start with the profile's default) and the accent colour as a row of swatches, the last of which
+ * opens the colour picker for any other colour.
  */
 export function AppearanceBar({ state, update, disabled }: Omit<EditorSectionProps, "errors"> & { disabled?: boolean }) {
   const t = useTranslations("invoices.editor");
+  const tTemplates = useTranslations("settings.templates");
   const accent = state.accentColor.toUpperCase();
   const custom = !(ACCENT_PRESETS as readonly string[]).includes(accent);
 
   return (
     <fieldset
       disabled={disabled}
-      aria-label={t("appearance.accent")}
+      aria-label={t("sections.appearance")}
       className="m-0 flex min-h-12 min-w-0 flex-wrap items-center justify-between gap-x-4 gap-y-2 border-0 border-b border-solid border-border bg-white px-4 py-2"
     >
-      <span aria-hidden className="text-[13px] font-medium text-fg">
-        {t("appearance.accent")}
-      </span>
+      <div className="flex items-center gap-2">
+        <label htmlFor="invoice-template" className="text-[13px] text-muted">
+          {t("appearance.template")}
+        </label>
+        <Select value={state.template} onValueChange={(value) => update({ template: value as Template })} disabled={disabled}>
+          <SelectTrigger id="invoice-template" className="h-8 w-32 text-[13px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {TEMPLATES.map((template) => (
+              <SelectItem key={template} value={template}>
+                {tTemplates(template)}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
       <div role="group" aria-label={t("appearance.presetLabel")} className="flex flex-wrap items-center gap-2">
+        <span aria-hidden className="mr-1 text-[13px] text-muted">
+          {t("appearance.accent")}
+        </span>
         {ACCENT_PRESETS.map((color) => (
           <button
             key={color}
