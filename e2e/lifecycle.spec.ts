@@ -251,7 +251,7 @@ test.describe("dashboard", () => {
     await page.goto("/invoices?tab=unpaid");
     const row = page.getByRole("row").nth(1);
     await expect(row).toContainText("Perlu konfirmasi");
-    await expect(row.getByText("telat 3 hari")).toHaveClass(/text-danger/);
+    await expect(row).not.toContainText("telat 3 hari");
     await expect(row).toContainText("Jatuh tempo");
 
     // Profile (address) was the only open step besides the sent invoice, which is done now.
