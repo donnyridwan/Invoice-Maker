@@ -1,7 +1,7 @@
 "use client";
 
-import { useState } from "react";
-import { Copy, Loader2, MoreHorizontal, Repeat, Trash2 } from "lucide-react";
+import { useState, type MouseEvent } from "react";
+import { Copy, Download, Loader2, MoreHorizontal, Repeat, Trash2 } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
@@ -13,14 +13,20 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 import { RecurringDialog } from "@/features/recurring/recurring-dialog";
 import { deleteInvoiceAction, duplicateInvoiceAction } from "../actions";
 import type { Invoice } from "../queries";
 
 /**
- * The ⋯ menu of the editor header: duplicate (any status), make the invoice recurring (or manage
- * its schedule) and delete (drafts only, after a confirmation). Duplicate and delete end in a full
+ * The ⋯ menu of the editor header: download the PDF, duplicate (any status), make the invoice
+ * recurring (or manage its schedule) and delete (drafts only, after a confirmation). Duplicate and delete end in a full
  * page navigation, so the editor never autosaves a deleted draft.
  */
 export function EditorMenu({
@@ -36,7 +42,7 @@ export function EditorMenu({
   status: Invoice["status"];
   /** Whether the invoice already repeats: the entry then manages the schedule instead of creating one. */
   hasSchedule: boolean;
-  /** Writes pending edits (so a duplicate has them). */
+  /** Writes pending edits (so a duplicate and the PDF have them). */
   flush: () => Promise<void>;
   /** Drops pending edits (so a deleted draft is not written again); called once the delete succeeded. */
   cancel: () => void;
@@ -47,6 +53,21 @@ export function EditorMenu({
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [recurringOpen, setRecurringOpen] = useState(false);
   const tRecurring = useTranslations("recurring");
+  const tInvoices = useTranslations("invoices.editor");
+
+  // The PDF is rendered from the saved invoice, so pending edits are written before it is fetched.
+  // Modified clicks (new tab, save link as) keep the plain link and its behaviour.
+  async function downloadPdf(event: MouseEvent<HTMLAnchorElement>) {
+    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
+    event.preventDefault();
+    const url = event.currentTarget.href;
+    try {
+      await flush();
+    } catch {
+      // A failed save shows in the autosave indicator; the PDF then reflects the last saved version.
+    }
+    window.location.assign(url);
+  }
 
   async function duplicate() {
     setBusy("duplicate");
@@ -95,6 +116,13 @@ export function EditorMenu({
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end">
+          <DropdownMenuItem asChild>
+            <a href={`/api/invoices/${invoiceId}/pdf`} download onClick={(event) => void downloadPdf(event)}>
+              <Download className="size-4 text-muted" />
+              {tInvoices("downloadPdf")}
+            </a>
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
           <DropdownMenuItem onSelect={() => void duplicate()}>
             <Copy className="size-4 text-muted" />
             {t("duplicate")}

@@ -1,8 +1,8 @@
 "use client";
 
-import { useDeferredValue, useEffect, useMemo, useRef, useState, type MouseEvent } from "react";
+import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Download } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { buildInvoiceDocument } from "@/documents/build-document";
 import { resolveLocale } from "@/i18n/config";
@@ -140,20 +140,6 @@ export function InvoiceEditor({
     [previewState, previewContext, locale],
   );
 
-  // The PDF is rendered from the saved invoice, so pending edits are written before it is fetched.
-  // Modified clicks (new tab, save link as) keep the plain link and its behaviour.
-  const downloadPdf = async (event: MouseEvent<HTMLAnchorElement>) => {
-    if (event.button !== 0 || event.metaKey || event.ctrlKey || event.shiftKey || event.altKey) return;
-    event.preventDefault();
-    const url = event.currentTarget.href;
-    try {
-      await autosave.flush();
-    } catch {
-      // A failed save shows in the autosave indicator; the PDF then reflects the last saved version.
-    }
-    window.location.assign(url);
-  };
-
   // The step in the URL hash is read once mounted (the server render has no hash).
   useEffect(() => {
     const fromHash = window.location.hash.slice(1);
@@ -233,17 +219,6 @@ export function InvoiceEditor({
                   {t("view")}
                 </Link>
               ) : null}
-              <a
-                href={`/api/invoices/${invoiceId}/pdf`}
-                download
-                onClick={(event) => void downloadPdf(event)}
-                aria-label={t("downloadPdf")}
-                className={buttonVariants({ variant: "secondary", size: "sm" })}
-              >
-                <Download className="size-4" aria-hidden />
-                {/* Icon only in the narrow column of a wide screen, labelled again on a very wide one. */}
-                <span className="hidden sm:inline xl:hidden 2xl:inline">{t("downloadPdf")}</span>
-              </a>
               {locked ? null : <SendMenu invoice={{ id: invoiceId, status }} flush={autosave.flush} emailEnabled={emailEnabled} />}
               <EditorMenu
                 invoiceId={invoiceId}

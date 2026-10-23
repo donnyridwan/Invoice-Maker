@@ -39,11 +39,14 @@ test.describe("owner pdf", () => {
     await expect(page).toHaveURL(new RegExp(`/invoices/${id}/edit$`));
   });
 
-  test("has an Unduh PDF link in the editor header and on the detail page", async ({ page }) => {
+  test("has an Unduh PDF link in the editor menu and on the detail page", async ({ page }) => {
     const id = await createInvoiceDraft(page);
-    const editorLink = page.getByRole("link", { name: "Unduh PDF" });
+    await page.getByRole("button", { name: "Aksi invoice" }).click();
+    const editorLink = page.getByRole("menuitem", { name: "Unduh PDF" });
     await expect(editorLink).toHaveAttribute("href", `/api/invoices/${id}/pdf`);
     await expect(editorLink).toHaveAttribute("download", "");
+
+    await page.keyboard.press("Escape");
 
     await markSentViaDb(id);
     await page.goto(`/invoices/${id}`);
@@ -62,7 +65,10 @@ test.describe("owner pdf", () => {
     await page.getByRole("group", { name: "Item 1" }).getByLabel("Nama item").fill("Revisi mendadak");
     const [download] = await Promise.all([
       page.waitForEvent("download"),
-      page.getByRole("link", { name: "Unduh PDF" }).click(),
+      page
+        .getByRole("button", { name: "Aksi invoice" })
+        .click()
+        .then(() => page.getByRole("menuitem", { name: "Unduh PDF" }).click()),
     ]);
     const file = testInfo.outputPath("invoice.pdf");
     await download.saveAs(file);
