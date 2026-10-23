@@ -45,7 +45,8 @@ export function DetailsSection({ state, errors, update }: EditorSectionProps) {
   return (
     // The fields carry their own labels; the step heading names the part.
     <EditorSection title={t("sections.details")} hideTitle>
-      <div className="grid grid-cols-2 gap-4">
+      {/* The number on its own row; under it a short currency field (a three-letter code) and the language. */}
+      <div className="grid grid-cols-[7.5rem_minmax(0,1fr)] gap-4">
         <FormField
           label={t("details.number")}
           htmlFor="invoice-number"
