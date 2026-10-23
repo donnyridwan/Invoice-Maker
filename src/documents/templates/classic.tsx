@@ -39,7 +39,7 @@ export function ClassicTemplate({ doc }: TemplateProps) {
             <p className="mt-[1.5mm] text-muted">—</p>
           )}
         </div>
-        <table className="self-start border-collapse text-[9pt]">
+        <table className="self-start justify-self-end border-collapse text-[9pt]">
           <tbody>
             {[
               [L.invoiceNumber, doc.number],

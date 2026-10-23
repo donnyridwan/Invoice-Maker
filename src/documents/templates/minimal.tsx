@@ -48,7 +48,7 @@ export function MinimalTemplate({ doc }: TemplateProps) {
             <p className="mt-[1.5mm] text-muted">—</p>
           )}
         </div>
-        <div>
+        <div className="text-right">
           <p className={label}>{L.issueDate}</p>
           <p className="mt-[1.5mm] font-medium">{doc.issueDate}</p>
           <p className={`${label} mt-[4mm]`}>{L.dueDate}</p>
