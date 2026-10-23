@@ -45,12 +45,12 @@ export function DetailsSection({ state, errors, update }: EditorSectionProps) {
   return (
     // The fields carry their own labels; the step heading names the part.
     <EditorSection title={t("sections.details")} hideTitle>
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+      <div className="grid grid-cols-2 gap-4">
         <FormField
           label={t("details.number")}
           htmlFor="invoice-number"
           error={errorText("number")}
-          className="col-span-2 sm:col-span-1"
+          className="col-span-2"
         >
           <Input
             id="invoice-number"

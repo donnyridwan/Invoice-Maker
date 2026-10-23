@@ -49,8 +49,8 @@ import { TotalsSection } from "./totals-section";
 type Tab = "form" | "preview";
 
 /**
- * The invoice editor: form on the left, a preview panel with the live A4 document on the right (tabs
- * on small screens). The form is split into three steps (client & details, items, payment) that can
+ * The invoice editor: a narrow form on the left, a preview panel with the live A4 document taking
+ * most of the width on the right (tabs on small screens). The form is split into three steps (client & details, items, payment) that can
  * be opened in any order: from the step bar, the back / next buttons by the total, or the recap of
  * the earlier steps. The open step is kept in the URL hash, so a reload stays on it.
  * Every change is validated on the client; a valid form is autosaved (debounced), an invalid one
@@ -282,7 +282,11 @@ export function InvoiceEditor({
           role="tabpanel"
           id="editor-panel-form"
           aria-labelledby="editor-tab-form"
-          className={cn("flex min-w-0 flex-1 flex-col xl:flex xl:overflow-y-auto", tab !== "form" && "hidden")}
+          // The form takes 40% of a wide screen (35% of a very wide one), the preview the rest.
+          className={cn(
+            "flex min-w-0 flex-1 flex-col xl:w-[40%] xl:flex-none xl:overflow-y-auto 2xl:w-[35%]",
+            tab !== "form" && "hidden",
+          )}
         >
           <EditorStepper current={step} errors={invalidSteps} onSelect={goTo} />
           <div className="mx-auto w-full max-w-[640px] flex-1 px-4 py-8 md:px-8 md:py-12">
@@ -364,7 +368,7 @@ export function InvoiceEditor({
           id="editor-panel-preview"
           aria-labelledby="editor-tab-preview"
           className={cn(
-            "min-w-0 bg-subtle xl:flex xl:w-[46%] xl:max-w-[720px] xl:flex-col xl:border-l xl:border-border",
+            "min-w-0 bg-subtle xl:flex xl:flex-1 xl:flex-col xl:border-l xl:border-border",
             tab !== "preview" && "hidden",
           )}
         >
