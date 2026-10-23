@@ -59,13 +59,13 @@ export function PaymentSection({
             const checked = selected.has(id);
             return (
               <li key={id}>
-                <label className="flex cursor-pointer items-start gap-3 border border-border px-3.5 py-3 text-sm transition-colors hover:bg-subtle has-[:checked]:border-fg has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
+                <label className="flex cursor-pointer items-center gap-3 border border-border px-3.5 py-3 text-sm transition-colors hover:bg-subtle has-[:checked]:border-fg has-[:disabled]:cursor-not-allowed has-[:disabled]:opacity-60">
                   <input
                     type="checkbox"
                     checked={checked}
                     disabled={!checked && atLimit}
                     onChange={(event) => toggle(id, event.target.checked)}
-                    className="mt-0.5 size-4 shrink-0 accent-accent"
+                    className="size-4 shrink-0 accent-accent"
                   />
                   <span className="min-w-0 flex-1">
                     <span className="block truncate font-medium text-fg">{account.title || "—"}</span>
