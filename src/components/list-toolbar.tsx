@@ -45,7 +45,7 @@ export function ListToolbar({
               href={tabHref(tab)}
               aria-current={current ? "page" : undefined}
               className={cn(
-                "-mb-px inline-flex h-10 items-center border-b-2 px-3 text-[13px] font-medium focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent",
+                "-mb-px inline-flex h-10 items-center border-b px-3 text-sm first:pl-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent",
                 current ? "border-fg text-fg" : "border-transparent text-muted hover:text-fg",
               )}
             >
@@ -54,7 +54,7 @@ export function ListToolbar({
           );
         })}
       </nav>
-      <form action={basePath} method="get" role="search" className="relative w-full">
+      <form action={basePath} method="get" role="search" className="relative w-full sm:w-80">
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
         {archived ? <input type="hidden" name="tab" value="archived" /> : null}
         <Input

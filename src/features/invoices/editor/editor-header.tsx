@@ -77,11 +77,11 @@ export function EditorHeader({
   const tNav = useTranslations("nav");
 
   return (
-    <header className="sticky top-12 z-20 flex h-12 shrink-0 items-center gap-2 border-b border-border bg-white px-3 md:top-0 md:px-4">
+    <header className="sticky top-14 z-20 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-white px-3 md:top-0 md:px-6">
       <Link
         href="/invoices"
         aria-label={t("backToList")}
-        className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted transition-colors hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        className="inline-flex size-8 shrink-0 items-center justify-center border border-border text-muted transition-colors hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
       >
         <ArrowLeft className="size-4" />
       </Link>
@@ -89,7 +89,7 @@ export function EditorHeader({
         {tNav("invoices")}
       </span>
       <ChevronRight aria-hidden className="hidden size-3.5 shrink-0 text-muted sm:block" />
-      <h1 className="min-w-0 truncate text-[13px] font-semibold text-fg">{number.trim() || "—"}</h1>
+      <h1 className="min-w-0 truncate font-serif text-lg text-fg">{number.trim() || "—"}</h1>
       <StatusBadge status={status} className="shrink-0" />
       <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
         <AutosaveIndicator status={autosave} onRetry={onRetry} />

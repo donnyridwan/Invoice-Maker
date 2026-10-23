@@ -36,7 +36,7 @@ function DialogContent({
       <DialogPrimitive.Content
         data-slot="dialog-content"
         className={cn(
-          "fixed left-1/2 top-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 rounded-panel border border-border bg-white p-6 shadow-xl",
+          "fixed left-1/2 top-1/2 z-50 grid w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 gap-4 border border-border bg-white p-6 shadow-[0_8px_30px_rgba(0,0,0,0.08)]",
           className,
         )}
         {...props}
@@ -44,7 +44,7 @@ function DialogContent({
         {children}
         <DialogPrimitive.Close
           aria-label={t("close")}
-          className="absolute right-4 top-4 inline-flex size-8 items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-accent"
+          className="absolute right-4 top-4 inline-flex size-8 items-center justify-center text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-accent"
         >
           <X className="size-4" />
         </DialogPrimitive.Close>
@@ -71,7 +71,7 @@ function DialogTitle({ className, ...props }: React.ComponentProps<typeof Dialog
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
-      className={cn("text-lg font-semibold text-fg", className)}
+      className={cn("font-serif text-xl text-fg", className)}
       {...props}
     />
   );

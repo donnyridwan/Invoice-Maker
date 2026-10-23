@@ -48,7 +48,7 @@ export function DetailPanel({ invoice, currency, today, now, events, pendingClai
       <section aria-label={t("status.label")} className="p-5">
         <StatusBadge status={status} />
         <p className="mt-3 text-xs text-muted">{t("status.total")}</p>
-        <p className="text-2xl font-semibold tabular-nums tracking-tight text-fg">
+        <p className="font-serif text-[28px] leading-tight tabular-nums tracking-tight text-fg">
           {formatMoney(invoice.totalMinor, currency, locale)}
         </p>
         {open ? (
@@ -99,7 +99,7 @@ export function DetailPanel({ invoice, currency, today, now, events, pendingClai
       {pendingClaims.length > 0 ? (
         <section aria-labelledby="claims-title" className="flex flex-col gap-3 bg-badge-warning-bg/50 p-5">
           <div>
-            <h2 id="claims-title" className="text-[15px] font-semibold text-fg">{t("claims.title")}</h2>
+            <h2 id="claims-title" className="font-serif text-lg text-fg">{t("claims.title")}</h2>
             <p className="text-sm text-muted">{t("claims.description")}</p>
           </div>
           <ClaimList claims={pendingClaims} currency={currency} />
@@ -107,7 +107,7 @@ export function DetailPanel({ invoice, currency, today, now, events, pendingClai
       ) : null}
 
       <section aria-labelledby="activity-title" className="flex flex-col gap-3 p-5">
-        <h2 id="activity-title" className="text-[15px] font-semibold text-fg">{t("activity.title")}</h2>
+        <h2 id="activity-title" className="font-serif text-lg text-fg">{t("activity.title")}</h2>
         <Timeline events={events} payerNames={payerNames} now={now} />
       </section>
     </div>

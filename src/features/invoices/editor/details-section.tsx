@@ -80,7 +80,7 @@ export function DetailsSection({ state, errors, update }: EditorSectionProps) {
               aria-pressed={active}
               onClick={() => chooseTerm(days)}
               className={cn(
-                "h-7 rounded-md border px-2.5 text-xs font-medium shadow-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                "h-7 border px-2.5 text-xs transition-colors focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
                 active
                   ? "border-accent bg-tint text-tint-fg"
                   : "border-border bg-white text-fg hover:bg-subtle",

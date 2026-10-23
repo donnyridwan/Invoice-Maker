@@ -1,7 +1,6 @@
 import Link from "next/link";
 import { useLocale, useTranslations } from "next-intl";
-import { Repeat } from "lucide-react";
-import { Avatar, IconTile } from "@/components/ui/avatar";
+import { Avatar } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { resolveLocale } from "@/i18n/config";
@@ -36,9 +35,8 @@ export function ScheduleTable({ schedules }: { schedules: ScheduleRow[] }) {
           return (
             // The source link stretches over the whole row, so the entire row is clickable.
             <TableRow key={schedule.id} className="relative">
-              <TableCell className="py-1.5">
+              <TableCell>
                 <span className="inline-flex items-center gap-3">
-                  <IconTile icon={Repeat} />
                   {schedule.sourceInvoiceId ? (
                     <Link
                       href={`/invoices/${schedule.sourceInvoiceId}`}
@@ -54,7 +52,7 @@ export function ScheduleTable({ schedules }: { schedules: ScheduleRow[] }) {
               <TableCell className={schedule.clientName ? undefined : "text-muted"}>
                 {schedule.clientName ? (
                   <span className="inline-flex items-center gap-2">
-                    <Avatar name={schedule.clientName} className="size-6 text-[10px]" />
+                    <Avatar name={schedule.clientName} className="size-6 text-[9px]" />
                     {schedule.clientName}
                   </span>
                 ) : (

@@ -1,69 +1,71 @@
 @import "tailwindcss";
 
 @theme {
-  /* ElevenLabs-inspired: a quiet neutral workspace. Near-black ink and primary buttons, light grey
-     sidebar and tiles, hairline borders, 8–12px corners. Colour is kept for status badges, errors,
-     destructive actions and overdue. */
-  --color-accent: #0a0a0a;
-  --color-accent-hover: #2a2a2a;
-  --color-border: #ebebeb;
-  --color-fg: #0a0a0a;
-  --color-muted: #6b6b6b;
-  --color-subtle: #f5f5f5;
-  --color-sidebar: #fafafa;
-  --color-tile: #f3f3f3;
+  /* Midday-inspired: a calm, almost monochrome workspace with square corners, hairline borders,
+     an icon rail, and a serif for headlines and big figures. Colour is kept for status badges,
+     errors, destructive actions and overdue. */
+  --color-accent: #121212;
+  --color-accent-hover: #2e2e2e;
+  --color-border: #e6e6e6;
+  --color-fg: #121212;
+  --color-muted: #878787;
+  --color-subtle: #f6f6f6;
+  --color-sidebar: #ffffff;
+  --color-tile: #f2f2f2;
   --color-danger: #d92d20;
   --color-danger-hover: #b42318;
 
-  --color-badge-success-bg: #e7f6ec;
-  --color-badge-success-fg: #17663a;
-  --color-badge-info-bg: #ebf2fe;
-  --color-badge-info-fg: #1f4fb8;
-  --color-badge-warning-bg: #fdf4dc;
-  --color-badge-warning-fg: #8a5300;
-  --color-badge-danger-bg: #fdecec;
-  --color-badge-danger-fg: #b42318;
-  --color-badge-neutral-bg: #f0f0f0;
-  --color-badge-neutral-fg: #555555;
+  --color-badge-success-bg: #e2f5e9;
+  --color-badge-success-fg: #0f7a3d;
+  --color-badge-info-bg: #e6eefc;
+  --color-badge-info-fg: #2a5bd7;
+  --color-badge-warning-bg: #fdf1dc;
+  --color-badge-warning-fg: #9a5b00;
+  --color-badge-danger-bg: #fdeceb;
+  --color-badge-danger-fg: #c4271c;
+  --color-badge-neutral-bg: #f2f2f2;
+  --color-badge-neutral-fg: #707070;
 
-  --radius: 8px;
-  --radius-sm: 6px;
-  --radius-md: var(--radius);
-  --radius-lg: 12px;
+  --radius: 0px;
+  --radius-sm: 2px;
+  --radius-md: 0px;
+  --radius-lg: 0px;
+  --radius-xl: 0px;
 
-  --font-sans: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
+  --font-serif: var(--font-hedvig-serif), Georgia, "Times New Roman", serif;
   --font-doc-serif: Georgia, "Times New Roman", Times, serif;
 
   /* Semantic tokens the components read. */
-  --color-primary: #0a0a0a;
+  --color-primary: #121212;
   --color-primary-fg: #ffffff;
-  --color-primary-hover: #2a2a2a;
-  --color-tint: #f0f0f0;
-  --color-tint-fg: #0a0a0a;
-  --radius-button: 8px;
-  --radius-input: 8px;
-  --radius-card: 12px;
-  --radius-panel: 16px;
+  --color-primary-hover: #2e2e2e;
+  --color-tint: #f2f2f2;
+  --color-tint-fg: #121212;
+  --radius-button: 0px;
+  --radius-input: 0px;
+  --radius-card: 0px;
+  --radius-panel: 0px;
 
-  --shadow-xs: 0 1px 2px rgba(10, 10, 10, 0.05);
+  --shadow-xs: none;
 }
 
 [data-slot="input"],
 [data-slot="select-trigger"],
 [data-slot="textarea"] {
-  border-color: #e3e3e3;
-  box-shadow: var(--shadow-xs);
+  border-color: #e6e6e6;
 }
 [data-slot="input"]:focus-visible,
 [data-slot="select-trigger"]:focus-visible,
 [data-slot="textarea"]:focus-visible {
-  border-color: #a3a3a3;
-  outline-color: color-mix(in srgb, var(--color-accent) 12%, transparent);
+  border-color: #878787;
+  outline-color: transparent;
 }
 [data-slot="wordmark"] {
   color: var(--color-fg);
-  font-weight: 700;
-  letter-spacing: -0.03em;
+  font-family: var(--font-serif);
+  font-weight: 400;
+  letter-spacing: -0.01em;
 }
 
 @layer base {

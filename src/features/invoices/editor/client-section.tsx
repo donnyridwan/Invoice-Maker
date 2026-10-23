@@ -190,10 +190,10 @@ function ClientCombobox({
 function ClientSummary({ client }: { client: ClientOption }) {
   const details = [client.company, client.email, client.address?.split("\n")[0]].filter(Boolean).join(" · ");
   return (
-    <div className="flex items-center gap-3 rounded-card border border-border bg-sidebar px-3 py-2.5">
+    <div className="flex items-center gap-3 border border-border px-3 py-2.5">
       <Avatar name={client.name} className="size-9 text-xs" />
       <span className="min-w-0">
-        <span className="block truncate font-semibold text-fg">{client.name}</span>
+        <span className="block truncate text-fg">{client.name}</span>
         {details ? <span className="block truncate text-xs text-muted">{details}</span> : null}
       </span>
     </div>

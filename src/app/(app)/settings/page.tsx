@@ -29,29 +29,24 @@ export default async function SettingsPage() {
   return (
     <>
       <PageHeader title={t("title")} description={t("description")} />
-      <div className="flex gap-10">
-        {/* Section links, like a settings sidebar; the page itself stays one scrollable form. */}
-        <nav aria-label={t("title")} className="sticky top-20 hidden h-fit w-44 shrink-0 lg:block">
-          <ul className="flex flex-col border-l border-border">
-            {sections.map((section) => (
-              <li key={section.id}>
-                <a
-                  href={`#${section.id}`}
-                  className="-ml-px block border-l border-transparent py-1.5 pl-3 text-[13px] text-muted hover:border-fg hover:text-fg"
-                >
-                  {section.label}
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
-        <div className="flex min-w-0 max-w-3xl flex-1 flex-col gap-6">
-          {sections.map((section) => (
-            <div key={section.id} id={section.id} className="scroll-mt-16">
-              {section.content}
-            </div>
-          ))}
-        </div>
+      {/* Section links as text tabs, Midday-style; the page itself stays one scrollable form. */}
+      <nav aria-label={t("title")} className="mb-8 flex gap-5 overflow-x-auto border-b border-border">
+        {sections.map((section) => (
+          <a
+            key={section.id}
+            href={`#${section.id}`}
+            className="-mb-px whitespace-nowrap border-b border-transparent pb-2.5 text-sm text-muted hover:border-fg hover:text-fg"
+          >
+            {section.label}
+          </a>
+        ))}
+      </nav>
+      <div className="flex max-w-2xl flex-col gap-6">
+        {sections.map((section) => (
+          <div key={section.id} id={section.id} className="scroll-mt-24">
+            {section.content}
+          </div>
+        ))}
       </div>
     </>
   );

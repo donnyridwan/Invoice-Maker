@@ -34,8 +34,8 @@
     "userMenu": "Menu pengguna",
     "openMenu": "Buka menu",
     "business": "Bisnis",
-    "detail": "Detail",
-    "breadcrumb": "Navigasi halaman"
+    "globalSearch": "Cari di semua invoice",
+    "globalSearchPlaceholder": "Cari nomor invoice atau klien…"
   },
   "auth": {
     "signIn": "Masuk",
@@ -93,11 +93,6 @@
     "recent": {
       "title": "Invoice terbaru",
       "viewAll": "Lihat semua"
-    },
-    "workspace": "Ruang kerja saya",
-    "announcement": {
-      "badge": "Baru",
-      "text": "Tagih klien rutin otomatis dengan invoice berulang"
     }
   },
   "invoices": {

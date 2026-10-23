@@ -1,5 +1,6 @@
 "use client";
 
+import { Fragment } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { FileText, Landmark, LayoutDashboard, Package, Settings, Users, type LucideIcon } from "lucide-react";
@@ -8,7 +9,7 @@ import { cn } from "@/lib/utils";
 
 type NavItem = { href: string; labelKey: string; icon: LucideIcon };
 
-/** The sidebar menu: the daily work first, then a labelled group for the business set-up. */
+/** The sidebar menu: the daily work first, then a group for the business set-up. */
 export const NAV_GROUPS: { labelKey?: string; items: NavItem[] }[] = [
   {
     items: [
@@ -36,50 +37,67 @@ function activeHref(pathname: string): string | undefined {
     .sort((a, b) => b.length - a.length)[0];
 }
 
-export function Sidebar({ onNavigate }: { onNavigate?: () => void }) {
+/** The logo mark: a black square with the initials. */
+export function LogoMark({ className }: { className?: string }) {
+  return (
+    <span aria-hidden className={cn("flex size-8 items-center justify-center bg-fg font-serif text-sm text-white", className)}>
+      IM
+    </span>
+  );
+}
+
+/**
+ * The navigation. `rail` is the desktop form, a narrow column of icons (the label is in a tooltip
+ * and for assistive technology); otherwise, as in the mobile drawer, icons come with their labels.
+ */
+export function Sidebar({ rail = false, onNavigate }: { rail?: boolean; onNavigate?: () => void }) {
   const t = useTranslations();
   const pathname = usePathname();
   const active = activeHref(pathname);
 
   return (
-    <div className="flex h-full flex-col">
-      <div className="flex h-12 items-center px-4">
+    <div className={cn("flex h-full flex-col", rail && "items-center")}>
+      <div className={cn("flex h-16 shrink-0 items-center", rail ? "justify-center" : "gap-2.5 px-4")}>
         <Link
           href="/dashboard"
           onClick={onNavigate}
-          className="flex items-center gap-2 rounded-md focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          aria-label={rail ? t("common.appName") : undefined}
+          className="flex items-center gap-2.5 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          <span aria-hidden className="flex size-6 items-center justify-center rounded-md bg-fg text-[11px] font-bold text-white">
-            IM
-          </span>
-          <span data-slot="wordmark" className="text-[15px]">
-            {t("common.appName")}
-          </span>
+          <LogoMark />
+          {rail ? null : (
+            <span data-slot="wordmark" className="text-lg">
+              {t("common.appName")}
+            </span>
+          )}
         </Link>
       </div>
-      <nav aria-label={t("nav.mainMenu")} className="flex flex-col gap-4 px-2 py-2">
+      <nav aria-label={t("nav.mainMenu")} className={cn("flex flex-col gap-1 py-2", rail ? "items-center" : "px-3")}>
         {NAV_GROUPS.map((group, index) => (
-          <div key={group.labelKey ?? index} className="flex flex-col gap-0.5">
-            {group.labelKey ? <p className="px-2.5 pb-1 text-xs font-medium text-muted">{t(group.labelKey)}</p> : null}
+          <Fragment key={group.labelKey ?? index}>
+            {index > 0 ? <span aria-hidden className={cn("my-2 h-px bg-border", rail ? "w-6" : "mx-1")} /> : null}
             {group.items.map(({ href, labelKey, icon: Icon }) => {
               const current = href === active;
+              const label = t(labelKey);
               return (
                 <Link
                   key={href}
                   href={href}
                   onClick={onNavigate}
+                  title={rail ? label : undefined}
                   aria-current={current ? "page" : undefined}
                   className={cn(
-                    "flex h-8 items-center gap-2.5 rounded-md px-2.5 text-[13px] font-medium text-fg/80 transition-colors hover:bg-black/[0.04] hover:text-fg focus-visible:outline-2 focus-visible:outline-accent",
-                    current && "bg-black/[0.06] text-fg hover:bg-black/[0.06]",
+                    "flex items-center border text-[13px] transition-colors focus-visible:outline-2 focus-visible:outline-accent",
+                    rail ? "size-10 justify-center" : "h-9 gap-3 px-3",
+                    current ? "border-border bg-subtle text-fg" : "border-transparent text-muted hover:bg-subtle hover:text-fg",
                   )}
                 >
-                  <Icon className={cn("size-4", current ? "text-fg" : "text-muted")} />
-                  {t(labelKey)}
+                  <Icon className="size-[18px]" strokeWidth={1.75} />
+                  <span className={rail ? "sr-only" : undefined}>{label}</span>
                 </Link>
               );
             })}
-          </div>
+          </Fragment>
         ))}
       </nav>
     </div>

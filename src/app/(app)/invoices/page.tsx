@@ -3,6 +3,8 @@ import { getTranslations } from "next-intl/server";
 import { EmptyState } from "@/components/ui/empty-state";
 import { Input } from "@/components/ui/input";
 import { PageHeader } from "@/components/ui/page-header";
+import { getDashboardSummary } from "@/features/dashboard/queries";
+import { SummaryCards } from "@/features/dashboard/summary-cards";
 import { InvoiceTable } from "@/features/invoices/invoice-table";
 import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { countInvoicesByTab, INVOICE_TABS, listInvoices, type InvoiceTab } from "@/features/invoices/queries";
@@ -21,19 +23,25 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/invoice
   const rawTab = firstParam(params.tab);
   const tab: InvoiceTab = INVOICE_TABS.find((candidate) => candidate === rawTab) ?? "all";
 
-  const [invoices, counts, recurringCount] = await Promise.all([
+  const today = todayInJakarta();
+  const [invoices, counts, recurringCount, summary] = await Promise.all([
     listInvoices(user.id, { search: q, tab }),
     countInvoicesByTab(user.id),
     countSchedules(user.id),
+    getDashboardSummary(user.id, today),
   ]);
 
   return (
     <>
       <PageHeader title={t("title")} description={t("description")} actions={<NewInvoiceButton />} />
 
+      <div className="mb-8">
+        <SummaryCards summary={summary} />
+      </div>
+
       <InvoiceTabs active={tab} counts={counts} q={q} recurringCount={recurringCount} />
 
-      <form action="/invoices" method="get" role="search" className="relative mb-2 w-full">
+      <form action="/invoices" method="get" role="search" className="relative mb-4 w-full sm:w-80">
         {tab !== "all" ? <input type="hidden" name="tab" value={tab} /> : null}
         <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted" />
         <Input
@@ -47,7 +55,7 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/invoice
       </form>
 
       {invoices.length > 0 ? (
-        <InvoiceTable invoices={invoices} today={todayInJakarta()} />
+        <InvoiceTable invoices={invoices} today={today} />
       ) : q ? (
         <EmptyState title={t("noResultsTitle")} description={t("noResultsDescription")} />
       ) : tab !== "all" ? (

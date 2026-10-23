@@ -89,7 +89,7 @@ test.describe("shell", () => {
       page.locator(selector).first().evaluate((el, prop) => parseFloat(getComputedStyle(el)[prop as never]), property);
     expect(await px("body", "fontSize")).toBe(14);
     expect(await px("h1", "fontSize")).toBe(24);
-    expect(await px("aside", "width")).toBe(240);
+    expect(await px("aside", "width")).toBe(70);
 
     await page.getByRole("link", { name: "Klien baru" }).first().click();
     await page.getByLabel("Nama", { exact: true }).fill("Dimensi");

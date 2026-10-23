@@ -34,8 +34,8 @@
     "userMenu": "User menu",
     "openMenu": "Open menu",
     "business": "Business",
-    "detail": "Details",
-    "breadcrumb": "Breadcrumb"
+    "globalSearch": "Search all invoices",
+    "globalSearchPlaceholder": "Search an invoice number or client…"
   },
   "auth": {
     "signIn": "Sign in",
@@ -93,11 +93,6 @@
     "recent": {
       "title": "Recent invoices",
       "viewAll": "View all"
-    },
-    "workspace": "My workspace",
-    "announcement": {
-      "badge": "New",
-      "text": "Bill regular clients automatically with recurring invoices"
     }
   },
   "invoices": {

@@ -15,7 +15,7 @@ type CardSpec = {
 };
 
 /**
- * Three figures in one strip: unpaid, overdue and paid this month. The big number is the total in the base
+ * Three bordered figures: unpaid, overdue and paid this month. The big number is the total in the base
  * currency, other currencies converted in; it starts with "≈" (and a tooltip names the rate date)
  * when any conversion went into it. Invoices in a currency without a known rate follow as small
  * "+ USD 120.00 without rate" lines, and the invoice count (all currencies) sits underneath. Each
@@ -32,33 +32,30 @@ export function SummaryCards({ summary }: { summary: DashboardSummary }) {
   ];
 
   return (
-    <section
-      aria-label={t("label")}
-      className="grid overflow-hidden rounded-card border border-border bg-white shadow-xs sm:grid-cols-3 sm:divide-x divide-y divide-border sm:divide-y-0"
-    >
+    <section aria-label={t("label")} className="grid gap-4 sm:grid-cols-3">
       {cards.map(({ key, card, href, alert }) => (
         <Link
           key={key}
           href={href}
-          className="block px-5 py-4 transition-colors hover:bg-subtle/70 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent"
+          className="block border border-border px-5 py-4 transition-colors hover:bg-subtle focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
-          <p className="text-[13px] text-muted">{t(key)}</p>
           <p
             title={card.converted && card.rateDate ? t("convertedAt", { date: formatDocDate(card.rateDate, locale) }) : undefined}
             className={cn(
-              "mt-1 text-2xl font-semibold tabular-nums tracking-tight",
+              "font-serif text-[26px] leading-tight tabular-nums tracking-tight",
               alert && card.totalBaseMinor > 0 ? "text-danger" : "text-fg",
             )}
           >
             {card.converted ? "≈ " : ""}
             {formatMoney(card.totalBaseMinor, card.baseCurrency, locale)}
           </p>
+          <p className="mt-2 text-sm text-fg">{t(key)}</p>
           {card.withoutRate.map((row) => (
             <p key={row.currency} className="text-sm tabular-nums text-muted">
               + {row.currency} {formatMoneyInput(row.totalMinor, row.currency, locale)} {t("withoutRate")}
             </p>
           ))}
-          <p className="mt-1 text-xs text-muted">{t("count", { count: card.count })}</p>
+          <p className="mt-0.5 text-[13px] text-muted">{t("count", { count: card.count })}</p>
         </Link>
       ))}
     </section>

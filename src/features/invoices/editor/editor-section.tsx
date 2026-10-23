@@ -35,7 +35,7 @@ export function EditorSection({
   return (
     <section aria-labelledby={headingId} className={cn("border-t border-border py-6 first:border-t-0 first:pt-0", className)}>
       <div className="flex min-h-8 items-center justify-between gap-3">
-        <h2 id={headingId} className="text-[15px] font-semibold tracking-tight text-fg">
+        <h2 id={headingId} className="font-serif text-lg text-fg">
           {title}
         </h2>
         {action}

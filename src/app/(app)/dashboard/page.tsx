@@ -1,10 +1,11 @@
 import Link from "next/link";
-import { ChevronRight, Clock, Repeat } from "lucide-react";
+import { Clock, Repeat } from "lucide-react";
 import { getTranslations } from "next-intl/server";
+import { PageHeader } from "@/components/ui/page-header";
 import { getDashboardSummary } from "@/features/dashboard/queries";
-import { QuickActions } from "@/features/dashboard/quick-actions";
 import { RecentInvoices } from "@/features/dashboard/recent-invoices";
 import { SummaryCards } from "@/features/dashboard/summary-cards";
+import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { listInvoices } from "@/features/invoices/queries";
 import { Checklist } from "@/features/profile/checklist";
 import { getChecklist } from "@/features/profile/queries";
@@ -25,32 +26,22 @@ export default async function DashboardPage() {
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col items-start gap-6">
-        <Link
-          href="/invoices/recurring"
-          className="inline-flex max-w-full items-center gap-2 rounded-full border border-border bg-white py-1 pl-1 pr-3 text-[13px] font-medium text-fg shadow-xs hover:bg-subtle"
-        >
-          <span className="rounded-full bg-fg px-2 py-0.5 text-[11px] font-semibold text-white">{t("announcement.badge")}</span>
-          <span className="truncate">{t("announcement.text")}</span>
-          <ChevronRight aria-hidden className="size-3.5 shrink-0 text-muted" />
-        </Link>
-        <div>
-          <p className="text-[13px] text-muted">{t("workspace")}</p>
-          <h1 className="text-[28px] font-semibold leading-tight tracking-tight text-fg">
-            {t("greeting", { name: firstName })}
-          </h1>
-        </div>
-      </div>
+      <PageHeader
+        title={t("greeting", { name: firstName })}
+        description={t("description")}
+        actions={<NewInvoiceButton />}
+        className="mb-0"
+      />
       {summary.pendingClaims > 0 || summary.recurringDrafts > 0 ? (
         <div className="flex flex-col gap-2">
           {summary.pendingClaims > 0 ? (
             <div
               role="status"
-              className="flex flex-wrap items-center gap-3 rounded-card border border-[#f5e2b0] bg-badge-warning-bg px-4 py-3 text-sm text-badge-warning-fg"
+              className="flex flex-wrap items-center gap-3 border border-[#f3dfb7] bg-badge-warning-bg px-4 py-3 text-sm text-badge-warning-fg"
             >
               <Clock className="size-4 shrink-0" aria-hidden />
-              <span className="font-medium">{t("claimsBanner", { count: summary.pendingClaims })}</span>
-              <Link href="/invoices?tab=unpaid" className="ml-auto font-medium underline underline-offset-2">
+              <span>{t("claimsBanner", { count: summary.pendingClaims })}</span>
+              <Link href="/invoices?tab=unpaid" className="ml-auto underline underline-offset-4">
                 {t("claimsBannerAction")}
               </Link>
             </div>
@@ -59,20 +50,19 @@ export default async function DashboardPage() {
             <div
               role="status"
               data-testid="recurring-drafts-banner"
-              className="flex flex-wrap items-center gap-3 rounded-card border border-[#d6e4fc] bg-badge-info-bg px-4 py-3 text-sm text-badge-info-fg"
+              className="flex flex-wrap items-center gap-3 border border-[#d3e0fa] bg-badge-info-bg px-4 py-3 text-sm text-badge-info-fg"
             >
               <Repeat className="size-4 shrink-0" aria-hidden />
-              <span className="font-medium">{t("recurringBanner", { count: summary.recurringDrafts })}</span>
-              <Link href="/invoices?tab=draft" className="ml-auto font-medium underline underline-offset-2">
+              <span>{t("recurringBanner", { count: summary.recurringDrafts })}</span>
+              <Link href="/invoices?tab=draft" className="ml-auto underline underline-offset-4">
                 {t("recurringBannerAction")}
               </Link>
             </div>
           ) : null}
         </div>
       ) : null}
-      <QuickActions />
       <SummaryCards summary={summary} />
-      <div className={checklistDone ? "grid gap-8" : "grid gap-8 lg:grid-cols-[minmax(0,1fr)_320px]"}>
+      <div className={checklistDone ? "grid gap-8" : "grid gap-8 lg:grid-cols-[minmax(0,1fr)_340px]"}>
         <RecentInvoices invoices={recent} today={today} />
         <Checklist state={checklist} />
       </div>

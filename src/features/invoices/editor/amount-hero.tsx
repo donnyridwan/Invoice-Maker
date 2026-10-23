@@ -41,8 +41,8 @@ export function AmountHero({
       </p>
       <p className="flex items-baseline gap-2">
         <span className="text-[13px] text-muted">{t("label")}</span>
-        <span className="rounded-md bg-subtle px-1.5 text-[11px] font-semibold text-muted">{currency}</span>
-        <span className="break-all text-lg font-semibold tracking-tight text-fg tabular-nums">{total}</span>
+        <span className="border border-border px-1.5 text-[11px] text-muted">{currency}</span>
+        <span className="break-all font-serif text-2xl tracking-tight text-fg tabular-nums">{total}</span>
       </p>
     </section>
   );

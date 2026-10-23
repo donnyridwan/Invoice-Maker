@@ -149,7 +149,7 @@ export function InvoiceEditor({
   return (
     // On wide screens the editor fills the viewport: form on the left and the preview panel on the
     // right scroll on their own, like a workspace; below that the page scrolls and tabs switch panes.
-    <div className="flex flex-col xl:h-full">
+    <div className="flex flex-col xl:h-screen">
       <EditorHeader
         number={state.number}
         status={displayStatus}
@@ -185,8 +185,8 @@ export function InvoiceEditor({
         }
       />
 
-      <div className="sticky top-24 z-10 border-b border-border bg-white px-4 py-2 md:top-12 xl:hidden">
-        <div role="tablist" aria-label={t("tabs.label")} className="flex gap-1 rounded-lg bg-subtle p-1">
+      <div className="sticky top-[120px] z-10 border-b border-border bg-white px-4 py-2 md:top-16 xl:hidden">
+        <div role="tablist" aria-label={t("tabs.label")} className="flex gap-1 border border-border bg-subtle p-1">
           {(["form", "preview"] as const).map((value) => (
             <button
               key={value}
@@ -197,7 +197,7 @@ export function InvoiceEditor({
               aria-controls={`editor-panel-${value}`}
               onClick={() => setTab(value)}
               className={cn(
-                "h-7 flex-1 rounded-md text-[13px] font-medium focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
+                "h-7 flex-1 text-[13px] focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent",
                 tab === value ? "bg-white text-fg shadow-xs" : "text-muted hover:text-fg",
               )}
             >
@@ -252,7 +252,7 @@ export function InvoiceEditor({
           id="editor-panel-preview"
           aria-labelledby="editor-tab-preview"
           className={cn(
-            "min-w-0 bg-sidebar xl:flex xl:w-[46%] xl:max-w-[720px] xl:flex-col xl:border-l xl:border-border",
+            "min-w-0 bg-subtle xl:flex xl:w-[46%] xl:max-w-[720px] xl:flex-col xl:border-l xl:border-border",
             tab !== "preview" && "hidden",
           )}
         >

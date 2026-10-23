@@ -55,30 +55,30 @@ laporan lanjutan, aplikasi mobile native, custom domain, paket berbayar.
 
 ## 2a. Gaya Visual
 
-Gaya ElevenLabs
-([ElevenLabs web](https://mobbin.com/apps/eleven-labs-web-a715a54a-7922-40d8-8250-3e43735682e8/7c321fea-483d-4fe6-8fc4-aa3899ddc93e/screens)):
-ruang kerja netral yang tenang.
+Gaya Midday
+([daftar invoice](https://mobbin.com/screens/296fd2ec-0218-439b-9b82-a92bf2ff8338),
+[settings](https://mobbin.com/screens/f8925ebe-9e09-42cc-ac01-3b179a4de13f)):
+ruang kerja hampir monokrom yang tenang.
 
-- Warna: tinta dan tombol utama hampir hitam `#0A0A0A` (teks putih), teks
-  sekunder `#6B6B6B`, border tipis `#EBEBEB`, sidebar dan kanvas `#FAFAFA`,
-  kotak abu `#F3F3F3`. Warna hanya untuk badge status (Lunas hijau, Terkirim/
-  Dilihat biru, Menunggu konfirmasi kuning, Draft/Void abu, Jatuh tempo merah),
-  error, aksi hapus, dan status Jatuh tempo.
-- Sudut kecil: tombol dan input 8px, kartu 12px, dialog 16px. Tombol dan input
-  setinggi 32–36px dengan bayangan tipis; badge kotak membulat kecil.
-- Layout: sidebar abu terang 240px (logo, menu utama, grup "Bisnis", kartu
-  pengguna di bawah) dan top bar 48px berisi breadcrumb. Judul halaman 24px
-  semibold; tab bergaris bawah; tabel datar tanpa kartu; pencarian selebar
-  halaman.
-- Dasbor: sapaan dengan label "Ruang kerja saya", kotak pintasan (Invoice baru,
-  Klien baru, Katalog, Rekening), satu kartu statistik terbagi tiga kolom, lalu
-  Invoice terbaru dan checklist berdampingan.
-- Editor dan detail invoice memenuhi layar: top bar sendiri (kembali,
-  breadcrumb, status, aksi), form atau dokumen di kiri, panel di kanan (preview
+- Warna: tinta dan tombol utama `#121212` (teks putih), teks sekunder `#878787`,
+  border tipis `#E6E6E6`, kanvas preview `#F6F6F6`. Warna hanya untuk badge
+  status (Lunas hijau, Terkirim/Dilihat biru, Menunggu konfirmasi kuning,
+  Draft/Void abu, Jatuh tempo merah), error, aksi hapus, dan status Jatuh tempo.
+- Sudut tajam: tombol, input, kartu, tabel, dan dialog tanpa radius; badge 2px.
+  Tidak ada bayangan kecuali menu, dialog, dan toast.
+- Font: Geist untuk teks (dasar 14px, label 13px abu); Hedvig Letters Serif
+  untuk judul halaman (24px), judul bagian, dan angka besar (ringkasan, total).
+- Layout: rail ikon 70px di kiri (logo "IM", menu, pemisah grup Bisnis, kotak
+  inisial pengguna di bawah) dan top bar 64px berisi pencarian invoice. Halaman
+  rata kiri, lebar maksimal 1400px.
+- Daftar: kartu ringkasan bergaris (angka serif besar, label, jumlah invoice),
+  tab teks polos, kotak pencarian, tabel bergaris kotak dengan avatar inisial
+  abu untuk klien. Kartu ringkasan juga tampil di atas daftar invoice.
+- Editor dan detail invoice memenuhi layar: top bar sendiri (kembali, nomor
+  serif, status, aksi), form atau dokumen di kiri, panel di kanan (preview
   dengan warna aksen di editor; status, aksi, jadwal berulang, dan aktivitas di
   detail). Total editor ada di bar bawah form.
-- Pengaturan memakai navigasi bagian di kiri. Toast gelap.
-- Font Inter, ukuran dasar 14px, label 13px.
+- Pengaturan memakai tab teks di atas.
 - Template dokumen invoice tetap bersih dan minimal; warna aksen default
   dokumen `#111111` (pengguna bisa memilih warna lain). Template default:
   **Minimal**.

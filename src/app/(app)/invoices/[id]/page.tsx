@@ -48,12 +48,12 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
   return (
     // A workspace like the editor: the document on the left, status, actions and activity in a
     // panel on the right; each scrolls on its own on wide screens.
-    <div className="flex flex-col xl:h-full">
-      <header className="sticky top-12 z-20 flex h-12 shrink-0 items-center gap-2 border-b border-border bg-white px-3 md:top-0 md:px-4">
+    <div className="flex flex-col xl:h-screen">
+      <header className="sticky top-14 z-20 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-white px-3 md:top-0 md:px-6">
         <Link
           href="/invoices"
           aria-label={t("back")}
-          className="inline-flex size-8 shrink-0 items-center justify-center rounded-md text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+          className="inline-flex size-8 shrink-0 items-center justify-center border border-border text-muted hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
         >
           <ArrowLeft className="size-4" />
         </Link>
@@ -61,11 +61,11 @@ export default async function InvoiceDetailPage({ params }: PageProps<"/invoices
           {tNav("invoices")}
         </span>
         <ChevronRight aria-hidden className="hidden size-3.5 shrink-0 text-muted sm:block" />
-        <h1 className="min-w-0 truncate text-[13px] font-semibold text-fg">{invoice.number}</h1>
+        <h1 className="min-w-0 truncate font-serif text-lg text-fg">{invoice.number}</h1>
       </header>
 
       <div className="flex min-h-0 flex-1 flex-col xl:flex-row">
-        <section aria-label={t("documentLabel")} className="min-w-0 bg-sidebar p-4 sm:p-6 xl:flex-1 xl:overflow-y-auto">
+        <section aria-label={t("documentLabel")} className="min-w-0 bg-subtle p-4 sm:p-6 xl:flex-1 xl:overflow-y-auto">
           <div className="mx-auto max-w-[794px] overflow-hidden rounded-md bg-white shadow-[0_1px_3px_rgba(10,10,10,0.08),0_0_0_1px_rgba(10,10,10,0.05)]">
             <ScaledDocument>
               <InvoiceDocumentView doc={buildInvoiceDocument(documentSourceFromInvoice(invoice))} />

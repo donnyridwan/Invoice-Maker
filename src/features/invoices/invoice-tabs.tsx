@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils";
 import { INVOICE_TABS, type InvoiceTab } from "./queries";
 
 const TAB_LINK_CLASS =
-  "-mb-px inline-flex h-10 items-center gap-1.5 whitespace-nowrap border-b-2 px-3 text-[13px] font-medium transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent";
+  "-mb-px inline-flex h-10 items-center gap-1.5 whitespace-nowrap border-b px-3 text-sm transition-colors first:pl-0 focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent";
 
 /**
  * Status tabs of the invoice list, each with its count; the search term is kept when switching.
@@ -39,7 +39,7 @@ export function InvoiceTabs({
             className={cn(TAB_LINK_CLASS, current ? "border-fg text-fg" : "border-transparent text-muted hover:text-fg")}
           >
             {t(tab)}
-            <span className="rounded-md bg-subtle px-1.5 text-[11px] tabular-nums text-muted">
+            <span className="text-xs tabular-nums text-muted">
               {counts[tab]}
             </span>
           </Link>
@@ -51,7 +51,7 @@ export function InvoiceTabs({
         className={cn(TAB_LINK_CLASS, active === "recurring" ? "border-fg text-fg" : "border-transparent text-muted hover:text-fg")}
       >
         {t("recurring")}
-        <span className="rounded-md bg-subtle px-1.5 text-[11px] tabular-nums text-muted">
+        <span className="text-xs tabular-nums text-muted">
           {recurringCount}
         </span>
       </Link>

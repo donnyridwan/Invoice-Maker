@@ -84,7 +84,7 @@ export function ScheduleCard({
   if (!schedule) {
     return (
       <Card role="region" aria-labelledby="schedule-title" className={flat ? "rounded-none border-0 p-5" : "p-5"}>
-        <h2 id="schedule-title" className="text-[15px] font-semibold text-fg">
+        <h2 id="schedule-title" className="font-serif text-lg text-fg">
           {t("card.title")}
         </h2>
         <p className="mt-1 text-sm text-muted">{t("card.empty")}</p>
@@ -107,7 +107,7 @@ export function ScheduleCard({
   return (
     <Card role="region" aria-labelledby="schedule-title" className={flat ? "rounded-none border-0 p-5" : "p-5"}>
       <div className="flex items-center justify-between gap-3">
-        <h2 id="schedule-title" className="text-[15px] font-semibold text-fg">
+        <h2 id="schedule-title" className="font-serif text-lg text-fg">
           {t("card.title")}
         </h2>
         <Badge variant={STATUS_VARIANT[status]}>{t(`status.${status}`)}</Badge>

@@ -2,10 +2,9 @@
 
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { MoreHorizontal, Package, Plus } from "lucide-react";
+import { MoreHorizontal, Plus } from "lucide-react";
 import { useLocale, useTranslations } from "next-intl";
 import { toast } from "sonner";
-import { IconTile } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import {
@@ -81,9 +80,8 @@ export function CatalogTable({ items, defaultCurrency }: { items: CatalogItem[];
             const archived = Boolean(item.archivedAt);
             return (
               <TableRow key={item.id} className={archived ? "text-muted" : undefined}>
-                <TableCell className="py-1.5">
+                <TableCell>
                   <div className="flex items-center gap-3">
-                    <IconTile icon={Package} />
                     <div className="min-w-0">
                       <span className="font-medium text-fg">{item.name}</span>
                       {archived ? <Badge className="ml-2 align-middle">{t("catalog.archived")}</Badge> : null}

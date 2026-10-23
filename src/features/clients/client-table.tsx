@@ -21,7 +21,7 @@ export function ClientTable({ clients }: { clients: Client[] }) {
       <TableBody>
         {clients.map((client) => (
           <TableRow key={client.id} className={client.archivedAt ? "text-muted" : undefined}>
-            <TableCell className="py-1.5">
+            <TableCell>
               <div className="flex items-center gap-3">
                 <Avatar name={client.name} className={client.archivedAt ? "opacity-50" : undefined} />
                 <div className="min-w-0">

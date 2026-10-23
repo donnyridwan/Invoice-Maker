@@ -13,13 +13,13 @@ function EmptyState({ title, description, action, className }: EmptyStateProps) 
     <div
       data-slot="empty-state"
       className={cn(
-        "flex flex-col items-center justify-center gap-2 rounded-card bg-sidebar px-6 py-14 text-center",
+        "flex flex-col items-center justify-center gap-1.5 border border-border px-6 py-16 text-center",
         className,
       )}
     >
-      <p className="text-base font-semibold text-fg">{title}</p>
+      <p className="text-base text-fg">{title}</p>
       {description ? <p className="max-w-sm text-sm text-muted">{description}</p> : null}
-      {action ? <div className="mt-2">{action}</div> : null}
+      {action ? <div className="mt-4">{action}</div> : null}
     </div>
   );
 }

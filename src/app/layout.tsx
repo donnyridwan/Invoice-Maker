@@ -1,13 +1,19 @@
 import type { Metadata } from "next";
-import { Inter } from "next/font/google";
+import { Geist, Hedvig_Letters_Serif } from "next/font/google";
 import { NextIntlClientProvider } from "next-intl";
 import { getLocale, getMessages, getTranslations } from "next-intl/server";
 import { Toaster } from "@/components/ui/sonner";
 import { TIME_ZONE } from "@/i18n/config";
 import "./globals.css";
 
-const inter = Inter({
-  variable: "--font-inter",
+const sans = Geist({
+  variable: "--font-geist",
+  subsets: ["latin"],
+});
+
+// Headlines and the big figures are set in a serif, Midday-style.
+const serif = Hedvig_Letters_Serif({
+  variable: "--font-hedvig-serif",
   subsets: ["latin"],
 });
 
@@ -21,7 +27,7 @@ export default async function RootLayout({ children }: LayoutProps<"/">) {
   const messages = await getMessages();
 
   return (
-    <html lang={locale} className={inter.variable}>
+    <html lang={locale} className={`${sans.variable} ${serif.variable}`}>
       <body className="min-h-screen font-sans">
         <NextIntlClientProvider locale={locale} messages={messages} timeZone={TIME_ZONE}>
           {children}
