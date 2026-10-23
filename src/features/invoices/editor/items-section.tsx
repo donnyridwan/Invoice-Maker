@@ -138,9 +138,10 @@ export function ItemsSection({
   return (
     // The step heading above already reads "Item"; the section title stays for assistive technology.
     <EditorSection title={t("sections.items")} hideTitle>
-      <div>
+      {/* The row layout follows the form's width, not the screen's. */}
+      <div className="@container">
         {/* Column headings (the inputs carry their own labels for assistive technology). */}
-        <div aria-hidden className="hidden items-end gap-2 border-b border-border pb-2 text-xs text-muted sm:flex">
+        <div aria-hidden className="hidden items-end gap-2 border-b border-border pb-2 text-xs text-muted @2xl:flex">
           <span className={ITEM_COLUMNS.grip} />
           <span className="flex-1">{t("items.name")}</span>
           <span className={cn("text-right", ITEM_COLUMNS.quantity)}>{t("items.quantity")}</span>

@@ -285,7 +285,7 @@ export function InvoiceEditor({
           className={cn("flex min-w-0 flex-1 flex-col xl:flex xl:overflow-y-auto", tab !== "form" && "hidden")}
         >
           <EditorStepper current={step} errors={invalidSteps} onSelect={goTo} />
-          <div className="mx-auto w-full max-w-[760px] flex-1 px-4 py-6 md:px-8 md:py-8">
+          <div className="mx-auto w-full max-w-[640px] flex-1 px-4 py-8 md:px-8 md:py-12">
             {recurringSchedule ? (
               <div className="mb-6">
                 <ScheduleCard
@@ -303,15 +303,10 @@ export function InvoiceEditor({
               </p>
             ) : null}
             <StepRecap rows={recapRows} onEdit={goTo} />
-            <div className="mb-6">
-              <p className="text-[13px] text-muted">
-                {t("steps.stepOf", { n: stepIndex + 1, total: EDITOR_STEPS.length })}
-              </p>
-              <h2 ref={stepHeadingRef} tabIndex={-1} className="mt-1 font-serif text-2xl text-fg outline-none">
-                {t(`steps.${step}`)}
-              </h2>
-            </div>
-            <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col border-0 p-0">
+            <h2 ref={stepHeadingRef} tabIndex={-1} className="mb-8 font-serif text-2xl text-fg outline-none">
+              {t(`steps.${step}`)}
+            </h2>
+            <fieldset disabled={locked} className="m-0 flex min-w-0 flex-col gap-8 border-0 p-0">
               {step === "details" ? (
                 <>
                   <ClientSection

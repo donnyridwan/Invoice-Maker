@@ -43,7 +43,8 @@ export function DetailsSection({ state, errors, update }: EditorSectionProps) {
     : [];
 
   return (
-    <EditorSection title={t("sections.details")}>
+    // The fields carry their own labels; the step heading names the part.
+    <EditorSection title={t("sections.details")} hideTitle>
       <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
         <FormField
           label={t("details.number")}

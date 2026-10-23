@@ -3,7 +3,6 @@
 import { useId, type ReactNode } from "react";
 import { useTranslations } from "next-intl";
 import { translateValidation } from "@/lib/validation-message";
-import { cn } from "@/lib/utils";
 import type { EditorErrors, EditorState } from "../editor-state";
 
 /** What every form section receives: the state, the errors to show and a way to change it. */
@@ -20,9 +19,9 @@ export function useErrorText(errors: EditorErrors): (key: string) => string | un
 }
 
 /**
- * A flat form section: a small label-like title, then the fields; sections are divided by a
- * hairline. `hideTitle` keeps the title for assistive technology only (the totals, which read as
- * the end of the items).
+ * A form section: a label-like title, then the fields. No frame or divider: the sections of a step
+ * are set apart by space alone. `hideTitle` keeps the title for assistive technology only (where
+ * the step heading or the fields' own labels already say it).
  */
 export function EditorSection({
   title,
@@ -39,14 +38,14 @@ export function EditorSection({
 }) {
   const headingId = useId();
   return (
-    <section aria-labelledby={headingId} className={cn("border-t border-border py-6 first:border-t-0 first:pt-0", className)}>
+    <section aria-labelledby={headingId} className={className}>
       {hideTitle ? (
         <h3 id={headingId} className="sr-only">
           {title}
         </h3>
       ) : (
-        <div className="mb-4 flex min-h-6 items-center justify-between gap-3">
-          <h3 id={headingId} className="text-[13px] font-medium text-fg">
+        <div className="mb-1.5 flex items-center justify-between gap-3">
+          <h3 id={headingId} className="text-[13px] font-normal text-[#606060]">
             {title}
           </h3>
           {action}

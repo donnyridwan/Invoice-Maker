@@ -116,9 +116,7 @@
     "editor": {
       "hero": {
         "label": "Invoice total",
-        "items": "{count, plural, one {# item} other {# items}}",
-        "due": "Due {date}",
-        "dueOnReceipt": "Due on receipt"
+        "due": "Due {date}"
       },
       "backToList": "Back to invoices",
       "tabs": {
@@ -237,7 +235,6 @@
         "recap": "Earlier steps",
         "edit": "Edit",
         "editStep": "Edit {step}",
-        "stepOf": "Step {n} of {total}",
         "back": "Back",
         "next": "Next",
         "backTo": "Back to {step}",

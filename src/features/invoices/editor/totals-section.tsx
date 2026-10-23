@@ -31,7 +31,7 @@ export function TotalsSection({
 
   return (
     // Reads as the foot of the items table: right-aligned, like the totals on the invoice itself.
-    <EditorSection title={t("sections.totals")} hideTitle className="border-t-0 pt-0">
+    <EditorSection title={t("sections.totals")} hideTitle className="mt-6">
       <dl className="ml-auto flex w-full max-w-sm flex-col gap-2.5 text-sm tabular-nums">
         <div className="flex items-center justify-between gap-4">
           <dt className="text-muted">{t("totals.subtotal")}</dt>

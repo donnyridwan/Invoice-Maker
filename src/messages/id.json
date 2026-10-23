@@ -116,9 +116,7 @@
     "editor": {
       "hero": {
         "label": "Total tagihan",
-        "items": "{count} item",
-        "due": "Jatuh tempo {date}",
-        "dueOnReceipt": "Jatuh tempo saat diterima"
+        "due": "Jatuh tempo {date}"
       },
       "backToList": "Kembali ke daftar invoice",
       "tabs": {
@@ -237,7 +235,6 @@
         "recap": "Ringkasan langkah sebelumnya",
         "edit": "Ubah",
         "editStep": "Ubah {step}",
-        "stepOf": "Langkah {n} dari {total}",
         "back": "Kembali",
         "next": "Lanjut",
         "backTo": "Kembali ke {step}",

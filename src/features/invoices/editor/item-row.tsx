@@ -19,9 +19,9 @@ import { useErrorText } from "./editor-section";
 /** Column widths shared by the rows and the header of the items table (from sm up). */
 export const ITEM_COLUMNS = {
   grip: "w-5",
-  quantity: "sm:w-[4.5rem]",
-  price: "sm:w-32",
-  amount: "sm:w-28",
+  quantity: "@2xl:w-[4.5rem]",
+  price: "@2xl:w-32",
+  amount: "@2xl:w-28",
   actions: "w-[4.25rem]",
 } as const;
 
@@ -142,8 +142,8 @@ export function ItemRow({
           ) : null}
         </div>
 
-        {/* The figures: beside the name from sm up, on their own line on a phone. */}
-        <div className="order-last flex w-full items-start gap-2 pl-7 sm:order-none sm:w-auto sm:pl-0">
+        {/* The figures: beside the name in a wide form, on their own line (qty × price = amount) in a narrow one. */}
+        <div className="order-last flex w-full items-start gap-2 pl-7 @2xl:order-none @2xl:w-auto @2xl:pl-0">
           <div className={cn("w-20 shrink-0", ITEM_COLUMNS.quantity)}>
             <label htmlFor={id("quantity")} className="sr-only">
               {t("quantity")}
@@ -159,7 +159,10 @@ export function ItemRow({
             />
             {errorFor("quantity")}
           </div>
-          <div className={cn("min-w-0 flex-1 sm:flex-none", ITEM_COLUMNS.price)}>
+          <span aria-hidden className="flex h-9 items-center text-[13px] text-muted @2xl:hidden">
+            ×
+          </span>
+          <div className={cn("min-w-0 max-w-40 flex-1 @2xl:max-w-none @2xl:flex-none", ITEM_COLUMNS.price)}>
             <label htmlFor={id("unitPrice")} className="sr-only">
               {t("unitPrice")}
             </label>
@@ -178,10 +181,13 @@ export function ItemRow({
             />
             {errorFor("unitPrice")}
           </div>
+          <span aria-hidden className="ml-auto flex h-9 items-center text-[13px] text-muted @2xl:hidden">
+            =
+          </span>
           <output
             aria-label={t("amount")}
             className={cn(
-              "flex h-9 w-28 shrink-0 items-center justify-end truncate text-sm font-medium tabular-nums text-fg",
+              "flex h-9 shrink-0 items-center justify-end truncate text-sm font-medium tabular-nums text-fg",
               ITEM_COLUMNS.amount,
             )}
           >
@@ -216,7 +222,7 @@ export function ItemRow({
       </div>
 
       {/* Second line, under the name: the optional description and unit. */}
-      <div className="flex items-start gap-2 pl-7 sm:pr-[4.75rem]">
+      <div className="flex items-start gap-2 pl-7 @2xl:pr-[4.75rem]">
         <div className="min-w-0 flex-1">
           <label htmlFor={id("description")} className="sr-only">
             {t("description")}

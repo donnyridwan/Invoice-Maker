@@ -265,7 +265,7 @@ export function ClientSection({
       </div>
       {selected ? <ClientSummary client={selected} /> : null}
       {clients.length === 0 ? (
-        <p className="-mt-2 text-xs text-muted">
+        <p className="text-xs text-muted">
           {t("client.none")}{" "}
           <a href="/clients/new" target="_blank" rel="noopener noreferrer" className="text-accent hover:underline">
             {t("client.add")}

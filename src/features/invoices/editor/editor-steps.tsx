@@ -49,7 +49,7 @@ export function EditorStepper({
 
   return (
     <nav aria-label={t("label")} className="border-b border-border bg-white xl:sticky xl:top-0 xl:z-10">
-      <ol className="mx-auto flex w-full max-w-[760px] px-4 md:px-8">
+      <ol className="mx-auto flex w-full max-w-[640px] px-4 md:px-8">
         {EDITOR_STEPS.map((step, index) => {
           const active = step === current;
           const done = index < currentIndex;
