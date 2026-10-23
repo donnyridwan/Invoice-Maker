@@ -1,13 +1,14 @@
 "use client";
 
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
 import { CurrencySelect } from "@/components/currency-select";
+import { DatePicker } from "@/components/ui/date-picker";
 import { FormField } from "@/components/ui/form-field";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { INVOICE_LANGUAGES, type InvoiceLanguage } from "@/features/profile/schema";
-import { addDays, daysBetween, isIsoDate } from "@/lib/dates";
-import { cn } from "@/lib/utils";
+import { resolveLocale } from "@/i18n/config";
+import { addDays, daysBetween, isIsoDate, todayInJakarta } from "@/lib/dates";
 import { EditorSection, useErrorText, type EditorSectionProps } from "./editor-section";
 
 /** Quick due dates, in days after the issue date (0 = on receipt). */
@@ -16,6 +17,8 @@ const TERMS = [0, 7, 14, 30] as const;
 export function DetailsSection({ state, errors, update }: EditorSectionProps) {
   const t = useTranslations("invoices.editor");
   const tLanguages = useTranslations("settings.languages");
+  const tDate = useTranslations("datePicker");
+  const locale = resolveLocale(useLocale());
   const errorText = useErrorText(errors);
 
   const term =
@@ -33,9 +36,11 @@ export function DetailsSection({ state, errors, update }: EditorSectionProps) {
     });
   }
 
-  function chooseTerm(days: number) {
-    update((current) => (isIsoDate(current.issueDate) ? { dueDate: addDays(current.issueDate, days) } : {}));
-  }
+  const termLabel = (days: number) => (days === 0 ? t("details.onReceipt") : t("details.days", { count: days }));
+  // The quick terms sit in the due date's calendar, as dates counted from the issue date.
+  const termPresets = isIsoDate(state.issueDate)
+    ? TERMS.map((days) => ({ label: termLabel(days), date: addDays(state.issueDate, days) }))
+    : [];
 
   return (
     <EditorSection title={t("sections.details")}>
@@ -79,45 +84,27 @@ export function DetailsSection({ state, errors, update }: EditorSectionProps) {
 
       <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
         <FormField label={t("details.issueDate")} htmlFor="invoice-issue-date" error={errorText("issueDate")}>
-          <Input
+          <DatePicker
             id="invoice-issue-date"
-            type="date"
             value={state.issueDate}
-            onChange={(event) => changeIssueDate(event.target.value)}
-            aria-invalid={Boolean(errors.issueDate) || undefined}
+            onChange={changeIssueDate}
+            language={locale}
+            presets={[{ label: tDate("today"), date: todayInJakarta() }]}
+            invalid={Boolean(errors.issueDate)}
           />
         </FormField>
-        <div className="flex flex-col gap-2">
-          <FormField label={t("details.dueDate")} htmlFor="invoice-due-date" error={errorText("dueDate")}>
-            <Input
-              id="invoice-due-date"
-              type="date"
-              value={state.dueDate}
-              onChange={(event) => update({ dueDate: event.target.value })}
-              aria-invalid={Boolean(errors.dueDate) || undefined}
-            />
-          </FormField>
-          {/* Quick terms right under the due date they set, as one joined row. */}
-          <div role="group" aria-label={t("details.termsLabel")} className="flex divide-x divide-border border border-border">
-            {TERMS.map((days) => {
-              const active = term === days;
-              return (
-                <button
-                  key={days}
-                  type="button"
-                  aria-pressed={active}
-                  onClick={() => chooseTerm(days)}
-                  className={cn(
-                    "h-7 flex-1 whitespace-nowrap px-2 text-xs transition-colors focus-visible:outline-2 focus-visible:-outline-offset-2 focus-visible:outline-accent",
-                    active ? "bg-fg text-white" : "bg-white text-muted hover:bg-subtle hover:text-fg",
-                  )}
-                >
-                  {days === 0 ? t("details.onReceipt") : t("details.days", { count: days })}
-                </button>
-              );
-            })}
-          </div>
-        </div>
+        <FormField label={t("details.dueDate")} htmlFor="invoice-due-date" error={errorText("dueDate")}>
+          <DatePicker
+            id="invoice-due-date"
+            value={state.dueDate}
+            onChange={(dueDate) => update({ dueDate })}
+            language={locale}
+            presets={termPresets}
+            presetsLabel={t("details.termsLabel")}
+            suffix={term !== null && term >= 0 ? termLabel(term) : undefined}
+            invalid={Boolean(errors.dueDate)}
+          />
+        </FormField>
       </div>
     </EditorSection>
   );

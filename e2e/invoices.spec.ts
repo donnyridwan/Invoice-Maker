@@ -138,23 +138,39 @@ test.describe("editor", () => {
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
   });
 
-  test("sets the due date from the quick terms", async ({ page }) => {
+  test("picks the dates from a calendar, with the quick terms in the due date's", async ({ page }) => {
     await openEditorWithClient(page);
-    const issue = await page.getByLabel("Tanggal terbit").inputValue();
+    const issueField = page.getByLabel("Tanggal terbit");
+    const dueField = page.getByLabel("Jatuh tempo", { exact: true });
+    const issue = (await issueField.getAttribute("data-value"))!;
     expect(issue).toMatch(DATE_RE);
 
-    await page.getByRole("button", { name: "30 hari" }).click();
-    await expect(page.getByLabel("Jatuh tempo", { exact: true })).toHaveValue(plusDays(issue, 30));
-    await expect(page.getByRole("button", { name: "30 hari" })).toHaveAttribute("aria-pressed", "true");
+    // The quick terms live in the due date's calendar and close it.
+    await dueField.click();
+    const terms = page.getByRole("group", { name: "Jatuh tempo cepat" });
+    await terms.getByRole("button", { name: "30 hari" }).click();
+    await expect(terms).toHaveCount(0);
+    await expect(dueField).toHaveAttribute("data-value", plusDays(issue, 30));
+    await expect(dueField).toContainText("30 hari");
 
-    await page.getByRole("button", { name: "Saat diterima" }).click();
-    await expect(page.getByLabel("Jatuh tempo", { exact: true })).toHaveValue(issue);
+    await dueField.click();
+    await expect(terms.getByRole("button", { name: "30 hari" })).toHaveAttribute("aria-pressed", "true");
+    await terms.getByRole("button", { name: "Saat diterima" }).click();
+    await expect(dueField).toHaveAttribute("data-value", issue);
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
 
+    // A day picked with the keyboard: the calendar opens on the chosen day.
+    await dueField.click();
+    await expect(page.locator(`[data-date="${issue}"]`)).toBeFocused();
+    await page.keyboard.press("ArrowDown");
+    await page.keyboard.press("Enter");
+    await expect(dueField).toHaveAttribute("data-value", plusDays(issue, 7));
+
     // Moving the issue date keeps the term.
-    await page.getByRole("button", { name: "14 hari" }).click();
-    await page.getByLabel("Tanggal terbit").fill(plusDays(issue, 3));
-    await expect(page.getByLabel("Jatuh tempo", { exact: true })).toHaveValue(plusDays(issue, 17));
+    await issueField.click();
+    await page.locator(`[data-date="${plusDays(issue, 3)}"]`).click();
+    await expect(issueField).toHaveAttribute("data-value", plusDays(issue, 3));
+    await expect(dueField).toHaveAttribute("data-value", plusDays(issue, 10));
   });
 
   test("rejects a number that another invoice already uses", async ({ page }) => {

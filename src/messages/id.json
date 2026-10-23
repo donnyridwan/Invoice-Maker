@@ -774,5 +774,11 @@
       "more": "dan {count} lainnya",
       "button": "Tinjau draft"
     }
+  },
+  "datePicker": {
+    "placeholder": "Pilih tanggal",
+    "previousMonth": "Bulan sebelumnya",
+    "nextMonth": "Bulan berikutnya",
+    "today": "Hari ini"
   }
 }

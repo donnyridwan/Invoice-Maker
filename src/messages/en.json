@@ -774,5 +774,11 @@
       "more": "and {count} more",
       "button": "Review drafts"
     }
+  },
+  "datePicker": {
+    "placeholder": "Pick a date",
+    "previousMonth": "Previous month",
+    "nextMonth": "Next month",
+    "today": "Today"
   }
 }
