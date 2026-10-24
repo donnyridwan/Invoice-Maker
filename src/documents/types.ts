@@ -46,6 +46,8 @@ export type InvoiceDocument = {
   discount: string | null;
   discountLabel: string;
   total: string;
+  /** ISO currency code of the amounts, e.g. "IDR". */
+  currency: string;
   paymentAccounts: { title: string; lines: { label: string; value: string }[] }[];
   notes: string;
   paid: boolean;

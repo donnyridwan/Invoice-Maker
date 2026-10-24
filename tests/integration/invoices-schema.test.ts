@@ -11,7 +11,7 @@ async function insertInvoice(userId: string, overrides: Partial<typeof invoices.
       number: "INV-2026-001",
       currency: "IDR",
       language: "id",
-      template: "minimal",
+      template: "highlight",
       accentColor: "#5850EC",
       issueDate: "2026-10-21",
       dueDate: "2026-11-04",

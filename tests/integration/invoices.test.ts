@@ -40,7 +40,7 @@ function draftInput(overrides: Record<string, unknown> = {}) {
     dueDate: addDays(today, 14),
     currency: "IDR",
     language: "id",
-    template: "minimal",
+    template: "highlight",
     accentColor: "#5850EC",
     discountType: "none",
     discountValue: 0,
@@ -76,7 +76,7 @@ describe("invoice domain", () => {
       expect(inv.issueDate).toBe(todayInJakarta());
       expect(inv.dueDate).toBe(addDays(inv.issueDate, 14));
       expect(inv.currency).toBe("IDR");
-      expect(inv.template).toBe("minimal");
+      expect(inv.template).toBe("highlight");
       expect(inv.notes).toBe("Terima kasih");
       expect(inv.paymentAccountsSnapshot).toHaveLength(1);
       expect(inv.businessSnapshot.businessName).toBe("Studio Donny");

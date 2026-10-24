@@ -47,7 +47,7 @@ async function sentInvoice(userId: string) {
     dueDate: addDays(today, 14),
     currency: "IDR",
     language: "id",
-    template: "minimal",
+    template: "highlight",
     accentColor: "#5850EC",
     discountType: "none",
     discountValue: 0,

@@ -497,9 +497,9 @@
     "invoiceDefaultsDescription": "Starting values for every new invoice.",
     "defaultTemplate": "Default template",
     "templates": {
-      "minimal": "Minimal",
-      "classic": "Classic",
-      "modern": "Modern"
+      "highlight": "Highlight",
+      "line": "Line",
+      "card": "Card"
     },
     "languages": {
       "id": "Bahasa Indonesia",

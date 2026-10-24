@@ -9,7 +9,7 @@ function source(overrides: Partial<InvoiceDocumentSource> = {}): InvoiceDocument
     number: "INV-2026-001",
     status: "draft",
     language: "id",
-    template: "minimal",
+    template: "highlight",
     accentColor: "#5850EC",
     currency: "IDR",
     issueDate: "2026-10-21",

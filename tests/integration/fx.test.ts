@@ -30,7 +30,7 @@ function draftInput(overrides: Record<string, unknown> = {}) {
     dueDate: addDays(today, 14),
     currency: "USD",
     language: "id",
-    template: "minimal",
+    template: "highlight",
     accentColor: "#5850EC",
     discountType: "none",
     discountValue: 0,

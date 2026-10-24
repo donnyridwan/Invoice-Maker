@@ -99,6 +99,13 @@
       "when": 1792722712822,
       "tag": "0013_faithful_zeigeist",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1792813855589,
+      "tag": "0014_new_templates",
+      "breakpoints": true
     }
   ]
 }

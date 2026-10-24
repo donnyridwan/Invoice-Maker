@@ -69,6 +69,7 @@ export function buildInvoiceDocument(src: InvoiceDocumentSource): InvoiceDocumen
     discount: src.discountMinor > 0 ? money(src.discountMinor) : null,
     discountLabel,
     total: money(src.totalMinor),
+    currency,
     paymentAccounts: src.paymentAccounts.map((account) => buildPaymentAccount(account, labels)),
     notes: src.notes ?? "",
     paid: src.status === "paid",

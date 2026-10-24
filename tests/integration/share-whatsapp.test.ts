@@ -33,7 +33,7 @@ async function draftInvoice(userId: string, opts: { phone?: string; withClient?:
     dueDate: addDays(today, 14),
     currency: "IDR",
     language: opts.language ?? "id",
-    template: "minimal",
+    template: "highlight",
     accentColor: "#5850EC",
     discountType: "none",
     discountValue: 0,

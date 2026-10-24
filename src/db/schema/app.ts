@@ -64,7 +64,7 @@ export const businessProfiles = pgTable("business_profiles", {
   taxId: text("tax_id"),
   logoUrl: text("logo_url"),
   accentColor: text("accent_color").notNull().default("#111111"),
-  defaultTemplate: text("default_template").notNull().default("minimal"),
+  defaultTemplate: text("default_template").notNull().default("highlight"),
   baseCurrency: text("base_currency").notNull().default("IDR"),
   defaultCurrency: text("default_currency").notNull().default("IDR"),
   defaultLanguage: text("default_language").notNull().default("id"),

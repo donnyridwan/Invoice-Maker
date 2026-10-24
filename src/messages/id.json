@@ -497,9 +497,9 @@
     "invoiceDefaultsDescription": "Nilai awal untuk setiap invoice baru.",
     "defaultTemplate": "Template default",
     "templates": {
-      "minimal": "Minimal",
-      "classic": "Klasik",
-      "modern": "Modern"
+      "highlight": "Sorot",
+      "line": "Garis",
+      "card": "Kartu"
     },
     "languages": {
       "id": "Bahasa Indonesia",

@@ -343,10 +343,10 @@ test.describe("editor extras", () => {
     const preview = page.getByRole("region", { name: "Preview invoice" });
     const document = preview.locator("[data-template]");
 
-    await expect(page.getByRole("combobox", { name: "Template" })).toHaveText("Minimal");
+    await expect(page.getByRole("combobox", { name: "Template" })).toHaveText("Sorot");
     await page.getByRole("combobox", { name: "Template" }).click();
-    await page.getByRole("option", { name: "Modern" }).click();
-    await expect(preview.locator('[data-template="modern"]')).toBeVisible();
+    await page.getByRole("option", { name: "Kartu" }).click();
+    await expect(preview.locator('[data-template="card"]')).toBeVisible();
 
     await page.getByRole("button", { name: "#00A67E" }).click();
     await expect(page.getByRole("button", { name: "#00A67E" })).toHaveAttribute("aria-pressed", "true");
@@ -358,7 +358,7 @@ test.describe("editor extras", () => {
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
 
     await page.reload();
-    await expect(page.getByRole("combobox", { name: "Template" })).toHaveText("Modern");
+    await expect(page.getByRole("combobox", { name: "Template" })).toHaveText("Kartu");
     await expect(page.getByRole("button", { name: "#0A2540" })).toHaveAttribute("aria-pressed", "true");
     await expect(document).toHaveAttribute("style", /#0A2540/i);
   });

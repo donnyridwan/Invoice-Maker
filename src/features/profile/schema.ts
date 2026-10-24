@@ -7,7 +7,9 @@ import {
   requiredText,
 } from "@/lib/zod-helpers";
 
-export const TEMPLATES = ["minimal", "classic", "modern"] as const;
+export const TEMPLATES = ["highlight", "line", "card"] as const;
+/** The template a new profile (and an invoice with an unknown template) gets. */
+export const DEFAULT_TEMPLATE = "highlight";
 export const INVOICE_LANGUAGES = ["id", "en"] as const;
 
 export type Template = (typeof TEMPLATES)[number];

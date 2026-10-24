@@ -23,7 +23,7 @@ const defaultsInput = (overrides: Record<string, unknown> = {}) => ({
   invoicePrefix: "INV-",
   defaultDueDays: 14,
   defaultLanguage: "id",
-  defaultTemplate: "minimal",
+  defaultTemplate: "highlight",
   accentColor: "#5850EC",
   ...overrides,
 });

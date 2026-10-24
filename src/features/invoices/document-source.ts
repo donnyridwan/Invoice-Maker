@@ -1,5 +1,5 @@
 import type { InvoiceDocumentSource } from "@/documents/types";
-import { INVOICE_LANGUAGES, TEMPLATES, type InvoiceLanguage, type Template } from "@/features/profile/schema";
+import { DEFAULT_TEMPLATE, INVOICE_LANGUAGES, TEMPLATES, type InvoiceLanguage, type Template } from "@/features/profile/schema";
 import type { DiscountType } from "@/lib/invoice-calc";
 import type { InvoiceWithItems } from "./queries";
 
@@ -13,7 +13,7 @@ export function documentSourceFromInvoice(invoice: InvoiceWithItems): InvoiceDoc
     number: invoice.number,
     status: invoice.status,
     language: oneOf<InvoiceLanguage>(INVOICE_LANGUAGES, invoice.language, "id"),
-    template: oneOf<Template>(TEMPLATES, invoice.template, "minimal"),
+    template: oneOf<Template>(TEMPLATES, invoice.template, DEFAULT_TEMPLATE),
     accentColor: invoice.accentColor,
     currency: invoice.currency,
     issueDate: invoice.issueDate,

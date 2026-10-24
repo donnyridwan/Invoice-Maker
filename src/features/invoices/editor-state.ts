@@ -3,7 +3,7 @@
 // no DB, so it is unit-testable and the same code serves the live preview and autosave.
 
 import type { InvoiceDocumentSource } from "@/documents/types";
-import { INVOICE_LANGUAGES, TEMPLATES, type InvoiceLanguage, type Template } from "@/features/profile/schema";
+import { DEFAULT_TEMPLATE, INVOICE_LANGUAGES, TEMPLATES, type InvoiceLanguage, type Template } from "@/features/profile/schema";
 import type { Locale } from "@/i18n/config";
 import { isCurrencyCode, type CurrencyCode } from "@/lib/currencies";
 import { isIsoDate, todayInJakarta } from "@/lib/dates";
@@ -178,7 +178,7 @@ export function editorStateFromInvoice(inv: InvoiceWithItems, locale: Locale): E
     dueDate: inv.dueDate,
     currency: inv.currency,
     language: oneOf(INVOICE_LANGUAGES, inv.language, "id"),
-    template: oneOf(TEMPLATES, inv.template, "minimal"),
+    template: oneOf(TEMPLATES, inv.template, DEFAULT_TEMPLATE),
     accentColor: inv.accentColor,
     discountType,
     discountValue,
