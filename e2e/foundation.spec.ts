@@ -1,4 +1,5 @@
 import { expect, test } from "@playwright/test";
+import { crc32, deflateSync } from "node:zlib";
 import { EDITOR_URL_RE, registerUser } from "./helpers";
 
 test.describe("auth", () => {
@@ -307,11 +308,32 @@ test.describe("catalog", () => {
   });
 });
 
-// 1x1 transparent PNG.
-const PNG_1X1 = Buffer.from(
-  "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==",
-  "base64",
-);
+/** A transparent PNG of the given size. */
+function transparentPng(width: number, height: number): Buffer {
+  const chunk = (type: string, data: Buffer) => {
+    const length = Buffer.alloc(4);
+    length.writeUInt32BE(data.length);
+    const body = Buffer.concat([Buffer.from(type, "ascii"), data]);
+    const crc = Buffer.alloc(4);
+    crc.writeUInt32BE(crc32(body));
+    return Buffer.concat([length, body, crc]);
+  };
+  const header = Buffer.alloc(13);
+  header.writeUInt32BE(width, 0);
+  header.writeUInt32BE(height, 4);
+  header[8] = 8; // bit depth
+  header[9] = 6; // RGBA
+  // Each row: filter byte 0, then fully transparent pixels.
+  const raw = Buffer.alloc((width * 4 + 1) * height);
+  return Buffer.concat([
+    Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]),
+    chunk("IHDR", header),
+    chunk("IDAT", deflateSync(raw)),
+    chunk("IEND", Buffer.alloc(0)),
+  ]);
+}
+
+const LOGO_PNG = transparentPng(512, 512);
 
 test.describe("logo", () => {
   test("uploads a logo, shows it and removes it again", async ({ page }) => {
@@ -319,10 +341,9 @@ test.describe("logo", () => {
     await page.goto("/settings");
 
     const card = page.getByRole("region", { name: "Logo" });
-    await expect(card.getByText("JPG, PNG, atau WebP, maks. 2 MB")).toBeVisible();
     await expect(card.getByRole("img")).toHaveCount(0);
 
-    await card.locator("input[type=file]").setInputFiles({ name: "logo.png", mimeType: "image/png", buffer: PNG_1X1 });
+    await card.locator("input[type=file]").setInputFiles({ name: "logo.png", mimeType: "image/png", buffer: LOGO_PNG });
     const logo = card.getByRole("img", { name: "Logo bisnis" });
     await expect(logo).toBeVisible();
     await expect(logo).toHaveAttribute("src", /^\/uploads\/logo\/[0-9a-f-]{36}\.png$/);
@@ -344,14 +365,32 @@ test.describe("logo", () => {
 
     const card = page.getByRole("region", { name: "Logo" });
     const input = card.locator("input[type=file]");
-    await input.setInputFiles({ name: "one.png", mimeType: "image/png", buffer: PNG_1X1 });
+    await input.setInputFiles({ name: "one.png", mimeType: "image/png", buffer: LOGO_PNG });
     const logo = card.getByRole("img", { name: "Logo bisnis" });
     await expect(logo).toBeVisible();
     const first = (await logo.getAttribute("src"))!;
 
-    await input.setInputFiles({ name: "two.png", mimeType: "image/png", buffer: PNG_1X1 });
+    await input.setInputFiles({ name: "two.png", mimeType: "image/png", buffer: LOGO_PNG });
     await expect(logo).not.toHaveAttribute("src", first);
     expect((await page.request.get(first)).status()).toBe(200);
+  });
+
+  test("turns down a logo that is too small or too thin", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/settings");
+
+    const card = page.getByRole("region", { name: "Logo" });
+    await expect(card.getByText("PNG, JPG, atau WebP · minimal 512 px · maks. 2 MB. Paling bagus PNG transparan.")).toBeVisible();
+    const input = card.locator("input[type=file]");
+    await input.setInputFiles({ name: "small.png", mimeType: "image/png", buffer: transparentPng(48, 32) });
+    await expect(card.getByRole("alert")).toHaveText(
+      "Logo terlalu kecil. Sisi terpanjang minimal 512 px dan sisi terpendek minimal 128 px.",
+    );
+    await input.setInputFiles({ name: "strip.png", mimeType: "image/png", buffer: transparentPng(1400, 200) });
+    await expect(card.getByRole("alert")).toHaveText(
+      "Logo terlalu panjang atau terlalu tinggi. Perbandingan sisinya maksimal 6:1.",
+    );
+    await expect(card.getByRole("img")).toHaveCount(0);
   });
 
   test("rejects a file that is not a real image", async ({ page }) => {

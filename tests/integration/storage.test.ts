@@ -6,6 +6,11 @@ import { getStorage, uploadFile } from "@/lib/storage";
 import { ValidationError } from "@/lib/errors";
 
 const PNG = new Uint8Array([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 0]);
+// The start of a 600 × 400 PNG: signature and IHDR, enough for the logo rules.
+const LOGO_PNG = new Uint8Array([
+  0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0, 0, 0, 13, 0x49, 0x48, 0x44, 0x52, 0, 0, 0x02, 0x58, 0, 0, 0x01, 0x90, 8, 6,
+  0, 0, 0,
+]);
 const created: string[] = [];
 
 const onDisk = (url: string) => path.join(process.cwd(), "public", url);
@@ -38,7 +43,12 @@ describe("local file storage", () => {
     const html = new File(["<html></html>"], "x.png", { type: "image/png" });
     await expect(uploadFile("logo", html)).rejects.toBeInstanceOf(ValidationError);
 
-    const { url } = await uploadFile("logo", new File([PNG], "logo.png", { type: "image/png" }));
+    // A PNG whose size cannot be read is turned down too: a logo must meet the size rules.
+    await expect(uploadFile("logo", new File([PNG], "logo.png", { type: "image/png" }))).rejects.toBeInstanceOf(
+      ValidationError,
+    );
+
+    const { url } = await uploadFile("logo", new File([LOGO_PNG], "logo.png", { type: "image/png" }));
     created.push(url);
     expect(url).toMatch(/^\/uploads\/logo\/[0-9a-f-]{36}\.png$/);
     expect(existsSync(onDisk(url))).toBe(true);

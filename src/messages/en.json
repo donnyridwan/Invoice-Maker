@@ -514,7 +514,7 @@
     "logoUpload": "Upload logo",
     "logoChange": "Change",
     "logoRemove": "Remove",
-    "logoHint": "JPG, PNG, or WebP, max. 2 MB",
+    "logoHint": "PNG, JPG, or WebP · at least 512 px · max. 2 MB. A transparent PNG works best.",
     "logoDescription": "Shown on your invoices.",
     "logoAlt": "Business logo",
     "logoRemoved": "Logo removed.",
@@ -664,7 +664,10 @@
     "endNotAfterStart": "The end date must be after the next invoice date",
     "scheduleExists": "This invoice already has a recurring schedule",
     "scheduleFinished": "This schedule has finished. Edit it to continue.",
-    "tooManyAttempts": "Too many attempts. Please try again later."
+    "tooManyAttempts": "Too many attempts. Please try again later.",
+    "logoTooSmall": "The logo is too small. The longer side must be at least 512 px and the shorter side at least 128 px.",
+    "logoTooBig": "The logo is too big. At most 4000 px per side.",
+    "logoRatio": "The logo is too wide or too tall. Its sides can be at most 6:1."
   },
   "errors": {
     "validation": "Please check your input.",

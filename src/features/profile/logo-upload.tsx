@@ -1,13 +1,35 @@
 "use client";
 
-import { useRef, type ChangeEvent } from "react";
+import { useRef, useState, type ChangeEvent } from "react";
 import { useRouter } from "next/navigation";
 import { useTranslations } from "next-intl";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { checkLogoSize } from "@/lib/storage/logo-rules";
 import { useServerForm } from "@/lib/use-server-form";
 import { removeLogoAction, uploadLogoAction } from "./actions";
+
+const LOGO_TYPES = ["image/jpeg", "image/png", "image/webp"];
+const LOGO_MAX_BYTES = 2 * 1024 * 1024;
+
+/**
+ * Checks a picked logo in the browser before it is sent, so a wrong file is turned down at once
+ * (the server checks it again): its type, its size in bytes and its pixel size. Returns the
+ * validation key of the first problem, or null.
+ */
+async function checkLogoFile(file: File): Promise<string | null> {
+  if (!LOGO_TYPES.includes(file.type)) return "fileType";
+  if (file.size > LOGO_MAX_BYTES) return "fileTooLarge";
+  try {
+    const bitmap = await createImageBitmap(file);
+    const problem = checkLogoSize({ width: bitmap.width, height: bitmap.height });
+    bitmap.close();
+    return problem;
+  } catch {
+    return "fileType";
+  }
+}
 
 export function LogoUpload({ logoUrl }: { logoUrl: string | null }) {
   const t = useTranslations();
@@ -15,13 +37,20 @@ export function LogoUpload({ logoUrl }: { logoUrl: string | null }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const upload = useServerForm<FormData>((formData) => uploadLogoAction(formData));
   const remove = useServerForm<void>(() => removeLogoAction());
+  const [checkError, setCheckError] = useState<string | null>(null);
   const pending = upload.pending || remove.pending;
-  const error = upload.errorFor("file") ?? upload.formError ?? remove.formError;
+  const error = checkError ?? upload.errorFor("file") ?? upload.formError ?? remove.formError;
 
   async function onFileChange(event: ChangeEvent<HTMLInputElement>) {
     const input = event.currentTarget;
     const file = input.files?.[0];
     if (!file) return;
+    const problem = await checkLogoFile(file);
+    setCheckError(problem ? t(`validation.${problem}`) : null);
+    if (problem) {
+      input.value = "";
+      return;
+    }
     const formData = new FormData();
     formData.set("file", file);
     const ok = await upload.submit(formData);

@@ -1,5 +1,7 @@
 import { ValidationError } from "@/lib/errors";
 import { detectFileType, type FileType } from "./file-type";
+import { imageSize } from "./image-size";
+import { checkLogoSize } from "./logo-rules";
 import { localStorage } from "./local";
 import { vercelBlobStorage } from "./vercel-blob";
 
@@ -18,14 +20,21 @@ export interface FileStorage {
 }
 
 /**
- * Checks an upload against the rules of its kind and returns its real type (from magic bytes).
- * Throws `ValidationError({ file: ['fileType'] | ['fileTooLarge'] })`.
+ * Checks an upload against the rules of its kind and returns its real type (from magic bytes). A
+ * logo must also have a readable size within the logo rules.
+ * Throws `ValidationError({ file: ['fileType' | 'fileTooLarge' | 'logoTooSmall' | 'logoTooBig' | 'logoRatio'] })`.
  */
 export function validateUpload(kind: UploadKind, file: { bytes: Uint8Array; size: number }): FileType {
   const rules = UPLOAD_RULES[kind];
   const type = detectFileType(file.bytes);
   if (!type || !rules.types.includes(type)) throw new ValidationError({ file: ["fileType"] });
   if (file.size > rules.maxBytes) throw new ValidationError({ file: ["fileTooLarge"] });
+  if (kind === "logo") {
+    const size = imageSize(file.bytes, type);
+    if (!size) throw new ValidationError({ file: ["fileType"] });
+    const problem = checkLogoSize(size);
+    if (problem) throw new ValidationError({ file: [problem] });
+  }
   return type;
 }
 

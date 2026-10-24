@@ -514,7 +514,7 @@
     "logoUpload": "Unggah logo",
     "logoChange": "Ganti",
     "logoRemove": "Hapus",
-    "logoHint": "JPG, PNG, atau WebP, maks. 2 MB",
+    "logoHint": "PNG, JPG, atau WebP · minimal 512 px · maks. 2 MB. Paling bagus PNG transparan.",
     "logoDescription": "Tampil di invoice Anda.",
     "logoAlt": "Logo bisnis",
     "logoRemoved": "Logo dihapus.",
@@ -664,7 +664,10 @@
     "endNotAfterStart": "Tanggal berakhir harus setelah tanggal invoice berikutnya",
     "scheduleExists": "Invoice ini sudah punya jadwal berulang",
     "scheduleFinished": "Jadwal ini sudah selesai. Ubah jadwalnya untuk melanjutkan.",
-    "tooManyAttempts": "Terlalu banyak percobaan. Coba lagi nanti."
+    "tooManyAttempts": "Terlalu banyak percobaan. Coba lagi nanti.",
+    "logoTooSmall": "Logo terlalu kecil. Sisi terpanjang minimal 512 px dan sisi terpendek minimal 128 px.",
+    "logoTooBig": "Logo terlalu besar. Maksimal 4000 px per sisi.",
+    "logoRatio": "Logo terlalu panjang atau terlalu tinggi. Perbandingan sisinya maksimal 6:1."
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",
