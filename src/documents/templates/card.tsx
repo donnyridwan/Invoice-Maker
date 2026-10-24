@@ -114,50 +114,47 @@ export function CardTemplate({ doc }: TemplateProps) {
           <div className="col-span-4 mt-[12pt] h-[0.5pt] bg-[#D7DAE0]" />
         </div>
 
-        <div className={`${body} flex items-start justify-between gap-[16pt] break-inside-avoid`}>
-          {/* Not in the design: the payment details take the empty space left of the totals. */}
-          <div className="min-w-0 flex-1 pt-[12pt]">
-            {doc.paymentAccounts.length > 0 && (
-              <>
-                <p className={label}>{L.paymentDetails}</p>
-                <div className="mt-[4pt] flex flex-col gap-[8pt]">
-                  {doc.paymentAccounts.map((account, index) => (
-                    <dl key={index} className="flex flex-col gap-[2pt]">
-                      {account.title && !account.lines.some((line) => line.value === account.title) && (
-                        <p className="font-semibold">{account.title}</p>
-                      )}
-                      {account.lines.map((line) => (
-                        <div key={line.key} className="flex gap-[8pt]">
-                          <dt className="w-[80pt] shrink-0 text-[#5E6470]">{line.label}</dt>
-                          <dd className="min-w-0 font-semibold break-words whitespace-pre-line">{line.value}</dd>
-                        </div>
-                      ))}
-                    </dl>
-                  ))}
-                </div>
-              </>
-            )}
+        <div className={`${body} ml-auto w-[240pt] font-medium break-inside-avoid`}>
+          <div className="flex justify-between pt-[12pt]">
+            <span>{L.subtotal}</span>
+            <span className="whitespace-nowrap">{doc.subtotal}</span>
           </div>
-          <div className="w-[240pt] shrink-0 font-medium">
+          {doc.discount && (
             <div className="flex justify-between pt-[12pt]">
-              <span>{L.subtotal}</span>
-              <span className="whitespace-nowrap">{doc.subtotal}</span>
+              <span>{doc.discountLabel}</span>
+              <span className="whitespace-nowrap">−{doc.discount}</span>
             </div>
-            {doc.discount && (
-              <div className="flex justify-between pt-[12pt]">
-                <span>{doc.discountLabel}</span>
-                <span className="whitespace-nowrap">−{doc.discount}</span>
-              </div>
-            )}
-            <div className="mt-[12pt] h-[0.5pt] bg-[#D7DAE0]" />
-            <div className="flex justify-between pt-[12pt] font-bold">
-              <span>{L.total}</span>
-              <span className="whitespace-nowrap">{doc.total}</span>
-            </div>
+          )}
+          <div className="mt-[12pt] h-[0.5pt] bg-[#D7DAE0]" />
+          <div className="flex justify-between pt-[12pt] font-bold">
+            <span>{L.total}</span>
+            <span className="whitespace-nowrap">{doc.total}</span>
           </div>
         </div>
 
-        <p className={`${body} mt-auto pt-[24pt] font-semibold`}>{L.thanksShort}</p>
+        {/* Not in the design: the payment details sit at the foot of the card, under the totals column. */}
+        {doc.paymentAccounts.length > 0 && (
+          <section className={`${body} mt-auto ml-auto w-[240pt] pt-[24pt] break-inside-avoid`}>
+            <p className={label}>{L.paymentDetails}</p>
+            <div className="mt-[4pt] flex flex-col gap-[8pt]">
+              {doc.paymentAccounts.map((account, index) => (
+                <dl key={index} className="flex flex-col gap-[2pt]">
+                  {account.title && !account.lines.some((line) => line.value === account.title) && (
+                    <p className="font-semibold">{account.title}</p>
+                  )}
+                  {account.lines.map((line) => (
+                    <div key={line.key} className="flex justify-between gap-[12pt]">
+                      <dt className="shrink-0 text-[#5E6470]">{line.label}</dt>
+                      <dd className="min-w-0 text-right font-semibold break-words whitespace-pre-line">{line.value}</dd>
+                    </div>
+                  ))}
+                </dl>
+              ))}
+            </div>
+          </section>
+        )}
+
+        <p className={`${body} ${doc.paymentAccounts.length > 0 ? "" : "mt-auto"} pt-[24pt] font-semibold`}>{L.thanksShort}</p>
       </main>
 
       {doc.terms && (
