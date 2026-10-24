@@ -145,6 +145,31 @@ describe("payment accounts", () => {
     expect(updated.isDefault).toBe(true);
   });
 
+  it("saves a custom method with its own rows and checks that each row is complete", async () => {
+    const u = await createTestUser();
+    const created = await createPaymentAccount(u.id, {
+      type: "other",
+      methodName: "GoPay",
+      field1Label: "Nomor HP",
+      field1Value: "0812 3456 7890",
+      field2Label: "",
+      field2Value: "",
+      isDefault: false,
+    });
+    expect(created.details).toEqual({ methodName: "GoPay", field1Label: "Nomor HP", field1Value: "0812 3456 7890" });
+
+    // A row needs both halves, and the method a name and a row or instructions.
+    await expect(
+      createPaymentAccount(u.id, { type: "other", methodName: "OVO", field1Label: "Nomor HP", isDefault: false }),
+    ).rejects.toBeInstanceOf(ValidationError);
+    await expect(createPaymentAccount(u.id, { type: "other", methodName: "OVO", isDefault: false })).rejects.toBeInstanceOf(
+      ValidationError,
+    );
+    await expect(
+      createPaymentAccount(u.id, { type: "other", field1Label: "Nomor HP", field1Value: "0812", isDefault: false }),
+    ).rejects.toBeInstanceOf(ValidationError);
+  });
+
   it("never lets another user read or change an account", async () => {
     const a = await createTestUser();
     const b = await createTestUser();

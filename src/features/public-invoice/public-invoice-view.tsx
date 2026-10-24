@@ -94,7 +94,8 @@ export function PublicInvoiceView({ invoice, language, pendingClaims, token }: P
       lines: paymentAccountLines(account, labels)
         // The bank name is already the card title.
         .filter((line) => !(line.key === "bankName" && line.value === title))
-        .map((line) => ({ ...line, copyable: COPYABLE_KEYS.has(line.key) })),
+        // Account numbers, IBANs, emails and the rows of a custom method can be copied.
+        .map((line) => ({ ...line, copyable: COPYABLE_KEYS.has(line.key) || line.key.startsWith("field") })),
     };
   });
 

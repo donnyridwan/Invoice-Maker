@@ -77,6 +77,37 @@ describe("buildInvoiceDocument", () => {
     ]);
   });
 
+  it("titles a custom method by its name and lists its own rows before the instructions", () => {
+    const doc = buildInvoiceDocument(
+      source({
+        paymentAccounts: [
+          {
+            id: "b",
+            type: "other",
+            label: "",
+            currency: null,
+            details: {
+              methodName: "GoPay",
+              field1Label: "Nomor HP",
+              field1Value: "0812 3456 7890",
+              field2Label: "Atas nama",
+              field2Value: "Donny",
+              instructions: "Kirim bukti transfer via WhatsApp",
+            },
+          },
+        ],
+      }),
+    );
+    expect(doc.paymentAccounts[0]).toEqual({
+      title: "GoPay",
+      lines: [
+        { label: "Nomor HP", value: "0812 3456 7890" },
+        { label: "Atas nama", value: "Donny" },
+        { label: "Instruksi", value: "Kirim bukti transfer via WhatsApp" },
+      ],
+    });
+  });
+
   it("omits the discount when it is zero and flags paid invoices", () => {
     const doc = buildInvoiceDocument(
       source({ discountType: "none", discountValue: 0, discountMinor: 0, totalMinor: 300_000, status: "paid" }),

@@ -558,9 +558,20 @@
       "email": "Email",
       "iban": "IBAN",
       "swift": "Kode SWIFT/BIC",
-      "instructions": "Instruksi pembayaran"
+      "instructions": "Instruksi pembayaran",
+      "methodName": "Nama metode",
+      "customFields": "Detail pembayaran",
+      "customLabel": "Nama detail {n}",
+      "customValue": "Isi detail {n}",
+      "customLabelPlaceholder": "mis. Nomor HP",
+      "customValuePlaceholder": "mis. 0812 3456 7890",
+      "addField": "Tambah detail",
+      "removeField": "Hapus detail {n}"
     },
-    "anyCurrency": "Semua mata uang"
+    "anyCurrency": "Semua mata uang",
+    "placeholders": {
+      "methodName": "mis. GoPay, OVO, QRIS"
+    }
   },
   "clients": {
     "title": "Klien",

@@ -1,4 +1,5 @@
 import type { PaymentAccountSnapshot } from "@/features/invoices/snapshots";
+import { CUSTOM_FIELD_COUNT, customFieldKeys } from "@/features/payment-accounts/schema";
 import { isCurrencyCode } from "@/lib/currencies";
 import { formatDocDate } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
@@ -17,15 +18,26 @@ const DETAIL_ORDER: DocLabelKey[] = [
   "instructions",
 ];
 
-/** The filled-in detail lines of a payment account, in print order, labelled in the given language. */
+/**
+ * The filled-in detail lines of a payment account, in print order, labelled in the given language.
+ * The rows of a custom ("other") method come first, labelled as the user wrote them (keys
+ * `field1` … `field6`).
+ */
 export function paymentAccountLines(
   account: PaymentAccountSnapshot,
   labels: Record<DocLabelKey, string>,
-): { key: DocLabelKey; label: string; value: string }[] {
-  return DETAIL_ORDER.flatMap((key) => {
+): { key: string; label: string; value: string }[] {
+  const custom = Array.from({ length: CUSTOM_FIELD_COUNT }, (_, index) => {
+    const keys = customFieldKeys(index + 1);
+    const label = account.details[keys.label];
+    const value = account.details[keys.value];
+    return label && value ? [{ key: `field${index + 1}`, label, value }] : [];
+  }).flat();
+  const standard = DETAIL_ORDER.flatMap((key) => {
     const value = account.details[key];
     return value ? [{ key, label: labels[key], value }] : [];
   });
+  return [...custom, ...standard];
 }
 
 function buildPaymentAccount(
@@ -33,8 +45,10 @@ function buildPaymentAccount(
   labels: Record<DocLabelKey, string>,
 ): InvoiceDocument["paymentAccounts"][number] {
   const lines = paymentAccountLines(account, labels).map(({ label, value }) => ({ label, value }));
-  // Bank-like accounts already show their bank name as a line; PayPal/Wise have no such line.
-  const fallbackTitle = account.type === "paypal" ? "PayPal" : account.type === "wise" ? "Wise" : "";
+  // Bank-like accounts already show their bank name as a line; PayPal/Wise have no such line, and a
+  // custom method has its own name.
+  const fallbackTitle =
+    account.type === "paypal" ? "PayPal" : account.type === "wise" ? "Wise" : (account.details.methodName ?? "");
   return { title: account.label || fallbackTitle, lines };
 }
 

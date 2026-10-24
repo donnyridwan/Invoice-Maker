@@ -558,9 +558,20 @@
       "email": "Email",
       "iban": "IBAN",
       "swift": "SWIFT/BIC code",
-      "instructions": "Payment instructions"
+      "instructions": "Payment instructions",
+      "methodName": "Method name",
+      "customFields": "Payment details",
+      "customLabel": "Detail name {n}",
+      "customValue": "Detail value {n}",
+      "customLabelPlaceholder": "e.g. Phone number",
+      "customValuePlaceholder": "e.g. 0812 3456 7890",
+      "addField": "Add detail",
+      "removeField": "Remove detail {n}"
     },
-    "anyCurrency": "Any currency"
+    "anyCurrency": "Any currency",
+    "placeholders": {
+      "methodName": "e.g. GoPay, OVO, QRIS"
+    }
   },
   "clients": {
     "title": "Clients",

@@ -42,5 +42,12 @@ describe("summarizePaymentAccount", () => {
     expect(
       summarizePaymentAccount({ type: "other", label: "", details: { instructions: "Transfer ke GoPay\n0812" } }),
     ).toEqual({ title: "Transfer ke GoPay", subtitle: "" });
+    expect(
+      summarizePaymentAccount({
+        type: "other",
+        label: "",
+        details: { methodName: "GoPay", field1Label: "Nomor HP", field1Value: "0812 3456 7890" },
+      }),
+    ).toEqual({ title: "GoPay", subtitle: "Nomor HP: 0812 3456 7890" });
   });
 });

@@ -36,8 +36,9 @@ export function summarizePaymentAccount(account: Summarizable): { title: string;
       subtitle = join([d.accountName, maskTail(d.iban ?? d.accountNumber), d.swift]);
       break;
     default:
-      title = (d.instructions ?? "").split("\n")[0].slice(0, 60);
-      subtitle = "";
+      // A custom method: its name (older ones only have instructions) and its first row.
+      title = d.methodName ?? (d.instructions ?? "").split("\n")[0].slice(0, 60);
+      subtitle = d.field1Label && d.field1Value ? `${d.field1Label}: ${d.field1Value}` : "";
   }
 
   return { title: account.label || title, subtitle };
