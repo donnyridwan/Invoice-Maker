@@ -1,7 +1,7 @@
 import type { PaymentAccountSnapshot } from "@/features/invoices/snapshots";
 import { CUSTOM_FIELD_COUNT, customFieldKeys } from "@/features/payment-accounts/schema";
 import { isCurrencyCode } from "@/lib/currencies";
-import { formatDocDate } from "@/lib/dates";
+import { formatDocDate, formatNumericDate, formatShortDate } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
 import { formatQuantity } from "@/lib/quantity";
 import { DOC_LABELS, type DocLabelKey } from "./dictionary";
@@ -44,7 +44,7 @@ function buildPaymentAccount(
   account: PaymentAccountSnapshot,
   labels: Record<DocLabelKey, string>,
 ): InvoiceDocument["paymentAccounts"][number] {
-  const lines = paymentAccountLines(account, labels).map(({ label, value }) => ({ label, value }));
+  const lines = paymentAccountLines(account, labels);
   // Bank-like accounts already show their bank name as a line; PayPal/Wise have no such line, and a
   // custom method has its own name.
   const fallbackTitle =
@@ -64,11 +64,17 @@ export function buildInvoiceDocument(src: InvoiceDocumentSource): InvoiceDocumen
       ? `${labels.discount} (${formatQuantity(src.discountValue * 10, language)}%)`
       : labels.discount;
 
+  const onReceipt = src.dueDate === src.issueDate;
+
   return {
     labels,
     number: src.number,
     issueDate: formatDocDate(src.issueDate, language),
-    dueDate: src.dueDate === src.issueDate ? labels.dueOnReceipt : formatDocDate(src.dueDate, language),
+    dueDate: onReceipt ? labels.dueOnReceipt : formatDocDate(src.dueDate, language),
+    issueDateNumeric: formatNumericDate(src.issueDate),
+    dueDateNumeric: onReceipt ? labels.dueOnReceipt : formatNumericDate(src.dueDate),
+    issueDateShort: formatShortDate(src.issueDate, language),
+    dueDateShort: onReceipt ? labels.dueOnReceipt : formatShortDate(src.dueDate, language),
     business: src.business,
     client: src.client,
     items: src.items.map((item) => ({

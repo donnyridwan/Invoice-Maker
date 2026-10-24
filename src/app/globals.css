@@ -34,7 +34,10 @@
 
   --font-sans: var(--font-geist), ui-sans-serif, system-ui, sans-serif;
   --font-serif: var(--font-hedvig-serif), Georgia, "Times New Roman", serif;
-  --font-doc-serif: Georgia, "Times New Roman", Times, serif;
+  /* The invoice templates: Inter for the text, Archivo and Geist for titles, Young Serif for the initial. */
+  --font-doc: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  --font-doc-display: var(--font-archivo), var(--font-inter), sans-serif;
+  --font-doc-initial: var(--font-young-serif), Georgia, serif;
 
   /* Semantic tokens the components read. */
   --color-primary: #121212;

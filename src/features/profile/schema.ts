@@ -10,6 +10,10 @@ import {
 export const TEMPLATES = ["highlight", "line", "card"] as const;
 /** The template a new profile (and an invoice with an unknown template) gets. */
 export const DEFAULT_TEMPLATE = "highlight";
+/** The accent each template is designed around; picking a template applies it. */
+export const TEMPLATE_ACCENTS = { highlight: "#E3FA7D", line: "#ED1B99", card: "#E87117" } as const;
+/** The accent a profile starts with: new invoices then take their template's own accent. */
+export const DEFAULT_ACCENT = "#111111";
 export const INVOICE_LANGUAGES = ["id", "en"] as const;
 
 export type Template = (typeof TEMPLATES)[number];

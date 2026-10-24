@@ -131,10 +131,10 @@ test.describe("editor", () => {
 
     await editorStep(page, "Klien & detail");
     await expect(page.getByRole("combobox", { name: "Klien" })).toHaveValue("Acme Inc");
-    await expect(preview).not.toContainText("Bill to");
+    await expect(preview).not.toContainText("Billed to");
     await page.getByLabel("Bahasa invoice").click();
     await page.getByRole("option", { name: "English" }).click();
-    await expect(preview).toContainText("Bill to");
+    await expect(preview).toContainText("Billed to");
     await expect(page.getByText("Tersimpan", { exact: true })).toBeVisible();
   });
 

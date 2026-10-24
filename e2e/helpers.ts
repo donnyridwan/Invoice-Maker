@@ -157,7 +157,7 @@ export async function fillNewInvoice(page: Page, opts: { english?: boolean } = {
   await page.reload();
   await editorStep(page, "Item");
   await expect(page.getByRole("group", { name: "Item 1" }).getByLabel("Harga", { exact: true })).toHaveValue("1.500.000");
-  if (opts.english) await expect(page.getByRole("region", { name: "Preview invoice" })).toContainText("Bill to");
+  if (opts.english) await expect(page.getByRole("region", { name: "Preview invoice" })).toContainText("Billed to");
   return id;
 }
 

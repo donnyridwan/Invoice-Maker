@@ -1,146 +1,191 @@
-import { clientLines, itemQuantity, Logo, Multiline, readableOn, type TemplateProps } from "./shared";
+import { Fragment } from "react";
+import { clientLines, itemQuantity, Logo, type TemplateProps } from "./shared";
+
+// Sizes are Figma pixels on the 595 × 842 A4 frame, which are points on the page.
+const caps = "text-[8pt] leading-[12pt] font-semibold tracking-[0.32pt] uppercase text-[#5E6470]";
+
+/** Purple on a light accent (the lime the design uses), white on a dark one. */
+function amountColor(hex: string): string {
+  const match = /^#([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec(hex);
+  if (!match) return "#6735F4";
+  const [r, g, b] = [match[1], match[2], match[3]].map((part) => parseInt(part, 16));
+  return (0.299 * r + 0.587 * g + 0.114 * b) / 255 > 0.65 ? "#6735F4" : "#FFFFFF";
+}
 
 /**
- * A big grey "Invoice" title, the amount due on an accent-coloured block, a numbered item list
- * and, at the foot of the page, a thank-you line over the payment info.
+ * A grey "Invoice" title, the dates centred between the client and the amount due on an
+ * accent-coloured tab running off the page edge, a numbered item list and, at the foot, a
+ * thank-you line over the payment info. A faint paper grain covers the page.
  */
 export function HighlightTemplate({ doc }: TemplateProps) {
   const L = doc.labels;
-  const label = "text-[7pt] font-medium tracking-[0.06em] text-muted uppercase";
   const contact = [doc.business.email, doc.business.phone].filter(Boolean);
+  const address = doc.business.address?.split("\n").join(", ");
 
   return (
-    <div className="flex min-h-[297mm] flex-col px-[17mm] pt-[15mm] pb-[14mm]">
-      <header className="flex items-start justify-between gap-[8mm]">
-        <div className="flex items-center gap-[5mm]">
-          <Logo business={doc.business} className="max-h-[17mm] max-w-[30mm] object-contain" />
-          <div>
-            <p className="text-[15pt] leading-tight font-semibold tracking-tight">{doc.business.businessName}</p>
+    <div className="relative flex min-h-[842pt] flex-col px-[40pt] pt-[32pt] pb-[32pt] font-doc text-[#1A1C21]">
+      {/* The grain, twice (the second turned over) as in the design. */}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/templates/noise.png" alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full" />
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src="/templates/noise.png" alt="" aria-hidden className="pointer-events-none absolute inset-0 size-full rotate-180" />
+
+      <header className="relative flex items-start justify-between gap-[20pt]">
+        <div className="flex items-start gap-[20pt]">
+          <Logo business={doc.business} className="size-[48pt] object-contain" />
+          <div className="flex flex-col gap-[2pt]">
+            <p className="text-[18pt] leading-[24pt] font-bold">{doc.business.businessName}</p>
             {contact.map((line) => (
-              <p key={line} className="mt-[0.6mm] text-muted">
+              <p key={line} className="text-[10pt] leading-[14pt] font-medium text-[#5E6470]">
                 {line}
               </p>
             ))}
           </div>
         </div>
-        <div className="text-right">
-          <p className="text-[27pt] leading-none font-semibold tracking-tight text-[#A3A7B0]">{L.invoice}</p>
-          <p className="mt-[2mm] font-medium text-muted tabular-nums">{doc.number}</p>
+        <div className="flex flex-col items-end gap-[6pt] text-right font-doc-display">
+          <p className="text-[36pt] leading-[40pt] font-semibold tracking-[-1.08pt] text-[#B2B7C2] [text-box:trim-both_cap_alphabetic]">
+            {L.invoice}
+          </p>
+          <p className="text-[12pt] leading-[16pt] font-medium tracking-[0.24pt] text-[#5E6470]">{doc.number}</p>
         </div>
       </header>
 
-      <section className="mt-[16mm] grid grid-cols-[1fr_auto_1fr] items-start gap-[8mm]">
-        <div>
-          <p className={label}>{L.billTo}</p>
+      <section className="relative mt-[48pt] flex items-start justify-between">
+        <div className="flex max-w-[180pt] flex-col gap-[2pt]">
+          <p className={`${caps} leading-[14pt]`}>{L.billTo}</p>
           {doc.client ? (
             <>
-              <p className="mt-[1.8mm] font-semibold">{doc.client.name}</p>
+              <p className="text-[10pt] leading-[14pt] font-semibold">{doc.client.name}</p>
               {clientLines(doc.client).map((line) => (
-                <Multiline key={line} className="mt-[0.4mm] block text-muted">
+                <p key={line} className="text-[10pt] leading-[14pt] whitespace-pre-line text-[#5E6470]">
                   {line}
-                </Multiline>
+                </p>
               ))}
             </>
           ) : (
-            <p className="mt-[1.8mm] text-muted">—</p>
+            <p className="text-[10pt] leading-[14pt] text-[#5E6470]">—</p>
           )}
         </div>
-        <div className="text-center">
-          <p className={label}>{L.issueDate}</p>
-          <p className="mt-[1.8mm] font-semibold">{doc.issueDate}</p>
-          <p className={`${label} mt-[5mm]`}>{L.dueDate}</p>
-          <p className="mt-[1.8mm] font-semibold">{doc.dueDate}</p>
+        {/* The dates, centred on the page. */}
+        <div className="absolute top-0 left-1/2 flex -translate-x-1/2 flex-col items-center gap-[20pt] text-center font-semibold whitespace-nowrap">
+          <div className="flex flex-col gap-[2pt]">
+            <p className={caps}>{L.issueDate}</p>
+            <p className="text-[10pt] leading-[14pt]">{doc.issueDateNumeric.replaceAll("/", ".")}</p>
+          </div>
+          <div className="flex flex-col gap-[2pt]">
+            <p className={caps}>{L.dueDate}</p>
+            <p className="text-[10pt] leading-[14pt]">{doc.dueDateNumeric.replaceAll("/", ".")}</p>
+          </div>
         </div>
-        <div className="mt-[5mm] flex flex-col items-end">
-          <p className={label}>{L.amountDue}</p>
+        <div className="mt-[28pt] -mr-[40pt] flex flex-col items-end gap-[4pt]">
+          <p className={`${caps} mr-[40pt] text-right`}>{L.amountDue}</p>
           <p
-            className="mt-[1.8mm] px-[3.5mm] py-[2.5mm] text-[13pt] font-bold tabular-nums"
-            style={{ backgroundColor: doc.accentColor, color: readableOn(doc.accentColor) }}
+            className="py-[6pt] pr-[40pt] pl-[12pt] text-right text-[14pt] leading-[20pt] font-bold tracking-[-0.14pt] whitespace-nowrap"
+            style={{ backgroundColor: doc.accentColor, color: amountColor(doc.accentColor) }}
           >
             {doc.total}
           </p>
         </div>
       </section>
 
-      <table className="mt-[14mm] w-full border-collapse">
-        <colgroup>
-          <col className="w-[8mm]" />
-          <col />
-          <col className="w-[36mm]" />
-        </colgroup>
-        <thead>
-          <tr className="border-b border-border">
-            <th className={`${label} py-[2.5mm] text-left`}>#</th>
-            <th className={`${label} py-[2.5mm] text-left`}>{L.description}</th>
-            <th className={`${label} py-[2.5mm] text-right`}>{L.amount}</th>
-          </tr>
-        </thead>
-        <tbody>
-          {doc.items.map((item, index) => (
-            <tr key={index} className="border-b border-border break-inside-avoid">
-              <td className="py-[3.2mm] align-top tabular-nums">{index + 1}</td>
-              <td className="py-[3.2mm] pr-[4mm] align-top">
-                <p className="font-semibold">{item.name}</p>
-                <p className="mt-[1mm] text-[8.5pt] text-muted tabular-nums">
-                  {itemQuantity(item)} × {item.unitPrice}
-                </p>
-                {item.description && <Multiline className="mt-[0.6mm] block text-[8.5pt] text-muted">{item.description}</Multiline>}
-              </td>
-              <td className="py-[3.2mm] text-right align-top tabular-nums whitespace-nowrap">{item.amount}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <section className="relative mt-[48pt]">
+        <div className="flex pb-[8pt]">
+          <p className={`${caps} w-[20pt] shrink-0`}>#</p>
+          <p className={`${caps} flex-1`}>{L.titleDescription}</p>
+          <p className={`${caps} text-right`}>{L.subtotal}</p>
+        </div>
+        <div className="h-[1pt] bg-[#D7DAE0]" />
+        {doc.items.map((item, index) => (
+          <div
+            key={index}
+            className="relative flex py-[8pt] break-inside-avoid before:absolute before:top-0 before:right-0 before:left-[20pt] before:h-[0.5pt] before:bg-[#D7DAE0] first-of-type:before:hidden"
+          >
+            <p className="w-[20pt] shrink-0 text-[10pt] leading-[14pt] font-medium">{index + 1}</p>
+            <div className="min-w-0 flex-1 pr-[12pt]">
+              <p className="text-[10pt] leading-[14pt] font-semibold">{item.name}</p>
+              <div className="mt-[4pt] flex flex-wrap items-start gap-x-[6pt] text-[10pt] leading-[14pt] text-[#5E6470] empty:hidden">
+                {/* The description's lines (and "qty × price" when it is not a single unit), dot-separated. */}
+                {[
+                  ...(item.quantity !== "1" || item.unit ? [`${itemQuantity(item)} × ${item.unitPrice}`] : []),
+                  ...item.description.split("\n").filter(Boolean),
+                ].map((part, partIndex) => (
+                  <Fragment key={partIndex}>
+                    {partIndex > 0 && (
+                      <span aria-hidden className="w-[3pt] text-center text-[12pt] leading-[14pt] font-light text-[#8B919E]">
+                        •
+                      </span>
+                    )}
+                    <span>{part}</span>
+                  </Fragment>
+                ))}
+              </div>
+            </div>
+            <p className="text-right text-[10pt] leading-[14pt] font-medium whitespace-nowrap text-[#5E6470]">{item.amount}</p>
+          </div>
+        ))}
+        <div className="h-[1pt] bg-[#D7DAE0]" />
 
-      <div className="break-inside-avoid">
-        {doc.discount && (
-          <>
-            <div className="flex justify-between py-[2mm]">
-              <span className="text-muted">{L.subtotal}</span>
-              <span className="tabular-nums">{doc.subtotal}</span>
-            </div>
-            <div className="flex justify-between border-b border-border py-[2mm]">
-              <span className="text-muted">{doc.discountLabel}</span>
-              <span className="tabular-nums">−{doc.discount}</span>
-            </div>
-          </>
+        <div className="mt-[12pt] flex flex-col gap-[6pt] break-inside-avoid text-[10pt] leading-[14pt]">
+          {doc.discount && (
+            <>
+              <div className="flex justify-between font-medium text-[#5E6470]">
+                <span>{L.subtotal}</span>
+                <span className="whitespace-nowrap">{doc.subtotal}</span>
+              </div>
+              <div className="flex justify-between font-medium text-[#5E6470]">
+                <span>{doc.discountLabel}</span>
+                <span className="whitespace-nowrap">−{doc.discount}</span>
+              </div>
+            </>
+          )}
+          <div className="flex justify-between font-bold">
+            <span>{L.total}</span>
+            <span className="whitespace-nowrap">{doc.total}</span>
+          </div>
+        </div>
+
+        {doc.notes && (
+          <div className="mt-[6pt] flex items-start gap-[6pt] break-inside-avoid">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src="/templates/quote.svg" alt="" aria-hidden width={10} height={14} className="h-[14pt] w-[10pt] shrink-0" />
+            <p className="text-[10pt] leading-[14pt] whitespace-pre-line text-[#5E6470]">{doc.notes}</p>
+          </div>
         )}
-        <div className="flex justify-between pt-[3mm]">
-          <span className="font-semibold">{L.total}</span>
-          <span className="font-bold tabular-nums">{doc.total}</span>
-        </div>
-      </div>
+      </section>
 
-      {doc.notes && (
-        <div className="mt-[4mm] flex items-start gap-[2mm] break-inside-avoid text-muted">
-          <span aria-hidden className="mt-[0.3mm] flex size-[3.6mm] shrink-0 items-center justify-center bg-[#A3A7B0] text-[8pt] leading-none font-bold text-white">
-            “
-          </span>
-          <Multiline>{doc.notes}</Multiline>
-        </div>
-      )}
-
-      <footer className="mt-auto pt-[14mm] break-inside-avoid">
-        <p className="font-semibold">{L.thanks}</p>
+      <footer className="relative mt-auto pt-[24pt] break-inside-avoid">
+        <p className="text-[10pt] leading-[14pt] font-semibold text-[#5E6470]">{L.thanks}</p>
         {doc.paymentAccounts.length > 0 && (
           <>
-            <div className="mt-[6mm] flex items-center gap-[3mm]">
-              <p className={label}>{L.paymentDetails}</p>
-              <span className="h-px flex-1 bg-border" />
+            <div className="mt-[24pt] flex items-center gap-[6pt]">
+              <p className={caps}>{L.paymentInfo}</p>
+              <span className="h-[0.5pt] flex-1 bg-[#D7DAE0]" />
             </div>
-            {doc.paymentAccounts.map((account, index) => (
-              <div key={index} className="mt-[4mm] flex items-start justify-between gap-[6mm]">
-                <p className="pt-[0.2mm] font-semibold">{account.title}</p>
-                <dl className="flex divide-x divide-border">
-                  {account.lines.map((line) => (
-                    <div key={line.label} className="px-[4mm] last:pr-0">
-                      <dt className="text-[7.5pt] text-muted">{line.label}</dt>
-                      <dd className="mt-[0.8mm] font-medium tabular-nums whitespace-pre-line">{line.value}</dd>
-                    </div>
+            {doc.paymentAccounts.map((account, index) => {
+              // The holder (or the account's own name) heads the row, over the business address.
+              const holder = account.lines.find((line) => line.key === "accountName");
+              const heading = account.title || holder?.value || "";
+              const columns = account.lines.filter((line) => line !== holder || account.title);
+              return (
+                <div key={index} className="mt-[12pt] flex items-center gap-[12pt]">
+                  <div className="min-w-0 flex-1">
+                    <p className="text-[8pt] leading-[12pt] font-semibold tracking-[0.32pt] uppercase">{heading}</p>
+                    {address && (
+                      <p className="text-[8pt] leading-[12pt] font-medium tracking-[0.08pt] text-[#5E6470]">{address}</p>
+                    )}
+                  </div>
+                  {columns.map((line, lineIndex) => (
+                    <Fragment key={line.key}>
+                      {lineIndex > 0 && <span aria-hidden className="h-[20pt] w-[0.5pt] shrink-0 bg-[#D7DAE0]" />}
+                      <div className="shrink-0 text-[8pt] leading-[12pt]">
+                        <p className="font-medium tracking-[0.08pt]">{line.label}</p>
+                        <p className="font-semibold tracking-[0.32pt] whitespace-pre-line text-[#5E6470]">{line.value}</p>
+                      </div>
+                    </Fragment>
                   ))}
-                </dl>
-              </div>
-            ))}
+                </div>
+              );
+            })}
           </>
         )}
       </footer>

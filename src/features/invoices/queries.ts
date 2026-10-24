@@ -22,6 +22,7 @@ import {
   type ClientSnapshot,
   type PaymentAccountSnapshot,
 } from "./snapshots";
+import { DEFAULT_ACCENT, DEFAULT_TEMPLATE, TEMPLATE_ACCENTS, TEMPLATES, type Template } from "@/features/profile/schema";
 
 export type Invoice = typeof invoices.$inferSelect;
 export type InvoiceItem = typeof invoiceItems.$inferSelect;
@@ -143,6 +144,9 @@ export async function createDraftInvoice(userId: string, opts: { clientId?: stri
     const profile = await lockProfile(tx, userId);
     const issueDate = todayInJakarta();
     const currency = client?.defaultCurrency ?? profile.defaultCurrency;
+    const template = (TEMPLATES as readonly string[]).includes(profile.defaultTemplate)
+      ? (profile.defaultTemplate as Template)
+      : DEFAULT_TEMPLATE;
     const fx = await fxForInvoice(currency, profile.baseCurrency, issueDate, tx);
     const invoice = await insertWithNextNumber(tx, userId, profile, issueDate, {
       clientId: client?.id ?? null,
@@ -151,8 +155,9 @@ export async function createDraftInvoice(userId: string, opts: { clientId?: stri
       fxRateDate: fx?.date ?? null,
       fxBaseCurrency: fx ? profile.baseCurrency : null,
       language: client?.defaultLanguage ?? profile.defaultLanguage,
-      template: profile.defaultTemplate,
-      accentColor: profile.accentColor,
+      template,
+      // A profile that kept the starting accent gets the accent its template is designed around.
+      accentColor: profile.accentColor === DEFAULT_ACCENT ? TEMPLATE_ACCENTS[template] : profile.accentColor,
       dueDate: addDays(issueDate, profile.defaultDueDays),
       clientSnapshot: client ? clientSnapshotFrom(client) : null,
       businessSnapshot: businessSnapshotFrom(profile),

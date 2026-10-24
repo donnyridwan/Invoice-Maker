@@ -2,12 +2,13 @@
 
 import { useTranslations } from "next-intl";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { TEMPLATES, type Template } from "@/features/profile/schema";
+import { TEMPLATE_ACCENTS, TEMPLATES, type Template } from "@/features/profile/schema";
 import { cn } from "@/lib/utils";
 import type { EditorSectionProps } from "./editor-section";
 
 /** Accent colours offered as one-click presets. */
-export const ACCENT_PRESETS = ["#111111", "#2F4B73", "#0A2540", "#00A67E", "#E25950", "#F5A623"] as const;
+// Includes the accents the three templates are designed around (lime, pink, orange).
+export const ACCENT_PRESETS = ["#111111", "#0A2540", "#00A67E", "#E3FA7D", "#ED1B99", "#E87117"] as const;
 
 const SWATCH_CLASS =
   "size-6 shrink-0 rounded-full border border-black/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent";
@@ -42,7 +43,12 @@ export function AppearanceBar({
         <label htmlFor="invoice-template" className="sr-only">
           {t("appearance.template")}
         </label>
-        <Select value={state.template} onValueChange={(value) => update({ template: value as Template })} disabled={disabled}>
+        {/* Picking a template also applies the accent it is designed around; the swatches change it after. */}
+        <Select
+          value={state.template}
+          onValueChange={(value) => update({ template: value as Template, accentColor: TEMPLATE_ACCENTS[value as Template] })}
+          disabled={disabled}
+        >
           <SelectTrigger id="invoice-template" className="h-8 w-32 text-[13px]">
             <SelectValue />
           </SelectTrigger>

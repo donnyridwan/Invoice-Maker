@@ -38,6 +38,11 @@ export type InvoiceDocument = {
   number: string;
   issueDate: string;
   dueDate: string;
+  /** The dates as "21/10/2026" and "21 Okt 2026" (the due date reads "due on receipt" when it is the issue date). */
+  issueDateNumeric: string;
+  dueDateNumeric: string;
+  issueDateShort: string;
+  dueDateShort: string;
   business: BusinessSnapshot;
   client: ClientSnapshot | null;
   items: { name: string; description: string; quantity: string; unit: string; unitPrice: string; amount: string }[];
@@ -48,7 +53,7 @@ export type InvoiceDocument = {
   total: string;
   /** ISO currency code of the amounts, e.g. "IDR". */
   currency: string;
-  paymentAccounts: { title: string; lines: { label: string; value: string }[] }[];
+  paymentAccounts: { title: string; lines: { key: string; label: string; value: string }[] }[];
   notes: string;
   paid: boolean;
   accentColor: string;

@@ -87,6 +87,21 @@ export function daysBetween(from: string, to: string): number {
   return Math.round((mustParse(to) - mustParse(from)) / DAY_MS);
 }
 
+/** "21/10/2026", the same in both languages. */
+export function formatNumericDate(date: string): string {
+  const d = new Date(mustParse(date));
+  const pad = (n: number) => String(n).padStart(2, "0");
+  return `${pad(d.getUTCDate())}/${pad(d.getUTCMonth() + 1)}/${d.getUTCFullYear()}`;
+}
+
+/** "21 Okt 2026" (id) or "21 Oct, 2026" (en). */
+export function formatShortDate(date: string, language: "id" | "en"): string {
+  const d = new Date(mustParse(date));
+  const month = MONTHS[language][d.getUTCMonth()].slice(0, 3);
+  const day = String(d.getUTCDate()).padStart(2, "0");
+  return language === "id" ? `${day} ${month} ${d.getUTCFullYear()}` : `${day} ${month}, ${d.getUTCFullYear()}`;
+}
+
 /** "21 Oktober 2026" (id) or "October 21, 2026" (en). */
 export function formatDocDate(date: string, language: "id" | "en"): string {
   const time = mustParse(date);

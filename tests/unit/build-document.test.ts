@@ -44,7 +44,7 @@ describe("buildInvoiceDocument", () => {
 
   it("uses English labels and the invoice currency", () => {
     const doc = buildInvoiceDocument(source({ language: "en", currency: "USD" }));
-    expect(doc.labels.billTo).toBe("Bill to");
+    expect(doc.labels.billTo).toBe("Billed to");
     expect(doc.total.startsWith("$")).toBe(true);
     expect(doc.discountLabel).toBe("Discount (12.5%)");
     expect(doc.items[0].quantity).toBe("1.5");
@@ -71,9 +71,9 @@ describe("buildInvoiceDocument", () => {
       }),
     );
     expect(doc.paymentAccounts[0].lines).toEqual([
-      { label: "Bank", value: "BCA" },
-      { label: "Nama pemilik", value: "Donny" },
-      { label: "No. rekening", value: "1234567890" },
+      { key: "bankName", label: "Bank", value: "BCA" },
+      { key: "accountName", label: "Nama pemilik", value: "Donny" },
+      { key: "accountNumber", label: "No. rekening", value: "1234567890" },
     ]);
   });
 
@@ -101,9 +101,9 @@ describe("buildInvoiceDocument", () => {
     expect(doc.paymentAccounts[0]).toEqual({
       title: "GoPay",
       lines: [
-        { label: "Nomor HP", value: "0812 3456 7890" },
-        { label: "Atas nama", value: "Donny" },
-        { label: "Instruksi", value: "Kirim bukti transfer via WhatsApp" },
+        { key: "field1", label: "Nomor HP", value: "0812 3456 7890" },
+        { key: "field2", label: "Atas nama", value: "Donny" },
+        { key: "instructions", label: "Instruksi", value: "Kirim bukti transfer via WhatsApp" },
       ],
     });
   });
