@@ -79,19 +79,22 @@ export function EditorHeader({
   const t = useTranslations("invoices.editor");
 
   return (
-    <header className="sticky top-14 z-20 flex h-16 shrink-0 items-center gap-2 border-b border-border bg-white px-3 md:top-0 md:px-6">
-      <Link
-        href="/invoices"
-        aria-label={t("backToList")}
-        className="inline-flex size-8 shrink-0 items-center justify-center border border-border text-muted transition-colors hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
-      >
-        <ArrowLeft className="size-4" />
-      </Link>
-      <h1 className="ml-1 min-w-0 truncate font-serif text-lg text-fg">{number.trim() || "—"}</h1>
-      <StatusBadge status={status} className="shrink-0" />
-      <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
-        <AutosaveIndicator status={autosave} onRetry={onRetry} />
-        {actions}
+    // No rule under it (the step bar below has one); its content lines up with the form column.
+    <header className="sticky top-14 z-20 shrink-0 bg-white md:top-0">
+      <div className="mx-auto flex h-16 w-full max-w-[640px] items-center gap-2 px-4 md:px-8">
+        <Link
+          href="/invoices"
+          aria-label={t("backToList")}
+          className="-ml-2 inline-flex size-8 shrink-0 items-center justify-center text-muted transition-colors hover:bg-subtle hover:text-fg focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
+          <ArrowLeft className="size-4" />
+        </Link>
+        <h1 className="min-w-0 truncate font-serif text-lg text-fg">{number.trim() || "—"}</h1>
+        <StatusBadge status={status} className="shrink-0" />
+        <div className="ml-auto flex min-w-0 items-center gap-2 sm:gap-3">
+          <AutosaveIndicator status={autosave} onRetry={onRetry} />
+          {actions}
+        </div>
       </div>
     </header>
   );

@@ -111,7 +111,7 @@ export function EditorMenu({
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" aria-label={t("actions")} disabled={busy !== null} className="size-8 border border-border px-0 shadow-xs">
+          <Button variant="ghost" size="sm" aria-label={t("actions")} disabled={busy !== null} className="-mr-2 size-8 px-0 text-muted hover:text-fg">
             {busy ? <Loader2 className="size-4 animate-spin" /> : <MoreHorizontal className="size-4" />}
           </Button>
         </DropdownMenuTrigger>
