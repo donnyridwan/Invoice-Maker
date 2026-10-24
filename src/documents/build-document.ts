@@ -1,7 +1,7 @@
 import type { PaymentAccountSnapshot } from "@/features/invoices/snapshots";
 import { CUSTOM_FIELD_COUNT, customFieldKeys } from "@/features/payment-accounts/schema";
 import { isCurrencyCode } from "@/lib/currencies";
-import { formatDocDate, formatNumericDate, formatShortDate } from "@/lib/dates";
+import { daysBetween, formatDocDate, formatNumericDate, formatShortDate } from "@/lib/dates";
 import { formatMoney } from "@/lib/money";
 import { formatQuantity } from "@/lib/quantity";
 import { DOC_LABELS, type DocLabelKey } from "./dictionary";
@@ -52,6 +52,12 @@ function buildPaymentAccount(
   return { title: account.label || fallbackTitle, lines };
 }
 
+/** "Please pay within 14 days of receiving this invoice." from the issue and due dates. */
+function termsSentence(issueDate: string, dueDate: string, labels: Record<DocLabelKey, string>): string {
+  const days = daysBetween(issueDate, dueDate);
+  return days > 0 ? labels.termsWithin.replace("{days}", String(days)) : labels.termsOnReceipt;
+}
+
 export function buildInvoiceDocument(src: InvoiceDocumentSource): InvoiceDocument {
   const { language } = src;
   const labels = DOC_LABELS[language];
@@ -92,6 +98,7 @@ export function buildInvoiceDocument(src: InvoiceDocumentSource): InvoiceDocumen
     currency,
     paymentAccounts: src.paymentAccounts.map((account) => buildPaymentAccount(account, labels)),
     notes: src.notes ?? "",
+    terms: src.notes?.trim() || termsSentence(src.issueDate, src.dueDate, labels),
     paid: src.status === "paid",
     accentColor: src.accentColor,
     template: src.template,

@@ -160,10 +160,10 @@ export function CardTemplate({ doc }: TemplateProps) {
         <p className={`${body} mt-auto pt-[24pt] font-semibold`}>{L.thanksShort}</p>
       </main>
 
-      {doc.notes && (
+      {doc.terms && (
         <section className={`${body} mt-[24pt] flex flex-col gap-[4pt] px-[16pt] break-inside-avoid`}>
           <p className="font-medium text-[#5E6470]">{L.terms}</p>
-          <p className="whitespace-pre-line">{doc.notes}</p>
+          <p className="whitespace-pre-line">{doc.terms}</p>
         </section>
       )}
     </div>

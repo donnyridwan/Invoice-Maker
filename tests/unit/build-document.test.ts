@@ -56,6 +56,19 @@ describe("buildInvoiceDocument", () => {
     expect(buildInvoiceDocument(source({ dueDate: "2026-10-21", language: "en" })).dueDate).toBe("Due on receipt");
   });
 
+  it("builds the payment terms line from the due date when there are no notes", () => {
+    expect(buildInvoiceDocument(source({ dueDate: "2026-11-04", notes: "" })).terms).toBe(
+      "Mohon dibayar dalam 14 hari setelah invoice diterima.",
+    );
+    expect(buildInvoiceDocument(source({ dueDate: "2026-11-04", notes: null, language: "en" })).terms).toBe(
+      "Please pay within 14 days of receiving this invoice.",
+    );
+    expect(buildInvoiceDocument(source({ dueDate: "2026-10-21", notes: "", language: "en" })).terms).toBe(
+      "Please pay on receipt of this invoice.",
+    );
+    expect(buildInvoiceDocument(source({ notes: "Transfer sebelum tanggal 5." })).terms).toBe("Transfer sebelum tanggal 5.");
+  });
+
   it("lists bank account lines unmasked, in a fixed order", () => {
     const doc = buildInvoiceDocument(
       source({

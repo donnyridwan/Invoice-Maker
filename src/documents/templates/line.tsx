@@ -105,13 +105,13 @@ export function LineTemplate({ doc }: TemplateProps) {
         </div>
       </section>
 
-      {(doc.paymentAccounts.length > 0 || doc.notes) && (
+      {(doc.paymentAccounts.length > 0 || doc.terms) && (
         <footer
           className={`${body} mt-auto ml-[128pt] grid grid-cols-[169pt_1fr] gap-x-[24pt] border-l-[2pt] border-[#5E6470] py-[7pt] pl-[14pt] break-inside-avoid`}
         >
           <div>
-            <p className="font-semibold">{doc.paymentAccounts.length > 0 ? L.paymentDetails : L.notes}</p>
-            {doc.notes && <p className="mt-[2pt] whitespace-pre-line text-[#5E6470]">{doc.notes}</p>}
+            <p className="font-semibold">{doc.paymentAccounts.length > 0 ? L.paymentDetails : L.terms}</p>
+            {doc.terms && <p className="mt-[2pt] whitespace-pre-line text-[#5E6470]">{doc.terms}</p>}
           </div>
           <div className="flex flex-col gap-[8pt]">
             {doc.paymentAccounts.map((account, index) => (

@@ -144,11 +144,11 @@ export function HighlightTemplate({ doc }: TemplateProps) {
           </div>
         </div>
 
-        {doc.notes && (
+        {doc.terms && (
           <div className="mt-[6pt] flex items-start gap-[6pt] break-inside-avoid">
             {/* eslint-disable-next-line @next/next/no-img-element */}
             <img src="/templates/quote.svg" alt="" aria-hidden width={10} height={14} className="h-[14pt] w-[10pt] shrink-0" />
-            <p className="text-[10pt] leading-[14pt] whitespace-pre-line text-[#5E6470]">{doc.notes}</p>
+            <p className="text-[10pt] leading-[14pt] whitespace-pre-line text-[#5E6470]">{doc.terms}</p>
           </div>
         )}
       </section>

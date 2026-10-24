@@ -55,6 +55,8 @@ export type InvoiceDocument = {
   currency: string;
   paymentAccounts: { title: string; lines: { key: string; label: string; value: string }[] }[];
   notes: string;
+  /** The payment terms line: the notes, or when there are none a sentence built from the due date. */
+  terms: string;
   paid: boolean;
   accentColor: string;
   template: Template;
