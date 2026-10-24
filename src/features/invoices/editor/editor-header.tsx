@@ -79,8 +79,8 @@ export function EditorHeader({
   const t = useTranslations("invoices.editor");
 
   return (
-    // No rule under it (the step bar below has one); its content lines up with the form column.
-    <header className="sticky top-14 z-20 shrink-0 bg-white md:top-0">
+    // Its content lines up with the form column.
+    <header className="sticky top-14 z-20 shrink-0 border-b border-border bg-white md:top-0">
       <div className="mx-auto flex h-16 w-full max-w-[640px] items-center gap-2 px-4 md:px-8">
         <Link
           href="/invoices"
