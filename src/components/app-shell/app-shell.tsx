@@ -107,7 +107,7 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
               <GlobalSearch />
               <LocaleSwitcher />
             </div>
-            <div className="w-full max-w-[1400px] px-4 py-6 md:px-8 md:py-8">{children}</div>
+            <div className="w-full px-4 py-6 md:px-8 md:py-8">{children}</div>
           </>
         )}
       </main>
