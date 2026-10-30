@@ -6,8 +6,14 @@ import { sendVerificationEmail } from "@/emails/send-verification";
 import { ensureProfile } from "@/features/profile/queries";
 import * as schema from "@/db/schema";
 
+// Both production domains may sign in: the custom domain (BETTER_AUTH_URL, which also builds the
+// links in auth emails) and the Vercel one. Better Auth trusts the base URL's origin already.
+const TRUSTED_ORIGINS = ["https://invoice-maker-beta-two.vercel.app", "https://invoice.donnyridwan.my.id"];
+
 // Reads BETTER_AUTH_SECRET and BETTER_AUTH_URL from the environment.
 export const auth = betterAuth({
+  baseURL: process.env.BETTER_AUTH_URL,
+  trustedOrigins: TRUSTED_ORIGINS,
   database: drizzleAdapter(db, { provider: "pg", schema }),
   emailAndPassword: {
     enabled: true,
