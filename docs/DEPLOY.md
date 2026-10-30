@@ -36,7 +36,7 @@ secret values: generate them as shown and paste them straight into Vercel.
 | `DATABASE_URL_UNPOOLED` | Neon **direct** connection string (migrations). |
 | `BETTER_AUTH_SECRET` | `openssl rand -base64 32` |
 | `BETTER_AUTH_URL` | The primary production origin, `https://invoice.donnyridwan.my.id` (no trailing slash). Sign-in also works on `https://invoice-maker-beta-two.vercel.app`: both are in `trustedOrigins` in `src/lib/auth.ts` (add any further domain there). |
-| `APP_URL` | Same origin. Used for every link that leaves the app (share links, emails) and as the origin the PDF renderer opens. |
+| `APP_URL` | The domain clients see, `https://invoice.donnyridwan.my.id`. Used for every link that leaves the app (share links, emails, WhatsApp) and as the origin the PDF renderer opens. |
 | `PRINT_SECRET` | `openssl rand -base64 32`. Signs the URL that headless Chromium opens to render a PDF. |
 | `CRON_SECRET` | `openssl rand -base64 32`. Vercel Cron sends it as `Authorization: Bearer <CRON_SECRET>`; the cron routes answer 401 without it. |
 | `BLOB_READ_WRITE_TOKEN` | Create a Vercel Blob store and connect it to the project (logos and payment proofs). |
