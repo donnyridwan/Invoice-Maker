@@ -8,7 +8,8 @@ test.describe("team", () => {
     const owner = await ownerContext.newPage();
     const finance = await financeContext.newPage();
 
-    // The owner runs two businesses, with an invoice in each.
+    // The owner runs two businesses: A with two invoices (the first draft and one more), B with one
+    // invoice and a client of its own.
     await registerUser(owner, { name: "Donny", businessName: "Bisnis A" });
     await createInvoiceViaUi(owner);
     await owner.goto("/dashboard");
@@ -21,7 +22,10 @@ test.describe("team", () => {
     await expect(owner).toHaveURL(EDITOR_URL_RE);
     await owner.goto("/invoices");
     await expect(owner.getByRole("row")).toHaveCount(2);
-    const invoiceOfB = (await owner.getByRole("row").nth(1).innerText()).match(/INV-\d{4}-\d{3}/)?.[0];
+    await owner.goto("/clients/new");
+    await owner.getByLabel("Nama", { exact: true }).fill("Klien Rahasia B");
+    await owner.getByRole("button", { name: "Simpan" }).click();
+    await expect(owner).toHaveURL(/\/clients$/);
 
     // A finance person signs up: no business yet, so the app waits.
     const { email } = await registerUser(finance, { name: "Rina", onboarding: "waiting" });
@@ -47,8 +51,9 @@ test.describe("team", () => {
     await finance.getByRole("button", { name: "Periksa lagi" }).click();
     await expect(finance).toHaveURL(/\/dashboard$/);
     await finance.goto("/invoices");
-    await expect(finance.getByRole("row")).toHaveCount(2);
-    await expect(finance.getByRole("row").nth(1)).not.toContainText(invoiceOfB ?? "-");
+    await expect(finance.getByRole("row")).toHaveCount(3);
+    await finance.goto("/clients");
+    await expect(finance.getByText("Klien Rahasia B")).toHaveCount(0);
     await finance.getByRole("button", { name: /^Ganti bisnis/ }).click();
     await expect(finance.getByRole("menuitem", { name: /Bisnis A/ })).toBeVisible();
     await expect(finance.getByRole("menuitem", { name: /Bisnis B/ })).toHaveCount(0);
