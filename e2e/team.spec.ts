@@ -1,5 +1,5 @@
 import { expect, test } from "@playwright/test";
-import { createInvoiceViaUi, registerUser } from "./helpers";
+import { createInvoiceViaUi, EDITOR_URL_RE, registerUser } from "./helpers";
 
 test.describe("team", () => {
   test("a new account waits until an owner adds it, then sees only that business", async ({ browser }) => {
@@ -18,6 +18,7 @@ test.describe("team", () => {
     await owner.getByRole("button", { name: "Buat bisnis" }).click();
     await expect(owner).toHaveURL(/\/onboarding$/);
     await owner.getByRole("button", { name: "Lewati" }).click();
+    await expect(owner).toHaveURL(EDITOR_URL_RE);
     await owner.goto("/invoices");
     await expect(owner.getByRole("row")).toHaveCount(2);
     const invoiceOfB = (await owner.getByRole("row").nth(1).innerText()).match(/INV-\d{4}-\d{3}/)?.[0];
