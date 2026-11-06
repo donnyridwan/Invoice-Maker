@@ -1,7 +1,7 @@
 "use server";
 
 import { cookies } from "next/headers";
-import { getProfile, updateUiLocale } from "@/features/profile/queries";
+import { getUiLocale, updateUiLocale } from "@/features/profile/queries";
 import { getOptionalUser } from "@/lib/session";
 import { LOCALE_COOKIE, resolveLocale, type Locale } from "./config";
 
@@ -16,23 +16,23 @@ export async function setLocale(locale: Locale): Promise<void> {
     sameSite: "lax",
   });
 
-  // Signed-in users also keep the choice on their profile.
+  // Signed-in users also keep the choice on their account.
   const user = await getOptionalUser();
   if (user) await updateUiLocale(user.id, resolved);
 }
 
 /**
  * After signing in on a browser without a language cookie, adopts the language saved on the
- * profile so the UI matches the one the user picked on another device.
+ * account so the UI matches the one the user picked on another device.
  */
 export async function syncLocaleFromProfile(): Promise<void> {
   const store = await cookies();
   if (store.get(LOCALE_COOKIE)) return;
   const user = await getOptionalUser();
   if (!user) return;
-  const profile = await getProfile(user.id).catch(() => null);
-  if (!profile) return;
-  store.set(LOCALE_COOKIE, resolveLocale(profile.uiLocale), {
+  const uiLocale = await getUiLocale(user.id);
+  if (!uiLocale) return;
+  store.set(LOCALE_COOKIE, resolveLocale(uiLocale), {
     maxAge: ONE_YEAR_SECONDS,
     path: "/",
     sameSite: "lax",

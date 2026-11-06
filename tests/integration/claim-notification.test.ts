@@ -7,6 +7,7 @@ import { createDraftInvoice, getInvoice, saveInvoiceDraft } from "@/features/inv
 import { CLAIM_NOTIFY_TIMEOUT_MS, notifyOwnerOfClaim } from "@/features/invoices/notify-claim";
 import { createPaymentClaim } from "@/features/payment-claims/queries";
 import { ensureProfile } from "@/features/profile/queries";
+import { addMemberByEmail } from "@/features/workspaces/queries";
 import type { EmailTransport, OutgoingEmail } from "@/lib/email";
 import { addDays, todayInJakarta } from "@/lib/dates";
 import { createTestUser, resetDb, testDb } from "./helpers";
@@ -36,7 +37,7 @@ function recording(kind: EmailTransport["kind"] = "file", failWith?: Error) {
 async function sentInvoiceOf(opts: { verified: boolean }) {
   const u = await createTestUser({ emailVerified: opts.verified });
   await ensureProfile(u.id, { businessName: "Studio Donny", email: "donny@example.test" });
-  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-" }).where(eq(businessProfiles.userId, u.id));
+  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-" }).where(eq(businessProfiles.workspaceId, u.id));
   const draft = await createDraftInvoice(u.id);
   const client = await createClient(u.id, { name: "PT Maju Jaya", defaultCurrency: "IDR" });
   const today = todayInJakarta();
@@ -80,6 +81,19 @@ describe("owner notification for a payment claim", () => {
     expect(email.html).toContain("Budi");
     expect(email.text).toContain(`/invoices/${invoice.id}`);
     expect(email.text).toContain("Transfer BCA");
+  });
+
+  it("emails every member of the workspace whose email is verified, one email each", async () => {
+    const sent = recording();
+    const { owner, invoice } = await sentInvoiceOf({ verified: true });
+    const finance = await createTestUser({ email: "fin@studio.test", emailVerified: true, workspace: false });
+    const unverified = await createTestUser({ email: "baru@studio.test", workspace: false });
+    await addMemberByEmail(owner.id, owner.id, { email: finance.email });
+    await addMemberByEmail(owner.id, owner.id, { email: unverified.email });
+
+    await createPaymentClaim(invoice.publicToken, claimInput(), null);
+
+    expect(sent.map((e) => e.to)).toEqual([[owner.email], [finance.email]]);
   });
 
   it("sends nothing to an owner whose email is not verified", async () => {

@@ -106,6 +106,13 @@
       "when": 1792813855589,
       "tag": "0014_new_templates",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1793963217927,
+      "tag": "0015_workspaces",
+      "breakpoints": true
     }
   ]
 }

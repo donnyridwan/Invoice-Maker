@@ -12,10 +12,10 @@ import { InvoiceTabs } from "@/features/invoices/invoice-tabs";
 import { countSchedules } from "@/features/recurring/queries";
 import { todayInJakarta } from "@/lib/dates";
 import { firstParam } from "@/lib/search-params";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 export default async function InvoicesPage({ searchParams }: PageProps<"/invoices">) {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   const t = await getTranslations("invoices");
   const params = await searchParams;
   const q = firstParam(params.q)?.trim() ?? "";
@@ -25,10 +25,10 @@ export default async function InvoicesPage({ searchParams }: PageProps<"/invoice
 
   const today = todayInJakarta();
   const [invoices, counts, recurringCount, summary] = await Promise.all([
-    listInvoices(user.id, { search: q, tab }),
-    countInvoicesByTab(user.id),
-    countSchedules(user.id),
-    getDashboardSummary(user.id, today),
+    listInvoices(workspaceId, { search: q, tab }),
+    countInvoicesByTab(workspaceId),
+    countSchedules(workspaceId),
+    getDashboardSummary(workspaceId, today),
   ]);
 
   return (

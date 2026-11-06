@@ -15,11 +15,14 @@ export type RegisterOptions = {
   email?: string;
   password?: string;
   /**
-   * New accounts are sent to /onboarding. "skip" (default) clicks "Lewati", which lands in the
+   * New accounts wait on /waiting until they join a team; the helper creates a business of their
+   * own there, which leads to /onboarding. "skip" (default) clicks "Lewati", which lands in the
    * editor of a first draft invoice; the helper then opens /dashboard so the test can carry on in
-   * the app. "stay" leaves the user on /onboarding.
+   * the app. "stay" leaves the user on /onboarding, "waiting" on /waiting (no business at all).
    */
-  onboarding?: "skip" | "stay";
+  onboarding?: "skip" | "stay" | "waiting";
+  /** The name of the business created on /waiting (the user's name by default). */
+  businessName?: string;
 };
 
 /** Registers a new user through the UI and waits until the session is established. */
@@ -35,6 +38,12 @@ export async function registerUser(
   await page.getByLabel("Email").fill(email);
   await page.getByLabel("Password").fill(password);
   await page.getByRole("button", { name: "Daftar" }).click();
+  await expect(page).toHaveURL(/\/waiting/);
+  if (opts.onboarding === "waiting") return { email, password };
+
+  await page.getByRole("button", { name: "Buat bisnis sendiri" }).click();
+  await page.getByLabel("Nama bisnis").fill(opts.businessName ?? opts.name ?? "Donny");
+  await page.getByRole("button", { name: "Buat bisnis" }).click();
   await expect(page).toHaveURL(/\/onboarding/);
 
   if ((opts.onboarding ?? "skip") === "skip") {
@@ -254,13 +263,15 @@ export async function verifyEmailViaDb(email: string): Promise<void> {
   }
 }
 
-/** Gives every client of the account `ownerEmail` an email address (the client form has its own test). */
+/** Gives every client in the workspaces of `ownerEmail` an email address (the client form has its own test). */
 export async function setClientEmailViaDb(ownerEmail: string, clientEmail: string): Promise<void> {
   const sql = postgres(e2eDatabaseUrl(), { max: 1, onnotice: () => {} });
   try {
     const rows = await sql`
       UPDATE clients SET email = ${clientEmail}
-      WHERE user_id = (SELECT id FROM "user" WHERE email = ${ownerEmail})
+      WHERE workspace_id IN (
+        SELECT m.workspace_id FROM workspace_members m JOIN "user" u ON u.id = m.user_id WHERE u.email = ${ownerEmail}
+      )
       RETURNING id`;
     if (rows.length === 0) throw new Error(`No clients for ${ownerEmail} in the e2e database`);
   } finally {

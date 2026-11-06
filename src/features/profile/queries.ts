@@ -1,6 +1,6 @@
 import { eq, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { businessProfiles } from "@/db/schema";
+import { businessProfiles, user } from "@/db/schema";
 import type { Locale } from "@/i18n/config";
 import { NotFoundError } from "@/lib/errors";
 import { parseInput } from "@/lib/validate";
@@ -12,14 +12,14 @@ const NOT_FOUND = "Business profile not found";
 
 /** Creates the profile row with column defaults; does nothing if it already exists. */
 export async function ensureProfile(
-  userId: string,
+  workspaceId: string,
   { businessName, email }: { businessName: string; email: string },
 ): Promise<void> {
-  await db.insert(businessProfiles).values({ userId, businessName, email }).onConflictDoNothing();
+  await db.insert(businessProfiles).values({ workspaceId, businessName, email }).onConflictDoNothing();
 }
 
-export async function getProfile(userId: string): Promise<BusinessProfile> {
-  const [row] = await db.select().from(businessProfiles).where(eq(businessProfiles.userId, userId)).limit(1);
+export async function getProfile(workspaceId: string): Promise<BusinessProfile> {
+  const [row] = await db.select().from(businessProfiles).where(eq(businessProfiles.workspaceId, workspaceId)).limit(1);
   if (!row) throw new NotFoundError(NOT_FOUND);
   return row;
 }
@@ -37,7 +37,7 @@ export function profileToInput(profile: BusinessProfile): Record<string, string 
   };
 }
 
-export async function updateProfile(userId: string, input: unknown): Promise<BusinessProfile> {
+export async function updateProfile(workspaceId: string, input: unknown): Promise<BusinessProfile> {
   const data = parseInput(profileSchema, input);
   const [row] = await db
     .update(businessProfiles)
@@ -50,13 +50,13 @@ export async function updateProfile(userId: string, input: unknown): Promise<Bus
       baseCurrency: data.baseCurrency,
       defaultCurrency: data.defaultCurrency,
     })
-    .where(eq(businessProfiles.userId, userId))
+    .where(eq(businessProfiles.workspaceId, workspaceId))
     .returning();
   if (!row) throw new NotFoundError(NOT_FOUND);
   return row;
 }
 
-export async function updateInvoiceDefaults(userId: string, input: unknown): Promise<BusinessProfile> {
+export async function updateInvoiceDefaults(workspaceId: string, input: unknown): Promise<BusinessProfile> {
   const data = parseInput(invoiceDefaultsSchema, input);
   const [row] = await db
     .update(businessProfiles)
@@ -68,57 +68,54 @@ export async function updateInvoiceDefaults(userId: string, input: unknown): Pro
       defaultTemplate: data.defaultTemplate,
       accentColor: data.accentColor,
     })
-    .where(eq(businessProfiles.userId, userId))
+    .where(eq(businessProfiles.workspaceId, workspaceId))
     .returning();
   if (!row) throw new NotFoundError(NOT_FOUND);
   return row;
 }
 
 /** Sets (or clears, with null) the logo URL and returns the previous one. The old file is never deleted: invoice snapshots may still point to it. */
-export async function setLogoUrl(userId: string, logoUrl: string | null): Promise<string | null> {
+export async function setLogoUrl(workspaceId: string, logoUrl: string | null): Promise<string | null> {
   return db.transaction(async (tx) => {
     const [current] = await tx
       .select({ logoUrl: businessProfiles.logoUrl })
       .from(businessProfiles)
-      .where(eq(businessProfiles.userId, userId))
+      .where(eq(businessProfiles.workspaceId, workspaceId))
       .for("update")
       .limit(1);
     if (!current) throw new NotFoundError(NOT_FOUND);
-    await tx.update(businessProfiles).set({ logoUrl }).where(eq(businessProfiles.userId, userId));
+    await tx.update(businessProfiles).set({ logoUrl }).where(eq(businessProfiles.workspaceId, workspaceId));
     return current.logoUrl;
   });
 }
 
 /** Stamps the completion time once; later calls keep the first timestamp. */
-export async function completeOnboarding(userId: string): Promise<void> {
+export async function completeOnboarding(workspaceId: string): Promise<void> {
   const rows = await db
     .update(businessProfiles)
     .set({ onboardingCompletedAt: sql`coalesce(${businessProfiles.onboardingCompletedAt}, now())` })
-    .where(eq(businessProfiles.userId, userId))
-    .returning({ userId: businessProfiles.userId });
+    .where(eq(businessProfiles.workspaceId, workspaceId))
+    .returning({ workspaceId: businessProfiles.workspaceId });
   if (rows.length === 0) throw new NotFoundError(NOT_FOUND);
 }
 
-/**
- * Whether the user has finished (or skipped) onboarding. Creates the profile row first if it is
- * missing (e.g. a user created before profiles existed), in which case onboarding is pending.
- */
-export async function isOnboardingComplete(user: { id: string; name: string; email: string }): Promise<boolean> {
-  const select = () =>
-    db
-      .select({ completedAt: businessProfiles.onboardingCompletedAt })
-      .from(businessProfiles)
-      .where(eq(businessProfiles.userId, user.id))
-      .limit(1);
-  let [row] = await select();
-  if (!row) {
-    await ensureProfile(user.id, { businessName: user.name, email: user.email });
-    [row] = await select();
-  }
+/** Whether the workspace's onboarding is done (or skipped). A workspace without a profile is not onboarded. */
+export async function isOnboardingComplete(workspaceId: string): Promise<boolean> {
+  const [row] = await db
+    .select({ completedAt: businessProfiles.onboardingCompletedAt })
+    .from(businessProfiles)
+    .where(eq(businessProfiles.workspaceId, workspaceId))
+    .limit(1);
   return Boolean(row?.completedAt);
 }
 
-/** Remembers the UI language chosen by the user. A user without a profile row is ignored. */
+/** Remembers the UI language chosen by the user. */
 export async function updateUiLocale(userId: string, locale: Locale): Promise<void> {
-  await db.update(businessProfiles).set({ uiLocale: locale }).where(eq(businessProfiles.userId, userId));
+  await db.update(user).set({ uiLocale: locale }).where(eq(user.id, userId));
+}
+
+/** The UI language the user last picked (null for an unknown user). */
+export async function getUiLocale(userId: string): Promise<string | null> {
+  const [row] = await db.select({ uiLocale: user.uiLocale }).from(user).where(eq(user.id, userId)).limit(1);
+  return row?.uiLocale ?? null;
 }

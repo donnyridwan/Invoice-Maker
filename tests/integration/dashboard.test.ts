@@ -26,7 +26,7 @@ type Spec = {
 async function setupUser(baseCurrency = "IDR") {
   const u = await createTestUser();
   await ensureProfile(u.id, { businessName: "Studio Donny", email: "donny@example.test" });
-  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-", baseCurrency }).where(eq(businessProfiles.userId, u.id));
+  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-", baseCurrency }).where(eq(businessProfiles.workspaceId, u.id));
   return u;
 }
 
@@ -176,7 +176,7 @@ describe("dashboard summary", () => {
     expect((await getDashboardSummary(u.id, TODAY)).unpaid.totalBaseMinor).toBe(1_500_000 + 1_000_000);
 
     // The profile switches to USD: the stored 15,000 must not be read as "USD per USD".
-    await testDb.update(businessProfiles).set({ baseCurrency: "USD" }).where(eq(businessProfiles.userId, u.id));
+    await testDb.update(businessProfiles).set({ baseCurrency: "USD" }).where(eq(businessProfiles.workspaceId, u.id));
     const { unpaid } = await getDashboardSummary(u.id, TODAY);
     // USD 100.00 stays 10,000 minor; IDR 1.000.000 -> 1,000,000 * 1.08 / 17000 = USD 63.53.
     expect(unpaid).toMatchObject({ baseCurrency: "USD", totalBaseMinor: 10_000 + 6_353, converted: true, withoutRate: [] });
@@ -269,7 +269,7 @@ describe("recurring drafts banner", () => {
   async function scheduleFor(userId: string) {
     const [row] = await testDb
       .insert(recurringSchedules)
-      .values({ userId, frequency: "monthly", anchorDay: 1, nextRunOn: "2026-11-01" })
+      .values({ workspaceId: userId, frequency: "monthly", anchorDay: 1, nextRunOn: "2026-11-01" })
       .returning();
     return row.id;
   }

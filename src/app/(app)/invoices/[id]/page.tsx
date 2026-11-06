@@ -16,23 +16,23 @@ import { isEmailEnabled } from "@/lib/email";
 import { isCurrencyCode } from "@/lib/currencies";
 import { todayInJakarta } from "@/lib/dates";
 import { NotFoundError } from "@/lib/errors";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 // Server actions called from this page (sending by email renders a PDF) may run up to 30 s.
 export const maxDuration = 30;
 
 /** Owner's view of an invoice that has left draft: the document, its status, actions, claims and activity. */
 export default async function InvoiceDetailPage({ params }: PageProps<"/invoices/[id]">) {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   const { id } = await params;
   const t = await getTranslations("invoices.detail");
   const tNav = await getTranslations("nav");
 
   const loaded = await Promise.all([
-    getInvoice(user.id, id),
-    listEvents(user.id, id),
-    listClaims(user.id, id),
-    getScheduleForInvoice(user.id, id),
+    getInvoice(workspaceId, id),
+    listEvents(workspaceId, id),
+    listClaims(workspaceId, id),
+    getScheduleForInvoice(workspaceId, id),
   ]).catch((error) => {
     if (error instanceof NotFoundError) notFound();
     throw error;

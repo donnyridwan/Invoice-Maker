@@ -1,9 +1,9 @@
 "use client";
 
-import { Fragment } from "react";
+import { Fragment, type ReactNode } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { FileText, Landmark, LayoutDashboard, Package, Settings, Users, type LucideIcon } from "lucide-react";
+import { FileText, Landmark, LayoutDashboard, Package, Settings, Users, UsersRound, type LucideIcon } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { cn } from "@/lib/utils";
 
@@ -23,6 +23,7 @@ export const NAV_GROUPS: { labelKey?: string; items: NavItem[] }[] = [
     labelKey: "nav.business",
     items: [
       { href: "/settings/payment-accounts", labelKey: "nav.paymentAccounts", icon: Landmark },
+      { href: "/settings/team", labelKey: "nav.team", icon: UsersRound },
       { href: "/settings", labelKey: "nav.settings", icon: Settings },
     ],
   },
@@ -49,8 +50,17 @@ export function LogoMark({ className }: { className?: string }) {
 /**
  * The navigation. `rail` is the desktop form, a narrow column of icons (the label is in a tooltip
  * and for assistive technology); otherwise, as in the mobile drawer, icons come with their labels.
+ * `workspace` (the business switcher) sits between the logo and the menu.
  */
-export function Sidebar({ rail = false, onNavigate }: { rail?: boolean; onNavigate?: () => void }) {
+export function Sidebar({
+  rail = false,
+  onNavigate,
+  workspace,
+}: {
+  rail?: boolean;
+  onNavigate?: () => void;
+  workspace?: ReactNode;
+}) {
   const t = useTranslations();
   const pathname = usePathname();
   const active = activeHref(pathname);
@@ -72,6 +82,7 @@ export function Sidebar({ rail = false, onNavigate }: { rail?: boolean; onNaviga
           )}
         </Link>
       </div>
+      {workspace ? <div className={cn("pt-1 pb-2", rail ? "flex justify-center" : "px-3")}>{workspace}</div> : null}
       <nav aria-label={t("nav.mainMenu")} className={cn("flex flex-col gap-1 py-2", rail ? "items-center" : "px-3")}>
         {NAV_GROUPS.map((group, index) => (
           <Fragment key={group.labelKey ?? index}>

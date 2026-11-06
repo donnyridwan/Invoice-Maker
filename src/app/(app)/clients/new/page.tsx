@@ -4,12 +4,12 @@ import { getTranslations } from "next-intl/server";
 import { PageHeader } from "@/components/ui/page-header";
 import { ClientForm } from "@/features/clients/client-form";
 import { getProfile } from "@/features/profile/queries";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 export default async function NewClientPage() {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   const t = await getTranslations();
-  const profile = await getProfile(user.id);
+  const profile = await getProfile(workspaceId);
 
   return (
     <>

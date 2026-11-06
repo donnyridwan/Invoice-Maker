@@ -6,14 +6,14 @@ import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { countInvoicesByTab } from "@/features/invoices/queries";
 import { listSchedules } from "@/features/recurring/queries";
 import { ScheduleTable } from "@/features/recurring/schedule-table";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 /** The "Berulang" tab of the invoice list: every recurring schedule of the user. */
 export default async function RecurringInvoicesPage() {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   const t = await getTranslations("invoices");
   const tRecurring = await getTranslations("recurring.list");
-  const [schedules, counts] = await Promise.all([listSchedules(user.id), countInvoicesByTab(user.id)]);
+  const [schedules, counts] = await Promise.all([listSchedules(workspaceId), countInvoicesByTab(workspaceId)]);
 
   return (
     <>

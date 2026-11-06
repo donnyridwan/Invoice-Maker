@@ -18,16 +18,26 @@ export async function resetDb(): Promise<void> {
   await testDb.execute(sql.raw(`TRUNCATE TABLE ${names} CASCADE`));
 }
 
+/**
+ * A user who owns a workspace of their own. The workspace shares the user's id (a UUID), so a test
+ * can pass `user.id` wherever a query wants the workspace id. Pass `workspace: false` for a user
+ * who belongs to no workspace.
+ */
 export async function createTestUser(
-  overrides: Partial<typeof schema.user.$inferInsert> = {},
+  overrides: Partial<typeof schema.user.$inferInsert> & { workspace?: boolean } = {},
 ): Promise<{ id: string; email: string }> {
-  const id = overrides.id ?? randomUUID();
-  const email = overrides.email ?? `${id}@example.test`;
+  const { workspace = true, ...fields } = overrides;
+  const id = fields.id ?? randomUUID();
+  const email = fields.email ?? `${id}@example.test`;
   await testDb.insert(schema.user).values({
     name: "Test User",
-    ...overrides,
+    ...fields,
     id,
     email,
   });
+  if (workspace) {
+    await testDb.insert(schema.workspaces).values({ id, name: fields.name ?? "Test User" });
+    await testDb.insert(schema.workspaceMembers).values({ workspaceId: id, userId: id, role: "owner" });
+  }
   return { id, email };
 }

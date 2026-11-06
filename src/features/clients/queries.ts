@@ -22,23 +22,23 @@ function toRow(input: ClientInput) {
   };
 }
 
-function ownedBy(userId: string, id: string) {
-  return and(eq(clients.id, id), eq(clients.userId, userId));
+function ownedBy(workspaceId: string, id: string) {
+  return and(eq(clients.id, id), eq(clients.workspaceId, workspaceId));
 }
 
-async function findOwned(userId: string, id: string): Promise<Client> {
+async function findOwned(workspaceId: string, id: string): Promise<Client> {
   if (!UUID_RE.test(id)) throw new NotFoundError("Client not found");
-  const [row] = await db.select().from(clients).where(ownedBy(userId, id)).limit(1);
+  const [row] = await db.select().from(clients).where(ownedBy(workspaceId, id)).limit(1);
   if (!row) throw new NotFoundError("Client not found");
   return row;
 }
 
 export async function listClients(
-  userId: string,
+  workspaceId: string,
   { search, includeArchived = false }: { search?: string; includeArchived?: boolean } = {},
 ): Promise<Client[]> {
   const term = search?.trim();
-  const conditions = [eq(clients.userId, userId)];
+  const conditions = [eq(clients.workspaceId, workspaceId)];
   if (!includeArchived) conditions.push(isNull(clients.archivedAt));
   if (term) {
     const pattern = likePattern(term);
@@ -51,32 +51,32 @@ export async function listClients(
     .orderBy(asc(clients.name), asc(clients.createdAt));
 }
 
-export async function getClient(userId: string, id: string): Promise<Client> {
-  return findOwned(userId, id);
+export async function getClient(workspaceId: string, id: string): Promise<Client> {
+  return findOwned(workspaceId, id);
 }
 
-export async function createClient(userId: string, input: unknown): Promise<Client> {
+export async function createClient(workspaceId: string, input: unknown): Promise<Client> {
   const row = toRow(parseInput(clientSchema, input));
   const [created] = await db
     .insert(clients)
-    .values({ ...row, userId })
+    .values({ ...row, workspaceId })
     .returning();
   return created;
 }
 
-export async function updateClient(userId: string, id: string, input: unknown): Promise<Client> {
+export async function updateClient(workspaceId: string, id: string, input: unknown): Promise<Client> {
   const row = toRow(parseInput(clientSchema, input));
-  await findOwned(userId, id);
-  const [updated] = await db.update(clients).set(row).where(ownedBy(userId, id)).returning();
+  await findOwned(workspaceId, id);
+  const [updated] = await db.update(clients).set(row).where(ownedBy(workspaceId, id)).returning();
   return updated;
 }
 
-export async function archiveClient(userId: string, id: string): Promise<void> {
-  await findOwned(userId, id);
-  await db.update(clients).set({ archivedAt: new Date() }).where(ownedBy(userId, id));
+export async function archiveClient(workspaceId: string, id: string): Promise<void> {
+  await findOwned(workspaceId, id);
+  await db.update(clients).set({ archivedAt: new Date() }).where(ownedBy(workspaceId, id));
 }
 
-export async function restoreClient(userId: string, id: string): Promise<void> {
-  await findOwned(userId, id);
-  await db.update(clients).set({ archivedAt: null }).where(ownedBy(userId, id));
+export async function restoreClient(workspaceId: string, id: string): Promise<void> {
+  await findOwned(workspaceId, id);
+  await db.update(clients).set({ archivedAt: null }).where(ownedBy(workspaceId, id));
 }

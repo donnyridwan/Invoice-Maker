@@ -18,24 +18,24 @@ function toRow(input: CatalogItemInput) {
   };
 }
 
-function ownedBy(userId: string, id: string) {
-  return and(eq(catalogItems.id, id), eq(catalogItems.userId, userId));
+function ownedBy(workspaceId: string, id: string) {
+  return and(eq(catalogItems.id, id), eq(catalogItems.workspaceId, workspaceId));
 }
 
-async function findOwned(userId: string, id: string): Promise<CatalogItem> {
+async function findOwned(workspaceId: string, id: string): Promise<CatalogItem> {
   if (!UUID_RE.test(id)) throw new NotFoundError("Catalog item not found");
-  const [row] = await db.select().from(catalogItems).where(ownedBy(userId, id)).limit(1);
+  const [row] = await db.select().from(catalogItems).where(ownedBy(workspaceId, id)).limit(1);
   if (!row) throw new NotFoundError("Catalog item not found");
   return row;
 }
 
 /** Plan 2 uses this (with `search`) for the invoice line-item autocomplete. */
 export async function listCatalogItems(
-  userId: string,
+  workspaceId: string,
   { search, includeArchived = false }: { search?: string; includeArchived?: boolean } = {},
 ): Promise<CatalogItem[]> {
   const term = search?.trim();
-  const conditions = [eq(catalogItems.userId, userId)];
+  const conditions = [eq(catalogItems.workspaceId, workspaceId)];
   if (!includeArchived) conditions.push(isNull(catalogItems.archivedAt));
   if (term) {
     const pattern = likePattern(term);
@@ -48,32 +48,32 @@ export async function listCatalogItems(
     .orderBy(asc(catalogItems.name), asc(catalogItems.createdAt));
 }
 
-export async function getCatalogItem(userId: string, id: string): Promise<CatalogItem> {
-  return findOwned(userId, id);
+export async function getCatalogItem(workspaceId: string, id: string): Promise<CatalogItem> {
+  return findOwned(workspaceId, id);
 }
 
-export async function createCatalogItem(userId: string, input: unknown): Promise<CatalogItem> {
+export async function createCatalogItem(workspaceId: string, input: unknown): Promise<CatalogItem> {
   const row = toRow(parseInput(catalogItemSchema, input));
   const [created] = await db
     .insert(catalogItems)
-    .values({ ...row, userId })
+    .values({ ...row, workspaceId })
     .returning();
   return created;
 }
 
-export async function updateCatalogItem(userId: string, id: string, input: unknown): Promise<CatalogItem> {
+export async function updateCatalogItem(workspaceId: string, id: string, input: unknown): Promise<CatalogItem> {
   const row = toRow(parseInput(catalogItemSchema, input));
-  await findOwned(userId, id);
-  const [updated] = await db.update(catalogItems).set(row).where(ownedBy(userId, id)).returning();
+  await findOwned(workspaceId, id);
+  const [updated] = await db.update(catalogItems).set(row).where(ownedBy(workspaceId, id)).returning();
   return updated;
 }
 
-export async function archiveCatalogItem(userId: string, id: string): Promise<void> {
-  await findOwned(userId, id);
-  await db.update(catalogItems).set({ archivedAt: new Date() }).where(ownedBy(userId, id));
+export async function archiveCatalogItem(workspaceId: string, id: string): Promise<void> {
+  await findOwned(workspaceId, id);
+  await db.update(catalogItems).set({ archivedAt: new Date() }).where(ownedBy(workspaceId, id));
 }
 
-export async function restoreCatalogItem(userId: string, id: string): Promise<void> {
-  await findOwned(userId, id);
-  await db.update(catalogItems).set({ archivedAt: null }).where(ownedBy(userId, id));
+export async function restoreCatalogItem(workspaceId: string, id: string): Promise<void> {
+  await findOwned(workspaceId, id);
+  await db.update(catalogItems).set({ archivedAt: null }).where(ownedBy(workspaceId, id));
 }

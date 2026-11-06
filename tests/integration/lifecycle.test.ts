@@ -20,7 +20,7 @@ import { createTestUser, resetDb, testDb } from "./helpers";
 async function setupUser() {
   const u = await createTestUser();
   await ensureProfile(u.id, { businessName: "Studio Donny", email: "donny@example.test" });
-  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-" }).where(eq(businessProfiles.userId, u.id));
+  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-" }).where(eq(businessProfiles.workspaceId, u.id));
   return u;
 }
 

@@ -1,6 +1,6 @@
 import { and, asc, eq, inArray, isNull, lte, sql } from "drizzle-orm";
 import { db } from "@/db/client";
-import { clients, invoiceItems, invoices, paymentAccounts, recurringSchedules, user } from "@/db/schema";
+import { clients, invoiceItems, invoices, paymentAccounts, recurringSchedules, user, workspaceMembers } from "@/db/schema";
 import { defaultInvoiceEmail } from "@/features/invoices/email-content";
 import { logEvent } from "@/features/invoices/events";
 import { getInvoice, insertInvoiceCopy, isUniqueViolation, type Invoice } from "@/features/invoices/queries";
@@ -41,9 +41,9 @@ const PENDING_MAX_AGE_MS = 3 * 24 * 3600_000;
 /** Pending deliveries the start of one run sweeps. */
 const SWEEP_LIMIT = 50;
 /** `lastError` codes that a successful delivery clears again. */
-const DELIVERY_ERRORS = ["emailNotVerified", "emailDisabled", "clientEmailMissing", "emailFailed", "rateLimited"];
+const DELIVERY_ERRORS = ["senderMissing", "emailNotVerified", "emailDisabled", "clientEmailMissing", "emailFailed", "rateLimited"];
 /** Codes of `sendInvoiceEmail` that retrying cannot fix. */
-const PERMANENT_ERRORS = ["emailNotVerified", "emailDisabled", "invalidTransition"];
+const PERMANENT_ERRORS = ["senderMissing", "emailNotVerified", "emailDisabled", "invalidTransition"];
 
 type Outcome = { schedule: Schedule; created: Invoice[]; pendingIds: string[] };
 
@@ -61,13 +61,13 @@ async function generateFor(scheduleId: string, today: string): Promise<Outcome |
       .for("update")
       .limit(1);
     if (!schedule || !schedule.active || schedule.nextRunOn > today) return null;
-    const { userId } = schedule;
+    const { workspaceId } = schedule;
 
     const [source] = schedule.sourceInvoiceId
       ? await tx
           .select()
           .from(invoices)
-          .where(and(eq(invoices.id, schedule.sourceInvoiceId), eq(invoices.userId, userId)))
+          .where(and(eq(invoices.id, schedule.sourceInvoiceId), eq(invoices.workspaceId, workspaceId)))
           .limit(1)
       : [];
     if (!source || source.status === "void") {
@@ -90,7 +90,7 @@ async function generateFor(scheduleId: string, today: string): Promise<Outcome |
       ? await tx
           .select()
           .from(clients)
-          .where(and(eq(clients.id, source.clientId), eq(clients.userId, userId)))
+          .where(and(eq(clients.id, source.clientId), eq(clients.workspaceId, workspaceId)))
           .limit(1)
       : [];
     const wanted = source.paymentAccountsSnapshot.map((a) => a.id);
@@ -98,14 +98,14 @@ async function generateFor(scheduleId: string, today: string): Promise<Outcome |
       ? await tx
           .select()
           .from(paymentAccounts)
-          .where(and(eq(paymentAccounts.userId, userId), isNull(paymentAccounts.archivedAt), inArray(paymentAccounts.id, wanted)))
+          .where(and(eq(paymentAccounts.workspaceId, workspaceId), isNull(paymentAccounts.archivedAt), inArray(paymentAccounts.id, wanted)))
       : [];
     accounts = wanted.flatMap((id) => accounts.filter((a) => a.id === id));
     if (wanted.length > 0 && accounts.length === 0) {
       accounts = await tx
         .select()
         .from(paymentAccounts)
-        .where(and(eq(paymentAccounts.userId, userId), isNull(paymentAccounts.archivedAt), eq(paymentAccounts.isDefault, true)))
+        .where(and(eq(paymentAccounts.workspaceId, workspaceId), isNull(paymentAccounts.archivedAt), eq(paymentAccounts.isDefault, true)))
         .limit(1);
     }
     const accountSnapshots: PaymentAccountSnapshot[] = accounts.map(paymentAccountSnapshotFrom);
@@ -118,8 +118,9 @@ async function generateFor(scheduleId: string, today: string): Promise<Outcome |
       lastRunDate = runDate;
       try {
         created.push(
-          await insertInvoiceCopy(tx, userId, source, items, {
+          await insertInvoiceCopy(tx, workspaceId, source, items, {
             issueDate: runDate,
+            createdBy: schedule.createdBy,
             recurringScheduleId: schedule.id,
             snapshots: (profile) => ({
               clientSnapshot: client ? clientSnapshotFrom(client) : source.clientSnapshot,
@@ -194,7 +195,7 @@ type Delivery = "sent" | "dropped" | "retry" | "timeout";
  * transaction committed (or in a later run's sweep), so nothing here can undo an invoice.
  * - Sent: the flag is cleared, and so is a delivery error on the schedule.
  * - Not sendable and never will be (hand-sent, void, schedule stopped, older than three days,
- *   owner not verified, email off, client without address): the flag is cleared; the invoice stays
+ *   sender gone or not verified, email off, client without address): the flag is cleared; the invoice stays
  *   a draft, with an `email_failed` event and the reason on the schedule when it was the owner's setup.
  * - A failed attempt: `email_failed` is logged, the code goes to the schedule's `lastError`, and the
  *   flag stays so that the next run tries again.
@@ -209,14 +210,28 @@ async function deliverPending(invoiceId: string, deps: RunDeps, timeoutMs: numbe
     return "dropped";
   }
 
-  const [owner] = await db
-    .select({ id: user.id, email: user.email, emailVerified: user.emailVerified })
-    .from(user)
-    .where(eq(user.id, invoice.userId))
+  // The sender is the member who set the schedule up, as long as they still belong to the workspace.
+  const [schedule] = await db
+    .select({ createdBy: recurringSchedules.createdBy })
+    .from(recurringSchedules)
+    .where(eq(recurringSchedules.id, scheduleId))
     .limit(1);
+  const [owner] = schedule?.createdBy
+    ? await db
+        .select({ id: user.id, email: user.email, emailVerified: user.emailVerified })
+        .from(user)
+        .innerJoin(
+          workspaceMembers,
+          and(eq(workspaceMembers.userId, user.id), eq(workspaceMembers.workspaceId, invoice.workspaceId)),
+        )
+        .where(eq(user.id, schedule.createdBy))
+        .limit(1)
+    : [];
   const transport = deps.transport ?? getEmailTransport();
   const to = invoice.clientSnapshot?.email;
-  const ineligible = !owner?.emailVerified
+  const ineligible = !owner
+    ? "senderMissing"
+    : !owner.emailVerified
     ? "emailNotVerified"
     : transport.kind === "disabled"
       ? "emailDisabled"
@@ -232,9 +247,9 @@ async function deliverPending(invoiceId: string, deps: RunDeps, timeoutMs: numbe
 
   const send = deps.sendInvoiceEmail ?? sendInvoiceEmail;
   try {
-    const full = await getInvoice(invoice.userId, invoice.id);
+    const full = await getInvoice(invoice.workspaceId, invoice.id);
     const raced = await withTimeout(
-      send(owner, invoice.id, { to, cc: [], ...defaultInvoiceEmail(emailFacts(full)) }, { transport, renderPdf: deps.renderPdf }),
+      send(invoice.workspaceId, owner, invoice.id, { to, cc: [], ...defaultInvoiceEmail(emailFacts(full)) }, { transport, renderPdf: deps.renderPdf }),
       timeoutMs,
     );
     if (raced.timedOut) return "timeout";

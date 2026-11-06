@@ -79,36 +79,37 @@ export function emailFacts(inv: InvoiceWithItems) {
 
 /** What the "Kirim lewat email" dialog starts from: the client's address and the default subject and message. */
 export async function getInvoiceEmailDefaults(
-  userId: string,
+  workspaceId: string,
   invoiceId: string,
 ): Promise<{ to: string; subject: string; message: string }> {
-  const inv = await getInvoice(userId, invoiceId);
+  const inv = await getInvoice(workspaceId, invoiceId);
   return { to: inv.clientSnapshot?.email ?? "", ...defaultInvoiceEmail(emailFacts(inv)) };
 }
 
-async function sentTodayCount(userId: string): Promise<number> {
+async function sentTodayCount(workspaceId: string): Promise<number> {
   const since = new Date(Date.now() - 24 * 3600_000);
   const [row] = await db
     .select({ n: count() })
     .from(invoiceEvents)
     .innerJoin(invoices, eq(invoices.id, invoiceEvents.invoiceId))
-    .where(and(eq(invoices.userId, userId), eq(invoiceEvents.type, "sent_email"), gte(invoiceEvents.createdAt, since)));
+    .where(and(eq(invoices.workspaceId, workspaceId), eq(invoiceEvents.type, "sent_email"), gte(invoiceEvents.createdAt, since)));
   return row.n;
 }
 
 /**
  * Emails the invoice (link, message and the PDF as an attachment) to the client and marks it sent.
- * Everything is enforced here, not in the UI: the invoice must be the user's and sendable, the
- * user's email verified, a transport configured, the daily limit not reached and the input valid.
+ * Everything is enforced here, not in the UI: the invoice must be the workspace's and sendable, the
+ * sender's (a member's) email verified, a transport configured, the daily limit not reached and the input valid.
  * A delivery failure is logged as `email_failed`, leaves the status alone and surfaces as `emailFailed`.
  */
 export async function sendInvoiceEmail(
+  workspaceId: string,
   user: EmailSender,
   invoiceId: string,
   input: unknown,
   deps: Deps = {},
 ): Promise<void> {
-  const inv = await getInvoice(user.id, invoiceId);
+  const inv = await getInvoice(workspaceId, invoiceId);
   if (inv.status === "void") throw formError("invalidTransition");
   assertSendable(inv);
 
@@ -117,7 +118,7 @@ export async function sendInvoiceEmail(
   if (transport.kind === "disabled") throw formError("emailDisabled");
 
   const data = parseInput(sendInvoiceEmailSchema, input);
-  if ((await sentTodayCount(user.id)) >= DAILY_EMAIL_LIMIT) throw formError("rateLimited");
+  if ((await sentTodayCount(workspaceId)) >= DAILY_EMAIL_LIMIT) throw formError("rateLimited");
 
   const facts = emailFacts(inv);
   try {
@@ -151,7 +152,7 @@ export async function sendInvoiceEmail(
 
   // The email is out: whatever happens to the status change, it counts towards the daily limit.
   try {
-    if (inv.status === "draft") await markSent(user.id, inv.id, "email");
+    if (inv.status === "draft") await markSent(workspaceId, inv.id, "email");
   } finally {
     await logEvent(db, inv.id, "sent_email", { to: data.to, cc: data.cc });
   }

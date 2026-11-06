@@ -91,9 +91,9 @@ export async function createPaymentClaim(
   return created;
 }
 
-/** All claims on an invoice of `userId`, newest first. Another user's invoice is NotFound. */
-export async function listClaims(userId: string, invoiceId: string): Promise<PaymentClaim[]> {
-  const invoice = await findOwned(db, userId, invoiceId);
+/** All claims on an invoice of `workspaceId`, newest first. Another user's invoice is NotFound. */
+export async function listClaims(workspaceId: string, invoiceId: string): Promise<PaymentClaim[]> {
+  const invoice = await findOwned(db, workspaceId, invoiceId);
   return db
     .select()
     .from(paymentClaims)
@@ -102,14 +102,14 @@ export async function listClaims(userId: string, invoiceId: string): Promise<Pay
 }
 
 /** Claims waiting for a decision across the user's invoices (the "needs attention" counter). */
-export async function countPendingClaims(userId: string): Promise<number> {
+export async function countPendingClaims(workspaceId: string): Promise<number> {
   const [row] = await db
     .select({ n: count() })
     .from(paymentClaims)
     .innerJoin(invoices, eq(invoices.id, paymentClaims.invoiceId))
     .where(
       and(
-        eq(invoices.userId, userId),
+        eq(invoices.workspaceId, workspaceId),
         eq(invoices.status, "payment_claimed"),
         eq(paymentClaims.status, "pending"),
       ),
@@ -118,20 +118,20 @@ export async function countPendingClaims(userId: string): Promise<number> {
 }
 
 /**
- * Resolves the claim's invoice for `userId`, locks the invoice row and re-reads the claim under
+ * Resolves the claim's invoice for `workspaceId`, locks the invoice row and re-reads the claim under
  * that lock, so concurrent decisions on the same invoice are serialised.
  */
-async function lockClaim(tx: Tx, userId: string, claimId: string): Promise<{ invoice: Invoice; claim: PaymentClaim }> {
+async function lockClaim(tx: Tx, workspaceId: string, claimId: string): Promise<{ invoice: Invoice; claim: PaymentClaim }> {
   if (!UUID_RE.test(claimId)) throw new NotFoundError("Claim not found");
   const [owned] = await tx
     .select({ invoiceId: paymentClaims.invoiceId })
     .from(paymentClaims)
     .innerJoin(invoices, eq(invoices.id, paymentClaims.invoiceId))
-    .where(and(eq(paymentClaims.id, claimId), eq(invoices.userId, userId)))
+    .where(and(eq(paymentClaims.id, claimId), eq(invoices.workspaceId, workspaceId)))
     .limit(1);
   if (!owned) throw new NotFoundError("Claim not found");
 
-  const invoice = await findOwned(tx, userId, owned.invoiceId, true);
+  const invoice = await findOwned(tx, workspaceId, owned.invoiceId, true);
   const [claim] = await tx.select().from(paymentClaims).where(eq(paymentClaims.id, claimId)).limit(1);
   if (!claim) throw new NotFoundError("Claim not found");
   return { invoice, claim };
@@ -141,9 +141,9 @@ async function lockClaim(tx: Tx, userId: string, claimId: string): Promise<{ inv
  * The owner accepts a claim: the claim becomes accepted, the invoice paid (on the claimed date)
  * and every other pending claim is rejected. One transaction, invoice row locked.
  */
-export async function acceptClaim(userId: string, claimId: string): Promise<PaymentClaim> {
+export async function acceptClaim(workspaceId: string, claimId: string): Promise<PaymentClaim> {
   return db.transaction(async (tx) => {
-    const { invoice, claim } = await lockClaim(tx, userId, claimId);
+    const { invoice, claim } = await lockClaim(tx, workspaceId, claimId);
     if (claim.status !== "pending" || invoice.status !== "payment_claimed") throw invalidTransition();
 
     const now = new Date();
@@ -171,9 +171,9 @@ export async function acceptClaim(userId: string, claimId: string): Promise<Paym
  * The owner rejects a claim. The invoice goes back to sent only when no other claim is still
  * pending. One transaction, invoice row locked.
  */
-export async function rejectClaim(userId: string, claimId: string): Promise<PaymentClaim> {
+export async function rejectClaim(workspaceId: string, claimId: string): Promise<PaymentClaim> {
   return db.transaction(async (tx) => {
-    const { invoice, claim } = await lockClaim(tx, userId, claimId);
+    const { invoice, claim } = await lockClaim(tx, workspaceId, claimId);
     if (claim.status !== "pending") throw invalidTransition();
 
     const now = new Date();

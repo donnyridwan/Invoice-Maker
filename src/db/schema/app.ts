@@ -53,10 +53,40 @@ export const recurringFrequency = pgEnum("recurring_frequency", ["weekly", "mont
 export const recurringEnd = pgEnum("recurring_end", ["never", "after_count", "on_date"]);
 export const recurringDelivery = pgEnum("recurring_delivery", ["draft", "auto_email"]);
 
+export const workspaceRole = pgEnum("workspace_role", ["owner", "member"]);
+
+/** A business: everything below (profile, clients, invoices…) belongs to one workspace. */
+export const workspaces = pgTable("workspaces", {
+  id: uuid("id").primaryKey().defaultRandom(),
+  name: text("name").notNull(),
+  ...timestamps,
+});
+
+/** Who may use a workspace. Owners also manage its members; every member sees all of its data. */
+export const workspaceMembers = pgTable(
+  "workspace_members",
+  {
+    workspaceId: uuid("workspace_id")
+      .notNull()
+      .references(() => workspaces.id, { onDelete: "cascade" }),
+    userId: text("user_id")
+      .notNull()
+      .references(() => user.id, { onDelete: "cascade" }),
+    role: workspaceRole("role").notNull().default("member"),
+    createdAt: timestamp("created_at", { withTimezone: true }).notNull().defaultNow(),
+  },
+  (t) => [primaryKey({ columns: [t.workspaceId, t.userId] }), index("workspace_members_user_id_idx").on(t.userId)],
+);
+
+const workspaceId = () =>
+  uuid("workspace_id")
+    .notNull()
+    .references(() => workspaces.id, { onDelete: "cascade" });
+
 export const businessProfiles = pgTable("business_profiles", {
-  userId: text("user_id")
+  workspaceId: uuid("workspace_id")
     .primaryKey()
-    .references(() => user.id, { onDelete: "cascade" }),
+    .references(() => workspaces.id, { onDelete: "cascade" }),
   businessName: text("business_name"),
   email: text("email"),
   phone: text("phone"),
@@ -74,7 +104,6 @@ export const businessProfiles = pgTable("business_profiles", {
   // Year `nextInvoiceNumber` belongs to; the sequence restarts when an invoice is issued in a later year.
   invoiceNumberYear: integer("invoice_number_year"),
   defaultNotes: text("default_notes"),
-  uiLocale: text("ui_locale").notNull().default("id"),
   onboardingCompletedAt: timestamp("onboarding_completed_at", { withTimezone: true }),
   ...timestamps,
 });
@@ -83,9 +112,7 @@ export const paymentAccounts = pgTable(
   "payment_accounts",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+    workspaceId: workspaceId(),
     type: paymentAccountType("type").notNull(),
     label: text("label").notNull(),
     // Keys are camelCase: bankName, accountName, accountNumber, swift, iban, email, instructions.
@@ -97,9 +124,9 @@ export const paymentAccounts = pgTable(
     ...timestamps,
   },
   (t) => [
-    // At most one active default account per user.
-    uniqueIndex("payment_accounts_one_default_per_user")
-      .on(t.userId)
+    // At most one active default account per workspace.
+    uniqueIndex("payment_accounts_one_default_per_workspace")
+      .on(t.workspaceId)
       .where(sql`${t.isDefault} AND ${t.archivedAt} IS NULL`),
   ],
 );
@@ -108,9 +135,7 @@ export const clients = pgTable(
   "clients",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+    workspaceId: workspaceId(),
     name: text("name").notNull(),
     company: text("company"),
     email: text("email"),
@@ -123,14 +148,12 @@ export const clients = pgTable(
     archivedAt: timestamp("archived_at", { withTimezone: true }),
     ...timestamps,
   },
-  (t) => [index("clients_user_id_name_idx").on(t.userId, t.name)],
+  (t) => [index("clients_workspace_id_name_idx").on(t.workspaceId, t.name)],
 );
 
 export const catalogItems = pgTable("catalog_items", {
   id: uuid("id").primaryKey().defaultRandom(),
-  userId: text("user_id")
-    .notNull()
-    .references(() => user.id, { onDelete: "cascade" }),
+  workspaceId: workspaceId(),
   name: text("name").notNull(),
   description: text("description"),
   unit: text("unit"),
@@ -144,9 +167,9 @@ export const invoices = pgTable(
   "invoices",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+    workspaceId: workspaceId(),
+    // Who created it (NULL once that account is deleted).
+    createdBy: text("created_by").references(() => user.id, { onDelete: "set null" }),
     clientId: uuid("client_id").references(() => clients.id, { onDelete: "set null" }),
     number: text("number").notNull(),
     status: invoiceStatus("status").notNull().default("draft"),
@@ -192,11 +215,11 @@ export const invoices = pgTable(
     ...timestamps,
   },
   (t) => [
-    uniqueIndex("invoices_user_id_number_idx").on(t.userId, t.number),
+    uniqueIndex("invoices_workspace_id_number_idx").on(t.workspaceId, t.number),
     // One invoice per schedule and run date: what makes a repeated cron run harmless.
     uniqueIndex("invoices_recurring_schedule_id_issue_date_idx").on(t.recurringScheduleId, t.issueDate),
-    index("invoices_user_id_status_idx").on(t.userId, t.status),
-    index("invoices_user_id_issue_date_idx").on(t.userId, t.issueDate),
+    index("invoices_workspace_id_status_idx").on(t.workspaceId, t.status),
+    index("invoices_workspace_id_issue_date_idx").on(t.workspaceId, t.issueDate),
     // The recurring run's sweep of auto-emails still to send reads only these few rows.
     index("invoices_email_pending_idx").on(t.createdAt).where(sql`${t.emailPending}`),
   ],
@@ -221,9 +244,9 @@ export const recurringSchedules = pgTable(
   "recurring_schedules",
   {
     id: uuid("id").primaryKey().defaultRandom(),
-    userId: text("user_id")
-      .notNull()
-      .references(() => user.id, { onDelete: "cascade" }),
+    workspaceId: workspaceId(),
+    // Who set it up: the sender of its auto emails (NULL once that account is deleted).
+    createdBy: text("created_by").references(() => user.id, { onDelete: "set null" }),
     sourceInvoiceId: uuid("source_invoice_id").references((): AnyPgColumn => invoices.id, { onDelete: "set null" }),
     frequency: recurringFrequency("frequency").notNull(),
     interval: integer("interval").notNull().default(1),
@@ -243,7 +266,7 @@ export const recurringSchedules = pgTable(
   },
   (t) => [
     index("recurring_schedules_active_next_run_on_idx").on(t.active, t.nextRunOn),
-    index("recurring_schedules_user_id_idx").on(t.userId),
+    index("recurring_schedules_workspace_id_idx").on(t.workspaceId),
     // One schedule per source invoice (NULLs, i.e. deleted sources, do not collide).
     uniqueIndex("recurring_schedules_source_invoice_id_idx").on(t.sourceInvoiceId),
   ],

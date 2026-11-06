@@ -35,7 +35,8 @@
     "openMenu": "Open menu",
     "business": "Business",
     "globalSearch": "Search all invoices",
-    "globalSearchPlaceholder": "Search an invoice number or client…"
+    "globalSearchPlaceholder": "Search an invoice number or client…",
+    "team": "Team"
   },
   "auth": {
     "signIn": "Sign in",
@@ -452,7 +453,8 @@
     "lastError": {
       "sourceUnavailable": "The source invoice was deleted or voided, so the schedule was stopped.",
       "runFailed": "The last invoice could not be created. It will be retried on the next run.",
-      "emailNotVerified": "A draft was created but not sent because your email is not verified.",
+      "senderMissing": "A draft was created but not sent because the member who set up this schedule is no longer on the team. Save the schedule again to send it from your email.",
+      "emailNotVerified": "A draft was created but not sent because the email of the member who set up this schedule isn't verified.",
       "emailDisabled": "A draft was created but email delivery is not configured.",
       "clientEmailMissing": "A draft was created but not sent because the client has no email.",
       "emailFailed": "A draft was created but the email could not be sent.",
@@ -667,7 +669,12 @@
     "tooManyAttempts": "Too many attempts. Please try again later.",
     "logoTooSmall": "The logo is too small. The longer side must be at least 512 px and the shorter side at least 128 px.",
     "logoTooBig": "The logo is too big. At most 4000 px per side.",
-    "logoRatio": "The logo is too wide or too tall. Its sides can be at most 6:1."
+    "logoRatio": "The logo is too wide or too tall. Its sides can be at most 6:1.",
+    "notRegistered": "This email isn't registered yet. Ask them to sign up first.",
+    "alreadyMember": "This person is already on the team.",
+    "ownerOnly": "Only owners can manage the team.",
+    "lastOwner": "A business needs at least one owner. Make another member an owner first.",
+    "nameMismatch": "The name doesn't match."
   },
   "errors": {
     "validation": "Please check your input.",
@@ -781,5 +788,62 @@
     "previousMonth": "Previous month",
     "nextMonth": "Next month",
     "today": "Today"
+  },
+  "workspaces": {
+    "label": "Businesses",
+    "switch": "Switch business (now: {name})",
+    "active": "Active",
+    "new": "New business",
+    "newTitle": "New business",
+    "newDescription": "Each business has its own invoices, clients, accounts and team. You will be its owner.",
+    "name": "Business name",
+    "nameHint": "You can change it later in Settings.",
+    "create": "Create business",
+    "roles": {
+      "owner": "Owner",
+      "member": "Member"
+    }
+  },
+  "team": {
+    "title": "Team",
+    "description": "Who can open the invoices, clients and settings of {name}.",
+    "addTitle": "Add a member",
+    "addDescription": "Ask them to sign up first, then enter the email they used. Members can manage every invoice, client, catalog item, account and setting of this business, but not the team.",
+    "email": "Account email",
+    "emailHint": "The email they signed up with.",
+    "add": "Add",
+    "added": "{email} was added to the team.",
+    "memberNotice": "Only owners can add or remove members.",
+    "membersLabel": "Team members",
+    "member": "Member",
+    "role": "Role",
+    "joined": "Joined",
+    "you": "you",
+    "actionsFor": "Actions for {name}",
+    "makeOwner": "Make owner",
+    "makeMember": "Make member",
+    "roleChanged": "Role changed.",
+    "remove": "Remove from team",
+    "removeTitle": "Remove {name} from the team?",
+    "removeDescription": "They lose access to this business right away. Invoices they created stay.",
+    "removed": "Member removed.",
+    "leave": "Leave team",
+    "leaveTitle": "Leave this business?",
+    "leaveDescription": "You lose access right away. Another owner can add you again.",
+    "left": "You left this business.",
+    "deleteTitle": "Delete business",
+    "deleteDescription": "Deletes this business with all its invoices, clients, catalog, accounts and recurring schedules. This cannot be undone.",
+    "delete": "Delete business",
+    "deleteConfirmTitle": "Delete {name}?",
+    "deleteConfirmDescription": "All of this business's data is deleted for good, and invoice links already sent stop working.",
+    "deleteConfirmLabel": "Type \"{name}\" to confirm"
+  },
+  "waiting": {
+    "title": "Waiting for access",
+    "description": "Your account isn't linked to any business yet. Ask the business owner to add the email below to their team, then check again.",
+    "yourEmail": "Your account email",
+    "checkAgain": "Check again",
+    "createOwn": "Create my own business",
+    "createTitle": "Start your own business"
   }
 }

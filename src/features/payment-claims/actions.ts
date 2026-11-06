@@ -9,7 +9,7 @@ import { NotFoundError, ValidationError } from "@/lib/errors";
 import { parseMoneyInput } from "@/lib/money";
 import { getClientIp } from "@/lib/client-ip";
 import { consumeRateLimit } from "@/lib/rate-limit";
-import { runUserAction } from "@/lib/run-user-action";
+import { runWorkspaceAction } from "@/lib/run-workspace-action";
 import { UPLOAD_RULES } from "@/lib/storage";
 import { acceptClaim, createPaymentClaim, rejectClaim } from "./queries";
 
@@ -66,13 +66,13 @@ export async function submitPaymentClaimAction(token: string, formData: FormData
 }
 
 export async function acceptClaimAction(claimId: string): Promise<ActionResult> {
-  return runUserAction("/invoices", async (userId) => {
-    await acceptClaim(userId, claimId);
+  return runWorkspaceAction("/invoices", async (workspaceId) => {
+    await acceptClaim(workspaceId, claimId);
   });
 }
 
 export async function rejectClaimAction(claimId: string): Promise<ActionResult> {
-  return runUserAction("/invoices", async (userId) => {
-    await rejectClaim(userId, claimId);
+  return runWorkspaceAction("/invoices", async (workspaceId) => {
+    await rejectClaim(workspaceId, claimId);
   });
 }

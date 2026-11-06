@@ -1,6 +1,7 @@
 import { eq } from "drizzle-orm";
 import { db } from "@/db/client";
-import { businessProfiles, invoices, paymentClaims, user } from "@/db/schema";
+import { businessProfiles, invoices, paymentClaims } from "@/db/schema";
+import { verifiedMemberEmails } from "@/features/workspaces/queries";
 import { renderClaimNotificationEmail } from "@/emails/claim-notification-email";
 import { resolveLocale } from "@/i18n/config";
 import { getAppUrl } from "@/lib/app-url";
@@ -9,14 +10,14 @@ import { formatDocDate } from "@/lib/dates";
 import { fromAddress, getEmailTransport, type EmailTransport } from "@/lib/email";
 import { formatMoney } from "@/lib/money";
 
-/** How long the public claim request waits for the owner's email before moving on without it. */
+/** How long the public claim request waits for the members' email before moving on without it. */
 export const CLAIM_NOTIFY_TIMEOUT_MS = 5000;
 
 /**
- * Tells the invoice's owner that a client reported a payment. Best effort: nothing is sent when
- * the owner's email is not verified or email is disabled, and any error is logged, never thrown,
+ * Tells the members of the invoice's workspace that a client reported a payment. Best effort: only
+ * members with a verified email get it, nothing is sent when email is disabled, and any error is logged, never thrown,
  * so a mail problem can never undo the claim. The wait is capped at `CLAIM_NOTIFY_TIMEOUT_MS`, so a
- * slow mail provider cannot stall the client's request. The language is the owner's default invoice language.
+ * slow mail provider cannot stall the client's request. The language is the workspace's default invoice language.
  */
 export async function notifyOwnerOfClaim(
   claimId: string,
@@ -43,20 +44,15 @@ async function sendClaimNotification(claimId: string, deps: { transport?: EmailT
     if (transport.kind === "disabled") return;
 
     const [row] = await db
-      .select({
-        claim: paymentClaims,
-        invoice: invoices,
-        ownerEmail: user.email,
-        ownerVerified: user.emailVerified,
-        language: businessProfiles.defaultLanguage,
-      })
+      .select({ claim: paymentClaims, invoice: invoices, language: businessProfiles.defaultLanguage })
       .from(paymentClaims)
       .innerJoin(invoices, eq(invoices.id, paymentClaims.invoiceId))
-      .innerJoin(user, eq(user.id, invoices.userId))
-      .leftJoin(businessProfiles, eq(businessProfiles.userId, invoices.userId))
+      .leftJoin(businessProfiles, eq(businessProfiles.workspaceId, invoices.workspaceId))
       .where(eq(paymentClaims.id, claimId))
       .limit(1);
-    if (!row || !row.ownerVerified) return;
+    if (!row) return;
+    const recipients = await verifiedMemberEmails(row.invoice.workspaceId);
+    if (recipients.length === 0) return;
 
     const language = resolveLocale(row.language);
     const currency = isCurrencyCode(row.invoice.currency) ? row.invoice.currency : "IDR";
@@ -69,8 +65,11 @@ async function sendClaimNotification(claimId: string, deps: { transport?: EmailT
       note: row.claim.note,
       url: `${getAppUrl()}/invoices/${row.invoice.id}`,
     });
-    await transport.send({ from: fromAddress("Invoice Maker"), to: [row.ownerEmail], subject, html, text });
+    // One email each, so members do not see each other's addresses.
+    for (const to of recipients) {
+      await transport.send({ from: fromAddress("Invoice Maker"), to: [to], subject, html, text });
+    }
   } catch (e) {
-    console.error("Could not notify the owner of a payment claim", e);
+    console.error("Could not notify the members of a payment claim", e);
   }
 }

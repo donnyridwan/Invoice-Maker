@@ -15,6 +15,7 @@ import {
   updateSchedule,
 } from "@/features/recurring/queries";
 import { runDueSchedules } from "@/features/recurring/run";
+import { addMemberByEmail, removeMember } from "@/features/workspaces/queries";
 import type { EmailTransport, OutgoingEmail } from "@/lib/email";
 import { addDays, todayInJakarta } from "@/lib/dates";
 import { NotFoundError, ValidationError } from "@/lib/errors";
@@ -86,7 +87,7 @@ const scheduleInput = (overrides: Record<string, unknown> = {}) => ({
 
 async function newSchedule(owner: Owner, input: Record<string, unknown> = {}, existing?: Awaited<ReturnType<typeof sourceInvoice>>) {
   const { invoice: source, client } = existing ?? (await sourceInvoice(owner.id));
-  return { schedule: await createSchedule(owner.id, source.id, scheduleInput(input)), source, client };
+  return { schedule: await createSchedule(owner.id, source.id, scheduleInput(input), owner.id), source, client };
 }
 
 async function generated(scheduleId: string) {
@@ -172,7 +173,7 @@ describe("runDueSchedules", () => {
     const owner = await setupOwner();
     const { schedule, source, client } = await newSchedule(owner);
     await testDb.update(clients).set({ name: "PT Maju Mundur" }).where(eq(clients.id, client.id));
-    await testDb.update(businessProfiles).set({ businessName: "Studio Baru" }).where(eq(businessProfiles.userId, owner.id));
+    await testDb.update(businessProfiles).set({ businessName: "Studio Baru" }).where(eq(businessProfiles.workspaceId, owner.id));
 
     await runDueSchedules(today, {});
     const [copy] = await generated(schedule.id);
@@ -220,7 +221,7 @@ describe("runDueSchedules", () => {
       .update(invoices)
       .set({ recurringScheduleId: schedule.id, issueDate: today })
       .where(eq(invoices.id, draft.id));
-    const [before] = await testDb.select().from(businessProfiles).where(eq(businessProfiles.userId, owner.id));
+    const [before] = await testDb.select().from(businessProfiles).where(eq(businessProfiles.workspaceId, owner.id));
 
     const result = await runDueSchedules(today, {});
     expect(result).toEqual({ processed: 1, created: 0, failed: 0, skipped: 0 });
@@ -228,7 +229,7 @@ describe("runDueSchedules", () => {
     const row = await scheduleRow(schedule.id);
     expect(row.runsDone).toBe(1);
     expect(row.nextRunOn > today).toBe(true);
-    const [after] = await testDb.select().from(businessProfiles).where(eq(businessProfiles.userId, owner.id));
+    const [after] = await testDb.select().from(businessProfiles).where(eq(businessProfiles.workspaceId, owner.id));
     expect(after.nextInvoiceNumber).toBe(before.nextInvoiceNumber);
     expect(source.id).not.toBe(draft.id);
   });
@@ -337,7 +338,7 @@ describe("runDueSchedules", () => {
     const { schedule } = await newSchedule(owner, { frequency: "weekly" });
     // 2 dates due; the profile row vanishes before the 2nd would be... simulate with a missing profile.
     await testDb.update(recurringSchedules).set({ nextRunOn: addDays(today, -7) }).where(eq(recurringSchedules.id, schedule.id));
-    await testDb.delete(businessProfiles).where(eq(businessProfiles.userId, owner.id));
+    await testDb.delete(businessProfiles).where(eq(businessProfiles.workspaceId, owner.id));
     const error = vi.spyOn(console, "error").mockImplementation(() => {});
     const result = await runDueSchedules(today, {});
     error.mockRestore();
@@ -427,7 +428,8 @@ describe("runDueSchedules with auto_email", () => {
     const result = await runDueSchedules(today, { transport, renderPdf, sendInvoiceEmail });
     error.mockRestore();
     expect(sendInvoiceEmail).toHaveBeenCalledTimes(1);
-    expect(sendInvoiceEmail.mock.calls[0][0]).toMatchObject({ id: owner.id, emailVerified: true });
+    expect(sendInvoiceEmail.mock.calls[0][0]).toBe(owner.id);
+    expect(sendInvoiceEmail.mock.calls[0][1]).toMatchObject({ id: owner.id, emailVerified: true });
     expect(result.created).toBe(1);
     expect((await generated(schedule.id))[0].status).toBe("draft");
     expect((await scheduleRow(schedule.id)).lastError).toBe("emailFailed");
@@ -534,6 +536,27 @@ describe("auto_email delivery is durable", () => {
     expect((await invoiceRow(copy.id)).emailPending).toBe(false);
     expect((await invoiceRow(copy.id)).status).toBe("draft");
     expect((await scheduleRow(schedule.id)).lastError).toBe("emailNotVerified");
+  });
+
+  it("sends from the member who set the schedule up, and keeps a draft once they left the workspace", async () => {
+    const owner = await setupOwner();
+    const finance = await createTestUser({ email: "fin@studio.test", emailVerified: true, workspace: false });
+    await addMemberByEmail(owner.id, owner.id, { email: finance.email });
+    const { schedule } = await newSchedule(owner, { delivery: "auto_email" });
+    // Saving the schedule makes the finance member its sender.
+    await updateSchedule(owner.id, schedule.id, scheduleInput({ delivery: "auto_email" }), finance.id);
+    const sendInvoiceEmail = vi.fn().mockResolvedValue(undefined);
+    await runDueSchedules(today, { transport: recordingTransport().transport, renderPdf, sendInvoiceEmail });
+    expect(sendInvoiceEmail.mock.calls[0][1]).toMatchObject({ id: finance.id, email: finance.email });
+
+    const later = await newSchedule(owner, { delivery: "auto_email" });
+    await updateSchedule(owner.id, later.schedule.id, scheduleInput({ delivery: "auto_email" }), finance.id);
+    await removeMember(owner.id, owner.id, finance.id);
+    const { transport, sent } = recordingTransport();
+    await runDueSchedules(today, { transport, renderPdf });
+    expect(sent.filter((e) => e.attachments)).toHaveLength(0);
+    expect((await generated(later.schedule.id))[0].status).toBe("draft");
+    expect((await scheduleRow(later.schedule.id)).lastError).toBe("senderMissing");
   });
 
   it("does not send a pending invoice that was sent or voided by hand, or whose schedule was stopped", async () => {

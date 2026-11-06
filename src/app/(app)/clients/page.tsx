@@ -8,16 +8,16 @@ import { PageHeader } from "@/components/ui/page-header";
 import { ClientTable } from "@/features/clients/client-table";
 import { listClients } from "@/features/clients/queries";
 import { firstParam } from "@/lib/search-params";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 export default async function ClientsPage({ searchParams }: PageProps<"/clients">) {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   const t = await getTranslations();
   const params = await searchParams;
   const q = firstParam(params.q)?.trim() ?? "";
   const archived = firstParam(params.tab) === "archived";
 
-  const found = await listClients(user.id, { search: q, includeArchived: archived });
+  const found = await listClients(workspaceId, { search: q, includeArchived: archived });
   const clients = archived ? found.filter((c) => c.archivedAt) : found;
 
   return (

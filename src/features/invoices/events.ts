@@ -38,12 +38,12 @@ export async function logEvent(
 }
 
 /** The invoice's activity log, newest first. Another user's (or a missing) invoice is NotFound. */
-export async function listEvents(userId: string, invoiceId: string): Promise<InvoiceEvent[]> {
+export async function listEvents(workspaceId: string, invoiceId: string): Promise<InvoiceEvent[]> {
   if (!UUID_RE.test(invoiceId)) throw new NotFoundError("Invoice not found");
   const [owned] = await db
     .select({ id: invoices.id })
     .from(invoices)
-    .where(and(eq(invoices.id, invoiceId), eq(invoices.userId, userId)))
+    .where(and(eq(invoices.id, invoiceId), eq(invoices.workspaceId, workspaceId)))
     .limit(1);
   if (!owned) throw new NotFoundError("Invoice not found");
   return db.select().from(invoiceEvents).where(eq(invoiceEvents.invoiceId, invoiceId)).orderBy(desc(invoiceEvents.createdAt));

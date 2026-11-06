@@ -31,7 +31,7 @@ const renderPdf = async () => PDF_BYTES;
 async function setupOwner(opts: { verified?: boolean } = {}) {
   const u = await createTestUser({ emailVerified: opts.verified ?? true, name: "Donny" });
   await ensureProfile(u.id, { businessName: "Studio Donny", email: "donny@example.test" });
-  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-" }).where(eq(businessProfiles.userId, u.id));
+  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-" }).where(eq(businessProfiles.workspaceId, u.id));
   return { id: u.id, email: u.email, emailVerified: opts.verified ?? true };
 }
 
@@ -91,7 +91,7 @@ describe("sendInvoiceEmail", () => {
     const inv = await draftInvoice(owner.id);
     const { transport, sent } = recordingTransport();
 
-    const errors = await fieldErrors(sendInvoiceEmail(owner, inv.id, validInput(), { transport, renderPdf }));
+    const errors = await fieldErrors(sendInvoiceEmail(owner.id, owner, inv.id, validInput(), { transport, renderPdf }));
 
     expect(errors).toEqual({ _form: ["emailNotVerified"] });
     expect(sent).toHaveLength(0);
@@ -103,7 +103,7 @@ describe("sendInvoiceEmail", () => {
     const inv = await draftInvoice(owner.id);
     const { transport, sent } = recordingTransport("disabled");
 
-    const errors = await fieldErrors(sendInvoiceEmail(owner, inv.id, validInput(), { transport, renderPdf }));
+    const errors = await fieldErrors(sendInvoiceEmail(owner.id, owner, inv.id, validInput(), { transport, renderPdf }));
 
     expect(errors).toEqual({ _form: ["emailDisabled"] });
     expect(sent).toHaveLength(0);
@@ -114,21 +114,21 @@ describe("sendInvoiceEmail", () => {
     const inv = await draftInvoice(owner.id);
     const { transport, sent } = recordingTransport();
 
-    const noTo = await fieldErrors(sendInvoiceEmail(owner, inv.id, validInput({ to: "" }), { transport, renderPdf }));
+    const noTo = await fieldErrors(sendInvoiceEmail(owner.id, owner, inv.id, validInput({ to: "" }), { transport, renderPdf }));
     expect(noTo?.to).toBeDefined();
     const badCc = await fieldErrors(
-      sendInvoiceEmail(owner, inv.id, validInput({ cc: ["bukan"] }), { transport, renderPdf }),
+      sendInvoiceEmail(owner.id, owner, inv.id, validInput({ cc: ["bukan"] }), { transport, renderPdf }),
     );
     expect(badCc?.cc).toEqual(["invalidEmail"]);
     const tooMany = await fieldErrors(
-      sendInvoiceEmail(owner, inv.id, validInput({ cc: Array.from({ length: 6 }, (_, i) => `c${i}@x.test`) }), {
+      sendInvoiceEmail(owner.id, owner, inv.id, validInput({ cc: Array.from({ length: 6 }, (_, i) => `c${i}@x.test`) }), {
         transport,
         renderPdf,
       }),
     );
     expect(tooMany?.cc).toEqual(["tooManyRecipients:5"]);
     const badSubject = await fieldErrors(
-      sendInvoiceEmail(owner, inv.id, validInput({ subject: "x".repeat(201), message: "y".repeat(5001) }), {
+      sendInvoiceEmail(owner.id, owner, inv.id, validInput({ subject: "x".repeat(201), message: "y".repeat(5001) }), {
         transport,
         renderPdf,
       }),
@@ -144,7 +144,7 @@ describe("sendInvoiceEmail", () => {
     const inv = await draftInvoice(owner.id);
     const { transport, sent } = recordingTransport();
 
-    await sendInvoiceEmail(owner, inv.id, validInput({ cc: ["akuntan@majujaya.test"] }), { transport, renderPdf });
+    await sendInvoiceEmail(owner.id, owner, inv.id, validInput({ cc: ["akuntan@majujaya.test"] }), { transport, renderPdf });
 
     expect(sent).toHaveLength(1);
     const [email] = sent;
@@ -178,7 +178,7 @@ describe("sendInvoiceEmail", () => {
     await markSent(owner.id, inv.id, "manual");
     const { transport, sent } = recordingTransport();
 
-    await sendInvoiceEmail(owner, inv.id, validInput(), { transport, renderPdf });
+    await sendInvoiceEmail(owner.id, owner, inv.id, validInput(), { transport, renderPdf });
 
     expect(sent).toHaveLength(1);
     expect((await getInvoice(owner.id, inv.id)).status).toBe("sent");
@@ -189,13 +189,13 @@ describe("sendInvoiceEmail", () => {
     const owner = await setupOwner();
     const noClient = await draftInvoice(owner.id, { withClient: false });
     const { transport, sent } = recordingTransport();
-    expect(await fieldErrors(sendInvoiceEmail(owner, noClient.id, validInput(), { transport, renderPdf }))).toEqual({
+    expect(await fieldErrors(sendInvoiceEmail(owner.id, owner, noClient.id, validInput(), { transport, renderPdf }))).toEqual({
       _form: ["clientRequired"],
     });
 
     const voided = await draftInvoice(owner.id);
     await voidInvoice(owner.id, voided.id);
-    expect(await fieldErrors(sendInvoiceEmail(owner, voided.id, validInput(), { transport, renderPdf }))).toEqual({
+    expect(await fieldErrors(sendInvoiceEmail(owner.id, owner, voided.id, validInput(), { transport, renderPdf }))).toEqual({
       _form: ["invalidTransition"],
     });
     expect(sent).toHaveLength(0);
@@ -207,7 +207,7 @@ describe("sendInvoiceEmail", () => {
     const inv = await draftInvoice(owner.id);
     const { transport, sent } = recordingTransport();
 
-    await expect(sendInvoiceEmail(other, inv.id, validInput(), { transport, renderPdf })).rejects.toBeInstanceOf(
+    await expect(sendInvoiceEmail(other.id, other, inv.id, validInput(), { transport, renderPdf })).rejects.toBeInstanceOf(
       NotFoundError,
     );
     expect(sent).toHaveLength(0);
@@ -226,7 +226,7 @@ describe("sendInvoiceEmail", () => {
       await seedSentEvents(inv.id, 50, new Date(Date.now() - 23 * 3600_000));
       const { transport, sent } = recordingTransport();
 
-      const errors = await fieldErrors(sendInvoiceEmail(owner, inv.id, validInput(), { transport, renderPdf }));
+      const errors = await fieldErrors(sendInvoiceEmail(owner.id, owner, inv.id, validInput(), { transport, renderPdf }));
 
       expect(errors).toEqual({ _form: ["rateLimited"] });
       expect(sent).toHaveLength(0);
@@ -244,9 +244,9 @@ describe("sendInvoiceEmail", () => {
       await seedSentEvents(foreign.id, 60, new Date());
       const { transport, sent } = recordingTransport();
 
-      await sendInvoiceEmail(owner, b.id, validInput(), { transport, renderPdf }); // the 50th
+      await sendInvoiceEmail(owner.id, owner, b.id, validInput(), { transport, renderPdf }); // the 50th
       expect(sent).toHaveLength(1);
-      expect(await fieldErrors(sendInvoiceEmail(owner, b.id, validInput(), { transport, renderPdf }))).toEqual({
+      expect(await fieldErrors(sendInvoiceEmail(owner.id, owner, b.id, validInput(), { transport, renderPdf }))).toEqual({
         _form: ["rateLimited"],
       });
     });
@@ -258,7 +258,7 @@ describe("sendInvoiceEmail", () => {
       const inv = await draftInvoice(owner.id);
       const { transport } = recordingTransport("resend", new Error("Resend is down"));
 
-      const errors = await fieldErrors(sendInvoiceEmail(owner, inv.id, validInput(), { transport, renderPdf }));
+      const errors = await fieldErrors(sendInvoiceEmail(owner.id, owner, inv.id, validInput(), { transport, renderPdf }));
 
       expect(errors).toEqual({ _form: ["emailFailed"] });
       expect((await getInvoice(owner.id, inv.id)).status).toBe("draft");
@@ -273,7 +273,7 @@ describe("sendInvoiceEmail", () => {
       const { transport, sent } = recordingTransport();
 
       const errors = await fieldErrors(
-        sendInvoiceEmail(owner, inv.id, validInput(), {
+        sendInvoiceEmail(owner.id, owner, inv.id, validInput(), {
           transport,
           renderPdf: async () => {
             throw new Error("Chromium crashed");

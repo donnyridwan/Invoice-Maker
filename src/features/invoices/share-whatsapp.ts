@@ -11,14 +11,14 @@ import { normalizeWhatsAppNumber, whatsAppMessage, whatsAppUrl } from "./whatsap
  * environment only (`APP_URL`), never from request headers.
  */
 export async function shareWhatsApp(
-  userId: string,
+  workspaceId: string,
   invoiceId: string,
   baseUrl: string = getAppUrl(),
 ): Promise<{ url: string }> {
-  const inv = await getInvoice(userId, invoiceId);
+  const inv = await getInvoice(workspaceId, invoiceId);
   assertSendable(inv);
   // Also rejects a void invoice and does the draft -> sent change plus the event.
-  await markSent(userId, invoiceId, "whatsapp");
+  await markSent(workspaceId, invoiceId, "whatsapp");
 
   const message = whatsAppMessage({ ...emailFacts(inv), url: `${baseUrl}/i/${inv.publicToken}` });
   return { url: whatsAppUrl(normalizeWhatsAppNumber(inv.clientSnapshot?.phone), message) };

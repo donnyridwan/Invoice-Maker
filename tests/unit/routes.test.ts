@@ -12,6 +12,7 @@ describe("protected routes", () => {
 
   it("cover the onboarding and payment account pages", () => {
     expect(isProtectedPath("/onboarding")).toBe(true);
+    expect(isProtectedPath("/waiting")).toBe(true);
     expect(isProtectedPath("/settings/payment-accounts")).toBe(true);
   });
 

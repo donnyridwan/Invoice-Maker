@@ -56,31 +56,31 @@ function newPublicToken(): string {
   return randomBytes(16).toString("base64url");
 }
 
-function ownedBy(userId: string, id: string) {
-  return and(eq(invoices.id, id), eq(invoices.userId, userId));
+function ownedBy(workspaceId: string, id: string) {
+  return and(eq(invoices.id, id), eq(invoices.workspaceId, workspaceId));
 }
 
-export async function findOwned(tx: Pick<Tx, "select">, userId: string, id: string, lock = false): Promise<Invoice> {
+export async function findOwned(tx: Pick<Tx, "select">, workspaceId: string, id: string, lock = false): Promise<Invoice> {
   if (!UUID_RE.test(id)) throw new NotFoundError("Invoice not found");
-  const query = tx.select().from(invoices).where(ownedBy(userId, id)).limit(1);
+  const query = tx.select().from(invoices).where(ownedBy(workspaceId, id)).limit(1);
   const [row] = await (lock ? query.for("update") : query);
   if (!row) throw new NotFoundError("Invoice not found");
   return row;
 }
 
-/** Locks the profile row; serialises number allocation per user. */
-async function lockProfile(tx: Tx, userId: string): Promise<BusinessProfile> {
+/** Locks the profile row; serialises number allocation per workspace. */
+async function lockProfile(tx: Tx, workspaceId: string): Promise<BusinessProfile> {
   const [profile] = await tx
     .select()
     .from(businessProfiles)
-    .where(eq(businessProfiles.userId, userId))
+    .where(eq(businessProfiles.workspaceId, workspaceId))
     .for("update")
     .limit(1);
   if (!profile) throw new NotFoundError("Business profile not found");
   return profile;
 }
 
-type NewInvoice = Omit<typeof invoices.$inferInsert, "userId" | "number" | "publicToken" | "issueDate">;
+type NewInvoice = Omit<typeof invoices.$inferInsert, "workspaceId" | "number" | "publicToken" | "issueDate">;
 
 /**
  * Inserts an invoice under the next free number and persists the advanced counter on the (already
@@ -90,7 +90,7 @@ type NewInvoice = Omit<typeof invoices.$inferInsert, "userId" | "number" | "publ
  */
 async function insertWithNextNumber(
   tx: Tx,
-  userId: string,
+  workspaceId: string,
   profile: BusinessProfile,
   issueDate: string,
   values: NewInvoice,
@@ -109,7 +109,7 @@ async function insertWithNextNumber(
     const [taken] = await tx
       .select({ id: invoices.id })
       .from(invoices)
-      .where(and(eq(invoices.userId, userId), eq(invoices.number, number)))
+      .where(and(eq(invoices.workspaceId, workspaceId), eq(invoices.number, number)))
       .limit(1);
     if (taken) continue;
 
@@ -117,14 +117,14 @@ async function insertWithNextNumber(
       const created = await tx.transaction(async (savepoint) => {
         const [row] = await savepoint
           .insert(invoices)
-          .values({ ...values, userId, number, issueDate, publicToken: newPublicToken() })
+          .values({ ...values, workspaceId, number, issueDate, publicToken: newPublicToken() })
           .returning();
         return row;
       });
       await tx
         .update(businessProfiles)
         .set({ nextInvoiceNumber: state.nextNumber, invoiceNumberYear: state.numberYear })
-        .where(eq(businessProfiles.userId, userId));
+        .where(eq(businessProfiles.workspaceId, workspaceId));
       return created;
     } catch (e) {
       // Only a taken number is worth another attempt; a run that was already generated is the caller's to handle.
@@ -135,20 +135,25 @@ async function insertWithNextNumber(
   throw new ValidationError({ _form: ["duplicateNumber"] });
 }
 
-export async function createDraftInvoice(userId: string, opts: { clientId?: string } = {}): Promise<Invoice> {
+/** A new draft with the workspace's defaults; `createdBy` is the member who made it. */
+export async function createDraftInvoice(
+  workspaceId: string,
+  opts: { clientId?: string; createdBy?: string } = {},
+): Promise<Invoice> {
   // Read everything that needs other connections before the transaction opens.
-  const client = opts.clientId ? await getClient(userId, opts.clientId) : null;
-  const defaultAccount = (await listPaymentAccounts(userId)).find((a) => a.isDefault);
+  const client = opts.clientId ? await getClient(workspaceId, opts.clientId) : null;
+  const defaultAccount = (await listPaymentAccounts(workspaceId)).find((a) => a.isDefault);
 
   return db.transaction(async (tx) => {
-    const profile = await lockProfile(tx, userId);
+    const profile = await lockProfile(tx, workspaceId);
     const issueDate = todayInJakarta();
     const currency = client?.defaultCurrency ?? profile.defaultCurrency;
     const template = (TEMPLATES as readonly string[]).includes(profile.defaultTemplate)
       ? (profile.defaultTemplate as Template)
       : DEFAULT_TEMPLATE;
     const fx = await fxForInvoice(currency, profile.baseCurrency, issueDate, tx);
-    const invoice = await insertWithNextNumber(tx, userId, profile, issueDate, {
+    const invoice = await insertWithNextNumber(tx, workspaceId, profile, issueDate, {
+      createdBy: opts.createdBy ?? null,
       clientId: client?.id ?? null,
       currency,
       fxRateToBase: fx?.rate ?? null,
@@ -169,8 +174,8 @@ export async function createDraftInvoice(userId: string, opts: { clientId?: stri
   });
 }
 
-export async function getInvoice(userId: string, id: string): Promise<InvoiceWithItems> {
-  const invoice = await findOwned(db, userId, id);
+export async function getInvoice(workspaceId: string, id: string): Promise<InvoiceWithItems> {
+  const invoice = await findOwned(db, workspaceId, id);
   const items = await db
     .select()
     .from(invoiceItems)
@@ -215,7 +220,7 @@ export async function getInvoiceForPrint(id: string): Promise<InvoiceWithItems |
 }
 
 export async function saveInvoiceDraft(
-  userId: string,
+  workspaceId: string,
   id: string,
   input: unknown,
 ): Promise<{ savedAt: string; totals: { subtotalMinor: number; discountMinor: number; totalMinor: number } }> {
@@ -225,7 +230,7 @@ export async function saveInvoiceDraft(
 
   try {
     return await db.transaction(async (tx) => {
-      const existing = await findOwned(tx, userId, id, true);
+      const existing = await findOwned(tx, workspaceId, id, true);
       if (LOCKED_STATUSES.has(existing.status)) throw new ValidationError({ _form: ["invoiceLocked"] });
 
       // Ownership of every referenced record, before anything is written.
@@ -234,7 +239,7 @@ export async function saveInvoiceDraft(
         const [client] = await tx
           .select()
           .from(clients)
-          .where(and(eq(clients.id, data.clientId), eq(clients.userId, userId)))
+          .where(and(eq(clients.id, data.clientId), eq(clients.workspaceId, workspaceId)))
           .limit(1);
         if (!client) throw new NotFoundError("Client not found");
         clientSnapshot = clientSnapshotFrom(client);
@@ -245,7 +250,7 @@ export async function saveInvoiceDraft(
         const accounts = await tx
           .select()
           .from(paymentAccounts)
-          .where(and(eq(paymentAccounts.userId, userId), inArray(paymentAccounts.id, data.paymentAccountIds)));
+          .where(and(eq(paymentAccounts.workspaceId, workspaceId), inArray(paymentAccounts.id, data.paymentAccountIds)));
         if (accounts.length !== data.paymentAccountIds.length) throw new NotFoundError("Payment account not found");
         const byId = new Map(accounts.map((a) => [a.id, a]));
         accountSnapshots = data.paymentAccountIds.map((accountId) => paymentAccountSnapshotFrom(byId.get(accountId)!));
@@ -254,14 +259,14 @@ export async function saveInvoiceDraft(
       const [clash] = await tx
         .select({ id: invoices.id })
         .from(invoices)
-        .where(and(eq(invoices.userId, userId), eq(invoices.number, data.number)))
+        .where(and(eq(invoices.workspaceId, workspaceId), eq(invoices.number, data.number)))
         .limit(1);
       if (clash && clash.id !== id) throw new ValidationError({ number: ["duplicateNumber"] });
 
       const [profile] = await tx
         .select()
         .from(businessProfiles)
-        .where(eq(businessProfiles.userId, userId))
+        .where(eq(businessProfiles.workspaceId, workspaceId))
         .limit(1);
       if (!profile) throw new NotFoundError("Business profile not found");
 
@@ -292,7 +297,7 @@ export async function saveInvoiceDraft(
           ...summary,
           updatedAt: savedAt,
         })
-        .where(ownedBy(userId, id));
+        .where(ownedBy(workspaceId, id));
 
       await tx.delete(invoiceItems).where(eq(invoiceItems.invoiceId, id));
       if (data.items.length > 0) {
@@ -350,17 +355,19 @@ export type InvoiceCopySnapshots = {
  */
 export async function insertInvoiceCopy(
   tx: Tx,
-  userId: string,
+  workspaceId: string,
   source: Invoice,
   items: InvoiceItem[],
   opts: {
     issueDate: string;
+    /** The member the copy is credited to (the one duplicating, or the schedule's creator). */
+    createdBy: string | null;
     snapshots?: (profile: BusinessProfile) => InvoiceCopySnapshots;
     recurringScheduleId?: string;
     event: { type: "duplicated" | "recurring_generated"; meta: Record<string, unknown> };
   },
 ): Promise<Invoice> {
-  const profile = await lockProfile(tx, userId);
+  const profile = await lockProfile(tx, workspaceId);
   const { issueDate } = opts;
   const termDays = Math.max(0, daysBetween(source.issueDate, source.dueDate));
   const fx = await fxForInvoice(source.currency, profile.baseCurrency, issueDate, tx);
@@ -369,8 +376,9 @@ export async function insertInvoiceCopy(
     businessSnapshot: source.businessSnapshot,
     paymentAccountsSnapshot: source.paymentAccountsSnapshot,
   };
-  const copy = await insertWithNextNumber(tx, userId, profile, issueDate, {
+  const copy = await insertWithNextNumber(tx, workspaceId, profile, issueDate, {
     status: "draft",
+    createdBy: opts.createdBy,
     clientId: source.clientId,
     currency: source.currency,
     fxRateToBase: fx?.rate ?? null,
@@ -413,16 +421,17 @@ export async function insertInvoiceCopy(
   return copy;
 }
 
-export async function duplicateInvoice(userId: string, id: string): Promise<Invoice> {
+export async function duplicateInvoice(workspaceId: string, id: string, createdBy: string | null = null): Promise<Invoice> {
   return db.transaction(async (tx) => {
-    const source = await findOwned(tx, userId, id);
+    const source = await findOwned(tx, workspaceId, id);
     const items = await tx
       .select()
       .from(invoiceItems)
       .where(eq(invoiceItems.invoiceId, source.id))
       .orderBy(asc(invoiceItems.position));
-    return insertInvoiceCopy(tx, userId, source, items, {
+    return insertInvoiceCopy(tx, workspaceId, source, items, {
       issueDate: todayInJakarta(),
+      createdBy,
       event: { type: "duplicated", meta: { sourceInvoiceId: source.id } },
     });
   });
@@ -432,13 +441,13 @@ export async function duplicateInvoice(userId: string, id: string): Promise<Invo
  * Deletes a draft or a voided invoice for good (its items, events and claims cascade; a recurring
  * schedule made from it keeps running without its source). Sent and paid invoices are kept.
  */
-export async function deleteInvoice(userId: string, id: string): Promise<void> {
+export async function deleteInvoice(workspaceId: string, id: string): Promise<void> {
   await db.transaction(async (tx) => {
-    const invoice = await findOwned(tx, userId, id, true);
+    const invoice = await findOwned(tx, workspaceId, id, true);
     if (invoice.status !== "draft" && invoice.status !== "void") {
       throw new ValidationError({ _form: ["onlyDraftDeletable"] });
     }
-    await tx.delete(invoices).where(ownedBy(userId, id));
+    await tx.delete(invoices).where(ownedBy(workspaceId, id));
   });
 }
 
@@ -454,10 +463,10 @@ const TAB_STATUSES: Record<Exclude<InvoiceTab, "all">, Invoice["status"][]> = {
 };
 
 export async function listInvoices(
-  userId: string,
+  workspaceId: string,
   { search, tab = "all", limit }: { search?: string; tab?: InvoiceTab; limit?: number } = {},
 ): Promise<Invoice[]> {
-  const conditions = [eq(invoices.userId, userId)];
+  const conditions = [eq(invoices.workspaceId, workspaceId)];
   if (tab !== "all") conditions.push(inArray(invoices.status, TAB_STATUSES[tab]));
   const term = search?.trim();
   if (term) {
@@ -473,11 +482,11 @@ export async function listInvoices(
 }
 
 /** How many invoices each tab of the list holds, in one query. */
-export async function countInvoicesByTab(userId: string): Promise<Record<InvoiceTab, number>> {
+export async function countInvoicesByTab(workspaceId: string): Promise<Record<InvoiceTab, number>> {
   const rows = await db
     .select({ status: invoices.status, n: count() })
     .from(invoices)
-    .where(eq(invoices.userId, userId))
+    .where(eq(invoices.workspaceId, workspaceId))
     .groupBy(invoices.status);
   const byStatus = new Map(rows.map((row) => [row.status, row.n]));
   const sum = (statuses: Invoice["status"][]) => statuses.reduce((total, status) => total + (byStatus.get(status) ?? 0), 0);

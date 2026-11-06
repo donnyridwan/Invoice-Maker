@@ -7,7 +7,7 @@ async function insertInvoice(userId: string, overrides: Partial<typeof invoices.
   const [row] = await testDb
     .insert(invoices)
     .values({
-      userId,
+      workspaceId: userId,
       number: "INV-2026-001",
       currency: "IDR",
       language: "id",
@@ -69,7 +69,7 @@ describe("invoice schema", () => {
 
   it("sets clientId to null when the client is deleted", async () => {
     const owner = await createTestUser();
-    const [client] = await testDb.insert(clients).values({ userId: owner.id, name: "Budi" }).returning();
+    const [client] = await testDb.insert(clients).values({ workspaceId: owner.id, name: "Budi" }).returning();
     const invoice = await insertInvoice(owner.id, { clientId: client.id });
     expect(invoice.clientId).toBe(client.id);
 
@@ -81,8 +81,8 @@ describe("invoice schema", () => {
 
   it("adds a nullable invoiceNumberYear to business profiles", async () => {
     const owner = await createTestUser();
-    await testDb.insert(businessProfiles).values({ userId: owner.id });
-    const [profile] = await testDb.select().from(businessProfiles).where(eq(businessProfiles.userId, owner.id));
+    await testDb.insert(businessProfiles).values({ workspaceId: owner.id });
+    const [profile] = await testDb.select().from(businessProfiles).where(eq(businessProfiles.workspaceId, owner.id));
     expect(profile.invoiceNumberYear).toBeNull();
   });
 });

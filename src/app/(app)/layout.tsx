@@ -2,12 +2,12 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { AppShell } from "@/components/app-shell/app-shell";
 import { isOnboardingComplete } from "@/features/profile/queries";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 export default async function AppLayout({ children }: LayoutProps<"/">) {
-  const user = await requireUser();
+  const { user, workspace, workspaces } = await requireWorkspace();
 
-  if (!(await isOnboardingComplete(user))) {
+  if (!(await isOnboardingComplete(workspace.id))) {
     // x-pathname is set by the proxy; without it we cannot tell where we are, so don't redirect.
     const pathname = (await headers()).get("x-pathname");
     if (pathname && !pathname.startsWith("/onboarding")) {
@@ -15,5 +15,9 @@ export default async function AppLayout({ children }: LayoutProps<"/">) {
     }
   }
 
-  return <AppShell user={user}>{children}</AppShell>;
+  return (
+    <AppShell user={user} workspace={workspace} workspaces={workspaces}>
+      {children}
+    </AppShell>
+  );
 }

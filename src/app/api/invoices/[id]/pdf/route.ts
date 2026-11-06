@@ -3,17 +3,17 @@ import { getInvoice } from "@/features/invoices/queries";
 import { NotFoundError } from "@/lib/errors";
 import { renderInvoicePdf } from "@/lib/pdf/render";
 import { pdfResponse } from "@/lib/pdf/response";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 export const maxDuration = 30;
 export const dynamic = "force-dynamic";
 
 /** Owner download: the invoice as a PDF, in any status. Opening it changes nothing. */
 export async function GET(_request: Request, { params }: RouteContext<"/api/invoices/[id]/pdf">) {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   const { id } = await params;
 
-  const invoice = await getInvoice(user.id, id).catch((error) => {
+  const invoice = await getInvoice(workspaceId, id).catch((error) => {
     if (error instanceof NotFoundError) notFound();
     throw error;
   });

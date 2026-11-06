@@ -1,7 +1,7 @@
-import { and, asc, eq, inArray, isNull, ne } from "drizzle-orm";
+import { and, asc, eq, inArray, isNull, notExists, sql } from "drizzle-orm";
 import { z } from "zod";
 import { db } from "@/db/client";
-import { invoiceItems, invoices } from "@/db/schema";
+import { invoiceItems, invoices, workspaceMembers } from "@/db/schema";
 import { isIsoDate, startOfJakartaDay } from "@/lib/dates";
 import { ValidationError } from "@/lib/errors";
 import { isLinkPreviewBot } from "@/lib/link-preview-bots";
@@ -41,7 +41,7 @@ export function assertSendable(inv: InvoiceWithItems): void {
  * `changes` plus the event in one transaction.
  */
 async function transition(
-  userId: string,
+  workspaceId: string,
   id: string,
   from: readonly Status[],
   to: Status,
@@ -49,7 +49,7 @@ async function transition(
   event: { type: InvoiceEventType; meta?: Record<string, unknown> },
 ): Promise<Invoice> {
   return db.transaction(async (tx) => {
-    const current = await findOwned(tx, userId, id, true);
+    const current = await findOwned(tx, workspaceId, id, true);
     if (!from.includes(current.status)) throw invalidTransition();
     return applyTransition(tx, current, to, changes, event);
   });
@@ -65,7 +65,7 @@ async function applyTransition(
   const [updated] = await tx
     .update(invoices)
     .set({ ...changes, status: to, updatedAt: new Date() })
-    .where(and(eq(invoices.id, current.id), eq(invoices.userId, current.userId)))
+    .where(and(eq(invoices.id, current.id), eq(invoices.workspaceId, current.workspaceId)))
     .returning();
   await logEvent(tx, current.id, event.type, event.meta);
   return updated;
@@ -75,9 +75,9 @@ async function applyTransition(
  * Sends a draft (draft → sent, `sentAt`, event `sent` with the channel). On an invoice that was
  * already sent (or paid) nothing changes except the share event for the channel, if it has one.
  */
-export async function markSent(userId: string, id: string, channel: ShareChannel): Promise<Invoice> {
+export async function markSent(workspaceId: string, id: string, channel: ShareChannel): Promise<Invoice> {
   return db.transaction(async (tx) => {
-    const current = await findOwned(tx, userId, id, true);
+    const current = await findOwned(tx, workspaceId, id, true);
 
     if (current.status === "draft") {
       const items = await tx
@@ -105,13 +105,13 @@ const markPaidSchema = z.object({
  * still pending are settled with it: the most recent is accepted, any others rejected.
  */
 export async function markPaid(
-  userId: string,
+  workspaceId: string,
   id: string,
   input: { paidOn: string; note?: string },
 ): Promise<Invoice> {
   const { paidOn, note } = parseInput(markPaidSchema, input);
   return db.transaction(async (tx) => {
-    const current = await findOwned(tx, userId, id, true);
+    const current = await findOwned(tx, workspaceId, id, true);
     if (current.status !== "sent" && current.status !== "payment_claimed") throw invalidTransition();
     const updated = await applyTransition(
       tx,
@@ -126,17 +126,17 @@ export async function markPaid(
 }
 
 /** paid → sent again, clearing the payment. */
-export async function unmarkPaid(userId: string, id: string): Promise<Invoice> {
-  return transition(userId, id, ["paid"], "sent", { paidAt: null, paidNote: null }, { type: "unmarked_paid" });
+export async function unmarkPaid(workspaceId: string, id: string): Promise<Invoice> {
+  return transition(workspaceId, id, ["paid"], "sent", { paidAt: null, paidNote: null }, { type: "unmarked_paid" });
 }
 
 /**
  * draft / sent / payment_claimed → void. A paid invoice has to be unmarked first. Claims still
  * pending are rejected in the same transaction: the invoice no longer takes payments.
  */
-export async function voidInvoice(userId: string, id: string): Promise<Invoice> {
+export async function voidInvoice(workspaceId: string, id: string): Promise<Invoice> {
   return db.transaction(async (tx) => {
-    const current = await findOwned(tx, userId, id, true);
+    const current = await findOwned(tx, workspaceId, id, true);
     if (current.status !== "draft" && current.status !== "sent" && current.status !== "payment_claimed") {
       throw invalidTransition();
     }
@@ -147,9 +147,9 @@ export async function voidInvoice(userId: string, id: string): Promise<Invoice> 
 }
 
 /**
- * Called when the public page is opened. The first view by someone other than the owner stamps
+ * Called when the public page is opened. The first view by someone outside the invoice's workspace stamps
  * `firstViewedAt` and logs `viewed`; the conditional UPDATE makes that happen exactly once even
- * for concurrent visits. Anything else (draft, void, unknown token, the owner, a link-preview bot
+ * for concurrent visits. Anything else (draft, void, unknown token, a member of the workspace, a link-preview bot
  * recognised by its `userAgent`) is a no-op.
  */
 export async function recordPublicView(
@@ -167,7 +167,15 @@ export async function recordPublicView(
           eq(invoices.publicToken, token),
           inArray(invoices.status, VIEWABLE_STATUSES),
           isNull(invoices.firstViewedAt),
-          viewerUserId ? ne(invoices.userId, viewerUserId) : undefined,
+          // A member of the invoice's own workspace opening the link is not the client viewing it.
+          viewerUserId
+            ? notExists(
+                tx
+                  .select({ one: sql`1` })
+                  .from(workspaceMembers)
+                  .where(and(eq(workspaceMembers.workspaceId, invoices.workspaceId), eq(workspaceMembers.userId, viewerUserId))),
+              )
+            : undefined,
         ),
       )
       .returning({ id: invoices.id });

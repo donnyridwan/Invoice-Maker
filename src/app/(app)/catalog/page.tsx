@@ -6,18 +6,18 @@ import { CatalogTable, NewCatalogItemButton } from "@/features/catalog/catalog-t
 import { listCatalogItems } from "@/features/catalog/queries";
 import { getProfile } from "@/features/profile/queries";
 import { firstParam } from "@/lib/search-params";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 export default async function CatalogPage({ searchParams }: PageProps<"/catalog">) {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   const t = await getTranslations();
   const params = await searchParams;
   const q = firstParam(params.q)?.trim() ?? "";
   const archived = firstParam(params.tab) === "archived";
 
   const [profile, found] = await Promise.all([
-    getProfile(user.id),
-    listCatalogItems(user.id, { search: q, includeArchived: archived }),
+    getProfile(workspaceId),
+    listCatalogItems(workspaceId, { search: q, includeArchived: archived }),
   ]);
   const items = archived ? found.filter((i) => i.archivedAt) : found;
   const defaultCurrency = profile.defaultCurrency;

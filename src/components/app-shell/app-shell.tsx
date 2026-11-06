@@ -7,6 +7,8 @@ import { Menu, Search } from "lucide-react";
 import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogOverlay, DialogPortal, DialogTitle } from "@/components/ui/dialog";
+import type { WorkspaceSummary } from "@/features/workspaces/queries";
+import { WorkspaceSwitcher } from "@/features/workspaces/workspace-switcher";
 import type { SessionUser } from "@/lib/session";
 import { LocaleSwitcher } from "./locale-switcher";
 import { LogoMark, Sidebar } from "./sidebar";
@@ -29,7 +31,17 @@ function GlobalSearch() {
   );
 }
 
-export function AppShell({ user, children }: { user: SessionUser; children: ReactNode }) {
+export function AppShell({
+  user,
+  workspace,
+  workspaces,
+  children,
+}: {
+  user: SessionUser;
+  workspace: WorkspaceSummary;
+  workspaces: WorkspaceSummary[];
+  children: ReactNode;
+}) {
   const t = useTranslations();
   const pathname = usePathname();
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -57,7 +69,7 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
       {/* Desktop: a narrow icon rail */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-[70px] flex-col border-r border-border bg-white md:flex">
         <div className="min-h-0 flex-1 overflow-y-auto">
-          <Sidebar rail />
+          <Sidebar rail workspace={<WorkspaceSwitcher compact workspace={workspace} workspaces={workspaces} />} />
         </div>
         <div className="flex justify-center py-4">
           <UserMenu user={user} compact />
@@ -89,7 +101,10 @@ export function AppShell({ user, children }: { user: SessionUser; children: Reac
           >
             <DialogTitle className="sr-only">{t("nav.mainMenu")}</DialogTitle>
             <div className="min-h-0 flex-1 overflow-y-auto">
-              <Sidebar onNavigate={() => setDrawerOpen(false)} />
+              <Sidebar
+                onNavigate={() => setDrawerOpen(false)}
+                workspace={<WorkspaceSwitcher workspace={workspace} workspaces={workspaces} />}
+              />
             </div>
             <div className="p-3">
               <UserMenu user={user} />

@@ -8,14 +8,14 @@ import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { ClientArchiveButton, ClientForm } from "@/features/clients/client-form";
 import { getClient } from "@/features/clients/queries";
 import { NotFoundError } from "@/lib/errors";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 export default async function ClientPage({ params }: PageProps<"/clients/[id]">) {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   const t = await getTranslations();
   const { id } = await params;
 
-  const client = await getClient(user.id, id).catch((error) => {
+  const client = await getClient(workspaceId, id).catch((error) => {
     if (error instanceof NotFoundError) notFound();
     throw error;
   });

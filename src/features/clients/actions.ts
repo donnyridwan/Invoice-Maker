@@ -2,17 +2,17 @@
 
 import { revalidatePath } from "next/cache";
 import { toActionError, type ActionResult } from "@/lib/action-result";
-import { runUserAction } from "@/lib/run-user-action";
-import { requireUser } from "@/lib/session";
+import { runWorkspaceAction } from "@/lib/run-workspace-action";
+import { requireWorkspace } from "@/lib/workspace";
 import { archiveClient, createClient, restoreClient, updateClient } from "./queries";
 
 const PATH = "/clients";
 
 /** Creates (id null) or updates a client. `input` is validated by the zod schema. */
 export async function saveClientAction(id: string | null, input: unknown): Promise<ActionResult<{ id: string }>> {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   try {
-    const saved = id ? await updateClient(user.id, id, input) : await createClient(user.id, input);
+    const saved = id ? await updateClient(workspaceId, id, input) : await createClient(workspaceId, input);
     revalidatePath(PATH);
     return { ok: true, data: { id: saved.id } };
   } catch (e) {
@@ -42,9 +42,9 @@ export type InlineClient = {
 
 /** Quick "new client" from the invoice editor: the short form, returning what the editor needs. */
 export async function createClientInlineAction(values: InlineClientValues): Promise<ActionResult<InlineClient>> {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   try {
-    const created = await createClient(user.id, values);
+    const created = await createClient(workspaceId, values);
     revalidatePath(PATH);
     return {
       ok: true,
@@ -66,9 +66,9 @@ export async function createClientInlineAction(values: InlineClientValues): Prom
 }
 
 export async function archiveClientAction(id: string): Promise<ActionResult> {
-  return runUserAction(PATH, (userId) => archiveClient(userId, id));
+  return runWorkspaceAction(PATH, (workspaceId) => archiveClient(workspaceId, id));
 }
 
 export async function restoreClientAction(id: string): Promise<ActionResult> {
-  return runUserAction(PATH, (userId) => restoreClient(userId, id));
+  return runWorkspaceAction(PATH, (workspaceId) => restoreClient(workspaceId, id));
 }

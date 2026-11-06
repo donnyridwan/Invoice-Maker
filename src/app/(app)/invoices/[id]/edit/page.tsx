@@ -20,7 +20,7 @@ import { resolveLocale } from "@/i18n/config";
 import { isEmailEnabled } from "@/lib/email";
 import { todayInJakarta } from "@/lib/dates";
 import { NotFoundError } from "@/lib/errors";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 function toClientOption(client: Client): ClientOption {
   return {
@@ -36,11 +36,11 @@ function toClientOption(client: Client): ClientOption {
 export const maxDuration = 30;
 
 export default async function EditInvoicePage({ params }: PageProps<"/invoices/[id]/edit">) {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   const { id } = await params;
   const locale = resolveLocale(await getLocale());
 
-  const invoice = await getInvoice(user.id, id).catch((error) => {
+  const invoice = await getInvoice(workspaceId, id).catch((error) => {
     if (error instanceof NotFoundError) notFound();
     throw error;
   });
@@ -49,17 +49,17 @@ export default async function EditInvoicePage({ params }: PageProps<"/invoices/[
   if (invoice.status === "paid" || invoice.status === "void") redirect(`/invoices/${invoice.id}`);
 
   const [profile, activeClients, allAccounts, catalogItems, schedule] = await Promise.all([
-    getProfile(user.id),
-    listClients(user.id),
-    listPaymentAccounts(user.id, { includeArchived: true }),
-    listCatalogItems(user.id),
-    getScheduleForInvoice(user.id, invoice.id),
+    getProfile(workspaceId),
+    listClients(workspaceId),
+    listPaymentAccounts(workspaceId, { includeArchived: true }),
+    listCatalogItems(workspaceId),
+    getScheduleForInvoice(workspaceId, invoice.id),
   ]);
 
   // The invoice's own client stays selectable even after it was archived.
   const clients = activeClients.map(toClientOption);
   if (invoice.clientId && !clients.some((client) => client.id === invoice.clientId)) {
-    const own = await getClient(user.id, invoice.clientId).catch(() => null);
+    const own = await getClient(workspaceId, invoice.clientId).catch(() => null);
     if (own) clients.push(toClientOption(own));
   }
 

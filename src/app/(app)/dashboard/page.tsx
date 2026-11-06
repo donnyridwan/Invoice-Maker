@@ -8,15 +8,15 @@ import { SummaryCards } from "@/features/dashboard/summary-cards";
 import { NewInvoiceButton } from "@/features/invoices/new-invoice-button";
 import { listInvoices } from "@/features/invoices/queries";
 import { todayInJakarta } from "@/lib/dates";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 export default async function DashboardPage() {
-  const user = await requireUser();
+  const { user, workspaceId } = await requireWorkspace();
   const t = await getTranslations("dashboard");
   const today = todayInJakarta();
   const [summary, recent] = await Promise.all([
-    getDashboardSummary(user.id, today),
-    listInvoices(user.id, { limit: 5 }),
+    getDashboardSummary(workspaceId, today),
+    listInvoices(workspaceId, { limit: 5 }),
   ]);
   const firstName = user.name.trim().split(/\s+/)[0] || user.email;
 

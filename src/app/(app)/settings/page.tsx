@@ -7,12 +7,12 @@ import { VerifyEmailCard } from "@/features/profile/verify-email-card";
 import { ProfileForm } from "@/features/profile/profile-form";
 import { getProfile } from "@/features/profile/queries";
 import { isEmailEnabled } from "@/lib/email";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 export default async function SettingsPage() {
-  const user = await requireUser();
+  const { user, workspaceId } = await requireWorkspace();
   const t = await getTranslations("settings");
-  const profile = await getProfile(user.id);
+  const profile = await getProfile(workspaceId);
 
   const sections = [
     { id: "profile", label: t("businessProfile"), content: <ProfileForm profile={profile} /> },

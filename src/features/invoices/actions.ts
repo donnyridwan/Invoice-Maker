@@ -6,8 +6,8 @@ import { notFound, redirect } from "next/navigation";
 import { toActionError, type ActionResult } from "@/lib/action-result";
 import { getAppUrl } from "@/lib/app-url";
 import { NotFoundError } from "@/lib/errors";
-import { runUserAction } from "@/lib/run-user-action";
-import { requireUser } from "@/lib/session";
+import { runWorkspaceAction } from "@/lib/run-workspace-action";
+import { requireWorkspace } from "@/lib/workspace";
 import { markPaid, markSent, unmarkPaid, voidInvoice } from "./lifecycle";
 import { shareWhatsApp } from "./share-whatsapp";
 import { getInvoiceEmailDefaults, sendInvoiceEmail, type SendInvoiceEmailInput } from "./send-email";
@@ -21,10 +21,10 @@ function revalidateInvoicePages(): void {
 }
 
 /** Runs a lifecycle change for the signed-in user and revalidates the pages that show the status. */
-async function runLifecycle<T>(action: (userId: string) => Promise<T>): Promise<ActionResult<T>> {
-  const user = await requireUser();
+async function runLifecycle<T>(action: (workspaceId: string) => Promise<T>): Promise<ActionResult<T>> {
+  const { workspaceId } = await requireWorkspace();
   try {
-    const data = await action(user.id);
+    const data = await action(workspaceId);
     revalidateInvoicePages();
     return { ok: true, data };
   } catch (e) {
@@ -36,13 +36,13 @@ const PATH = "/invoices";
 
 /** Creates a draft (optionally for `clientId`) and opens it in the editor. */
 export async function createInvoiceAction(formData: FormData): Promise<void> {
-  const user = await requireUser();
+  const { user, workspaceId } = await requireWorkspace();
   const raw = formData.get("clientId");
   const clientId = typeof raw === "string" && raw !== "" ? raw : undefined;
 
   let id: string;
   try {
-    id = (await createDraftInvoice(user.id, { clientId })).id;
+    id = (await createDraftInvoice(workspaceId, { clientId, createdBy: user.id })).id;
   } catch (e) {
     if (e instanceof NotFoundError) notFound();
     throw e;
@@ -55,11 +55,11 @@ export async function saveInvoiceDraftAction(
   id: string,
   input: InvoiceDraftInput,
 ): Promise<ActionResult<{ savedAt: string }>> {
-  const user = await requireUser();
+  const { workspaceId } = await requireWorkspace();
   try {
     // No revalidatePath: autosave must not re-render the edit page on every save, and the (dynamic)
     // invoice list reads fresh data on each visit.
-    const { savedAt } = await saveInvoiceDraft(user.id, id, input);
+    const { savedAt } = await saveInvoiceDraft(workspaceId, id, input);
     return { ok: true, data: { savedAt } };
   } catch (e) {
     return toActionError(e);
@@ -67,9 +67,9 @@ export async function saveInvoiceDraftAction(
 }
 
 export async function duplicateInvoiceAction(id: string): Promise<ActionResult<{ id: string }>> {
-  const user = await requireUser();
+  const { user, workspaceId } = await requireWorkspace();
   try {
-    const copy = await duplicateInvoice(user.id, id);
+    const copy = await duplicateInvoice(workspaceId, id, user.id);
     revalidatePath(PATH);
     return { ok: true, data: { id: copy.id } };
   } catch (e) {
@@ -78,13 +78,13 @@ export async function duplicateInvoiceAction(id: string): Promise<ActionResult<{
 }
 
 export async function deleteInvoiceAction(id: string): Promise<ActionResult> {
-  return runUserAction(PATH, (userId) => deleteInvoice(userId, id));
+  return runWorkspaceAction(PATH, (workspaceId) => deleteInvoice(workspaceId, id));
 }
 
 /** The user hands the invoice over by other means: draft → sent, no link is produced. */
 export async function markSentAction(id: string): Promise<ActionResult> {
-  return runLifecycle(async (userId) => {
-    await markSent(userId, id, "manual");
+  return runLifecycle(async (workspaceId) => {
+    await markSent(workspaceId, id, "manual");
   });
 }
 
@@ -94,8 +94,8 @@ export async function markSentAction(id: string): Promise<ActionResult> {
  */
 export async function copyLinkAction(id: string): Promise<ActionResult<{ url: string }>> {
   const base = getAppUrl(await headers());
-  return runLifecycle(async (userId) => {
-    const invoice = await markSent(userId, id, "link");
+  return runLifecycle(async (workspaceId) => {
+    const invoice = await markSent(workspaceId, id, "link");
     return { url: `${base}/i/${invoice.publicToken}` };
   });
 }
@@ -105,27 +105,27 @@ export async function copyLinkAction(id: string): Promise<ActionResult<{ url: st
  * (client's number, prefilled message with the public link) for the browser to open.
  */
 export async function shareWhatsAppAction(id: string): Promise<ActionResult<{ url: string }>> {
-  return runLifecycle((userId) => shareWhatsApp(userId, id));
+  return runLifecycle((workspaceId) => shareWhatsApp(workspaceId, id));
 }
 
 export async function markPaidAction(
   id: string,
   input: { paidOn: string; note?: string },
 ): Promise<ActionResult> {
-  return runLifecycle(async (userId) => {
-    await markPaid(userId, id, input);
+  return runLifecycle(async (workspaceId) => {
+    await markPaid(workspaceId, id, input);
   });
 }
 
 export async function unmarkPaidAction(id: string): Promise<ActionResult> {
-  return runLifecycle(async (userId) => {
-    await unmarkPaid(userId, id);
+  return runLifecycle(async (workspaceId) => {
+    await unmarkPaid(workspaceId, id);
   });
 }
 
 export async function voidInvoiceAction(id: string): Promise<ActionResult> {
-  return runLifecycle(async (userId) => {
-    await voidInvoice(userId, id);
+  return runLifecycle(async (workspaceId) => {
+    await voidInvoice(workspaceId, id);
   });
 }
 
@@ -134,9 +134,9 @@ export async function voidInvoiceAction(id: string): Promise<ActionResult> {
  * verified flag comes from the session, and `sendInvoiceEmail` enforces every prerequisite.
  */
 export async function sendInvoiceEmailAction(id: string, input: SendInvoiceEmailInput): Promise<ActionResult> {
-  const user = await requireUser();
+  const { user, workspaceId } = await requireWorkspace();
   try {
-    await sendInvoiceEmail(user, id, input);
+    await sendInvoiceEmail(workspaceId, user, id, input);
     revalidateInvoicePages();
     return { ok: true, data: undefined };
   } catch (e) {
@@ -155,9 +155,9 @@ export type EmailDialogData = {
 
 /** Everything the email dialog needs, read fresh when it opens (after the editor flushed its changes). */
 export async function getEmailDialogDataAction(id: string): Promise<ActionResult<EmailDialogData>> {
-  const user = await requireUser();
+  const { user, workspaceId } = await requireWorkspace();
   try {
-    const defaults = await getInvoiceEmailDefaults(user.id, id);
+    const defaults = await getInvoiceEmailDefaults(workspaceId, id);
     return { ok: true, data: { ...defaults, accountEmail: user.email, verified: user.emailVerified } };
   } catch (e) {
     return toActionError(e);

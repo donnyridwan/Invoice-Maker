@@ -35,7 +35,8 @@
     "openMenu": "Buka menu",
     "business": "Bisnis",
     "globalSearch": "Cari di semua invoice",
-    "globalSearchPlaceholder": "Cari nomor invoice atau klien…"
+    "globalSearchPlaceholder": "Cari nomor invoice atau klien…",
+    "team": "Tim"
   },
   "auth": {
     "signIn": "Masuk",
@@ -452,7 +453,8 @@
     "lastError": {
       "sourceUnavailable": "Invoice sumber dihapus atau di-void, jadi jadwal dihentikan.",
       "runFailed": "Invoice terakhir gagal dibuat. Akan dicoba lagi pada jadwal berikutnya.",
-      "emailNotVerified": "Draft dibuat, tetapi tidak terkirim karena email kamu belum diverifikasi.",
+      "senderMissing": "Draft dibuat, tetapi tidak terkirim karena anggota yang mengatur jadwal ini sudah tidak ada di tim. Simpan ulang jadwalnya agar dikirim dari email kamu.",
+      "emailNotVerified": "Draft dibuat, tetapi tidak terkirim karena email anggota yang mengatur jadwal ini belum diverifikasi.",
       "emailDisabled": "Draft dibuat, tetapi pengiriman email belum dikonfigurasi.",
       "clientEmailMissing": "Draft dibuat, tetapi tidak terkirim karena klien tidak punya email.",
       "emailFailed": "Draft dibuat, tetapi emailnya gagal terkirim.",
@@ -667,7 +669,12 @@
     "tooManyAttempts": "Terlalu banyak percobaan. Coba lagi nanti.",
     "logoTooSmall": "Logo terlalu kecil. Sisi terpanjang minimal 512 px dan sisi terpendek minimal 128 px.",
     "logoTooBig": "Logo terlalu besar. Maksimal 4000 px per sisi.",
-    "logoRatio": "Logo terlalu panjang atau terlalu tinggi. Perbandingan sisinya maksimal 6:1."
+    "logoRatio": "Logo terlalu panjang atau terlalu tinggi. Perbandingan sisinya maksimal 6:1.",
+    "notRegistered": "Email ini belum terdaftar. Minta orangnya daftar dulu.",
+    "alreadyMember": "Orang ini sudah ada di tim.",
+    "ownerOnly": "Hanya pemilik yang bisa mengatur tim.",
+    "lastOwner": "Bisnis harus punya setidaknya satu pemilik. Jadikan anggota lain pemilik dulu.",
+    "nameMismatch": "Nama tidak cocok."
   },
   "errors": {
     "validation": "Periksa kembali isian Anda.",
@@ -781,5 +788,62 @@
     "previousMonth": "Bulan sebelumnya",
     "nextMonth": "Bulan berikutnya",
     "today": "Hari ini"
+  },
+  "workspaces": {
+    "label": "Bisnis",
+    "switch": "Ganti bisnis (sekarang: {name})",
+    "active": "Aktif",
+    "new": "Bisnis baru",
+    "newTitle": "Bisnis baru",
+    "newDescription": "Setiap bisnis punya invoice, klien, rekening, dan timnya sendiri. Kamu akan jadi pemiliknya.",
+    "name": "Nama bisnis",
+    "nameHint": "Bisa diubah nanti di Pengaturan.",
+    "create": "Buat bisnis",
+    "roles": {
+      "owner": "Pemilik",
+      "member": "Anggota"
+    }
+  },
+  "team": {
+    "title": "Tim",
+    "description": "Siapa saja yang bisa membuka invoice, klien, dan pengaturan {name}.",
+    "addTitle": "Tambah anggota",
+    "addDescription": "Minta orangnya daftar dulu, lalu masukkan email yang ia pakai. Anggota bisa mengelola semua invoice, klien, katalog, rekening, dan pengaturan bisnis ini, tapi tidak bisa mengatur tim.",
+    "email": "Email akun",
+    "emailHint": "Email yang dipakai saat mendaftar.",
+    "add": "Tambahkan",
+    "added": "{email} ditambahkan ke tim.",
+    "memberNotice": "Hanya pemilik yang bisa menambah atau menghapus anggota.",
+    "membersLabel": "Anggota tim",
+    "member": "Anggota",
+    "role": "Peran",
+    "joined": "Bergabung",
+    "you": "kamu",
+    "actionsFor": "Aksi untuk {name}",
+    "makeOwner": "Jadikan pemilik",
+    "makeMember": "Jadikan anggota",
+    "roleChanged": "Peran diubah.",
+    "remove": "Hapus dari tim",
+    "removeTitle": "Hapus {name} dari tim?",
+    "removeDescription": "Ia langsung kehilangan akses ke bisnis ini. Invoice yang pernah ia buat tetap ada.",
+    "removed": "Anggota dihapus.",
+    "leave": "Keluar dari tim",
+    "leaveTitle": "Keluar dari bisnis ini?",
+    "leaveDescription": "Kamu langsung kehilangan akses. Pemilik lain bisa menambahkanmu lagi.",
+    "left": "Kamu keluar dari bisnis ini.",
+    "deleteTitle": "Hapus bisnis",
+    "deleteDescription": "Menghapus bisnis ini beserta semua invoice, klien, katalog, rekening, dan jadwal berulangnya. Tidak bisa dibatalkan.",
+    "delete": "Hapus bisnis",
+    "deleteConfirmTitle": "Hapus {name}?",
+    "deleteConfirmDescription": "Semua data bisnis ini dihapus permanen, dan link invoice yang sudah dikirim berhenti berfungsi.",
+    "deleteConfirmLabel": "Ketik \"{name}\" untuk konfirmasi"
+  },
+  "waiting": {
+    "title": "Menunggu akses",
+    "description": "Akunmu belum terhubung ke bisnis mana pun. Minta pemilik bisnis menambahkan email di bawah ini ke timnya, lalu periksa lagi.",
+    "yourEmail": "Email akunmu",
+    "checkAgain": "Periksa lagi",
+    "createOwn": "Buat bisnis sendiri",
+    "createTitle": "Mulai bisnismu sendiri"
   }
 }

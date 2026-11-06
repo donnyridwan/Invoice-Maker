@@ -18,7 +18,7 @@ vi.mock("next/cache", () => ({ revalidatePath: () => {} }));
 async function sentInvoice() {
   const u = await createTestUser({ emailVerified: false });
   await ensureProfile(u.id, { businessName: "Studio Donny", email: "donny@example.test" });
-  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-" }).where(eq(businessProfiles.userId, u.id));
+  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-" }).where(eq(businessProfiles.workspaceId, u.id));
   const draft = await createDraftInvoice(u.id);
   const client = await createClient(u.id, { name: "PT Maju Jaya", defaultCurrency: "IDR" });
   const today = todayInJakarta();

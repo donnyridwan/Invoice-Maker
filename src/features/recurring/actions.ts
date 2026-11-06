@@ -4,7 +4,7 @@ import { revalidatePath } from "next/cache";
 import { toActionError, type ActionResult } from "@/lib/action-result";
 import { isEmailEnabled } from "@/lib/email";
 import { todayInJakarta } from "@/lib/dates";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 import {
   createSchedule,
   deleteSchedule,
@@ -21,10 +21,10 @@ function revalidateSchedulePages(): void {
   revalidatePath("/invoices", "layout");
 }
 
-async function run<T>(work: (userId: string) => Promise<T>): Promise<ActionResult<T>> {
-  const user = await requireUser();
+async function run<T>(work: (workspaceId: string, userId: string) => Promise<T>): Promise<ActionResult<T>> {
+  const { user, workspaceId } = await requireWorkspace();
   try {
-    const data = await work(user.id);
+    const data = await work(workspaceId, user.id);
     revalidateSchedulePages();
     return { ok: true, data };
   } catch (e) {
@@ -34,7 +34,7 @@ async function run<T>(work: (userId: string) => Promise<T>): Promise<ActionResul
 
 export type ScheduleDialogData = {
   schedule: ScheduleView | null;
-  /** Automatic email needs a verified account, a configured transport and a client with an address. */
+  /** Automatic email goes out from the member who last saved the schedule: it needs their verified account, a configured transport and a client with an address. */
   emailVerified: boolean;
   emailEnabled: boolean;
   clientEmail: string | null;
@@ -43,9 +43,9 @@ export type ScheduleDialogData = {
 
 /** Everything the schedule dialog needs, read fresh when it opens (after the editor flushed its changes). */
 export async function getScheduleDialogDataAction(invoiceId: string): Promise<ActionResult<ScheduleDialogData>> {
-  const user = await requireUser();
+  const { user, workspaceId } = await requireWorkspace();
   try {
-    const { schedule, clientEmail } = await getScheduleContext(user.id, invoiceId);
+    const { schedule, clientEmail } = await getScheduleContext(workspaceId, invoiceId);
     return {
       ok: true,
       data: {
@@ -62,31 +62,31 @@ export async function getScheduleDialogDataAction(invoiceId: string): Promise<Ac
 }
 
 export async function createScheduleAction(invoiceId: string, input: RecurringScheduleInput): Promise<ActionResult> {
-  return run(async (userId) => {
-    await createSchedule(userId, invoiceId, input);
+  return run(async (workspaceId, userId) => {
+    await createSchedule(workspaceId, invoiceId, input, userId);
   });
 }
 
 export async function updateScheduleAction(id: string, input: RecurringScheduleInput): Promise<ActionResult> {
-  return run(async (userId) => {
-    await updateSchedule(userId, id, input);
+  return run(async (workspaceId, userId) => {
+    await updateSchedule(workspaceId, id, input, userId);
   });
 }
 
 export async function pauseScheduleAction(id: string): Promise<ActionResult> {
-  return run(async (userId) => {
-    await pauseSchedule(userId, id);
+  return run(async (workspaceId) => {
+    await pauseSchedule(workspaceId, id);
   });
 }
 
 export async function resumeScheduleAction(id: string): Promise<ActionResult> {
-  return run(async (userId) => {
-    await resumeSchedule(userId, id);
+  return run(async (workspaceId) => {
+    await resumeSchedule(workspaceId, id);
   });
 }
 
 export async function deleteScheduleAction(id: string): Promise<ActionResult> {
-  return run(async (userId) => {
-    await deleteSchedule(userId, id);
+  return run(async (workspaceId) => {
+    await deleteSchedule(workspaceId, id);
   });
 }

@@ -3,7 +3,15 @@
  * through the `x-pathname` header the proxy sets on every page request, by the (app) layout's
  * onboarding gate. Adding a top-level app route only needs an entry here.
  */
-export const PROTECTED_PREFIXES = ["/dashboard", "/invoices", "/onboarding", "/settings", "/clients", "/catalog"] as const;
+export const PROTECTED_PREFIXES = [
+  "/dashboard",
+  "/invoices",
+  "/onboarding",
+  "/settings",
+  "/clients",
+  "/catalog",
+  "/waiting",
+] as const;
 
 /** Pages that signed-in users are sent away from. */
 export const AUTH_PATHS = ["/login", "/register"] as const;

@@ -17,7 +17,7 @@ const OK_BODY = { amount: 1, base: "EUR", date: "2026-10-20", rates: { USD: 1.08
 async function setupUser(baseCurrency = "IDR") {
   const u = await createTestUser();
   await ensureProfile(u.id, { businessName: "Studio Donny", email: "donny@example.test" });
-  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-", baseCurrency }).where(eq(businessProfiles.userId, u.id));
+  await testDb.update(businessProfiles).set({ invoicePrefix: "INV-", baseCurrency }).where(eq(businessProfiles.workspaceId, u.id));
   return u;
 }
 
@@ -168,7 +168,7 @@ describe("fx rate on invoices", () => {
   it("fills the rate on a new draft in a foreign default currency and on a duplicate", async () => {
     await saveRates("2026-10-20", { EUR: "1", USD: "1.08", IDR: "17000" });
     const u = await setupUser("IDR");
-    await testDb.update(businessProfiles).set({ defaultCurrency: "USD" }).where(eq(businessProfiles.userId, u.id));
+    await testDb.update(businessProfiles).set({ defaultCurrency: "USD" }).where(eq(businessProfiles.workspaceId, u.id));
     const draft = await createDraftInvoice(u.id);
     expect(draft.currency).toBe("USD");
     expect(Number(draft.fxRateToBase)).toBeCloseTo(15740.74, 2);
@@ -190,7 +190,7 @@ describe("fx rate on invoices", () => {
     await saveInvoiceDraft(u.id, draft.id, draftInput());
     expect((await getInvoice(u.id, draft.id)).fxBaseCurrency).toBe("IDR");
 
-    await testDb.update(businessProfiles).set({ baseCurrency: "USD" }).where(eq(businessProfiles.userId, u.id));
+    await testDb.update(businessProfiles).set({ baseCurrency: "USD" }).where(eq(businessProfiles.workspaceId, u.id));
     await saveInvoiceDraft(u.id, draft.id, draftInput());
     const saved = await getInvoice(u.id, draft.id);
     expect(saved.fxBaseCurrency).toBe("USD");

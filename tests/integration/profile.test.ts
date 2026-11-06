@@ -38,7 +38,7 @@ describe("business profile", () => {
     await ensureProfile(u.id, { businessName: "Donny", email: u.email });
     await ensureProfile(u.id, { businessName: "Other", email: "other@example.test" });
 
-    const rows = await testDb.select().from(businessProfiles).where(eq(businessProfiles.userId, u.id));
+    const rows = await testDb.select().from(businessProfiles).where(eq(businessProfiles.workspaceId, u.id));
     expect(rows).toHaveLength(1);
     expect(rows[0]).toMatchObject({
       businessName: "Donny",

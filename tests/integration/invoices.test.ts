@@ -25,7 +25,7 @@ async function setupUser(profile: Partial<typeof businessProfiles.$inferInsert> 
   await testDb
     .update(businessProfiles)
     .set({ invoicePrefix: "INV-", defaultDueDays: 14, defaultNotes: "Terima kasih", ...profile })
-    .where(eq(businessProfiles.userId, u.id));
+    .where(eq(businessProfiles.workspaceId, u.id));
   return u;
 }
 
@@ -85,7 +85,7 @@ describe("invoice domain", () => {
       const events = await testDb.select().from(invoiceEvents).where(eq(invoiceEvents.invoiceId, inv.id));
       expect(events.map((e) => e.type)).toEqual(["created"]);
 
-      const [profile] = await testDb.select().from(businessProfiles).where(eq(businessProfiles.userId, u.id));
+      const [profile] = await testDb.select().from(businessProfiles).where(eq(businessProfiles.workspaceId, u.id));
       expect(profile.nextInvoiceNumber).toBe(2);
       expect(profile.invoiceNumberYear).toBe(YEAR);
     });

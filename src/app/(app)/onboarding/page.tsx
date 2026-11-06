@@ -2,13 +2,13 @@ import { getTranslations } from "next-intl/server";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { OnboardingForm } from "@/features/profile/onboarding-form";
 import { ensureProfile, getProfile } from "@/features/profile/queries";
-import { requireUser } from "@/lib/session";
+import { requireWorkspace } from "@/lib/workspace";
 
 export default async function OnboardingPage() {
-  const user = await requireUser();
+  const { user, workspaceId } = await requireWorkspace();
   const t = await getTranslations("onboarding");
-  await ensureProfile(user.id, { businessName: user.name, email: user.email });
-  const profile = await getProfile(user.id);
+  await ensureProfile(workspaceId, { businessName: user.name, email: user.email });
+  const profile = await getProfile(workspaceId);
 
   return (
     <Card className="mx-auto w-full max-w-[480px]">
