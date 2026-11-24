@@ -20,7 +20,9 @@
     "genericError": "Terjadi kesalahan. Silakan coba lagi.",
     "saved": "Tersimpan",
     "optional": "opsional",
-    "close": "Tutup"
+    "close": "Tutup",
+    "showPassword": "Tampilkan password",
+    "hidePassword": "Sembunyikan password"
   },
   "nav": {
     "dashboard": "Dasbor",

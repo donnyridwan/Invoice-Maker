@@ -8,7 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { FormField } from "@/components/ui/form-field";
-import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { authClient } from "@/lib/auth-client";
 
 const MIN_PASSWORD_LENGTH = 8;
@@ -69,10 +69,10 @@ export function AccountCard() {
         <form onSubmit={onSubmit} noValidate className="grid gap-4 sm:grid-cols-2">
           <h3 className="text-sm font-semibold text-fg sm:col-span-2">{t("settings.changePassword")}</h3>
           <FormField label={t("settings.currentPassword")} htmlFor="currentPassword" error={error?.field === "current" ? error.message : undefined}>
-            <Input id="currentPassword" name="currentPassword" type="password" autoComplete="current-password" />
+            <PasswordInput id="currentPassword" name="currentPassword" autoComplete="current-password" />
           </FormField>
           <FormField label={t("settings.newPassword")} htmlFor="newPassword" error={error?.field === "new" ? error.message : undefined}>
-            <Input id="newPassword" name="newPassword" type="password" autoComplete="new-password" />
+            <PasswordInput id="newPassword" name="newPassword" autoComplete="new-password" />
           </FormField>
           {error?.field === "form" ? (
             <p role="alert" className="text-sm text-danger sm:col-span-2">

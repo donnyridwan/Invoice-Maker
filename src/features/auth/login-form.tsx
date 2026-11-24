@@ -6,6 +6,7 @@ import { useTranslations } from "next-intl";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import { PasswordInput } from "@/components/ui/password-input";
 import { Label } from "@/components/ui/label";
 import { syncLocaleFromProfile } from "@/i18n/actions";
 import { authClient } from "@/lib/auth-client";
@@ -68,7 +69,7 @@ export function LoginForm({ next, expired = false }: { next?: string; expired?: 
           </div>
           <div className="flex flex-col gap-1.5">
             <Label htmlFor="password">{t("auth.password")}</Label>
-            <Input id="password" name="password" type="password" autoComplete="current-password" />
+            <PasswordInput id="password" name="password" autoComplete="current-password" />
           </div>
           {error ? (
             <p role="alert" className="text-sm text-danger">

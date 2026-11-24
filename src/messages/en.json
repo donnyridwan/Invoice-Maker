@@ -20,7 +20,9 @@
     "genericError": "Something went wrong. Please try again.",
     "saved": "Saved",
     "optional": "optional",
-    "close": "Close"
+    "close": "Close",
+    "showPassword": "Show password",
+    "hidePassword": "Hide password"
   },
   "nav": {
     "dashboard": "Dashboard",

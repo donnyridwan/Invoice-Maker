@@ -17,10 +17,22 @@ test.describe("auth", () => {
     await context.clearCookies();
     await page.goto("/login");
     await page.getByLabel("Email").fill(`  ${email.toUpperCase()} `);
-    await page.getByLabel("Password").fill(password);
+    await page.getByLabel("Password", { exact: true }).fill(password);
     await page.getByRole("button", { name: "Masuk" }).click();
     await expect(page).not.toHaveURL(/\/login/);
     expect((await context.cookies()).some((c) => c.name.includes("session_token"))).toBe(true);
+  });
+
+  test("shows and hides the password with the eye button", async ({ page }) => {
+    await page.goto("/login");
+    const password = page.getByLabel("Password", { exact: true });
+    await password.fill("rahasia123");
+    await expect(password).toHaveAttribute("type", "password");
+    await page.getByRole("button", { name: "Tampilkan password" }).click();
+    await expect(password).toHaveAttribute("type", "text");
+    await expect(password).toHaveValue("rahasia123");
+    await page.getByRole("button", { name: "Sembunyikan password" }).click();
+    await expect(password).toHaveAttribute("type", "password");
   });
 
   test("shows an error for a wrong password", async ({ page, context }) => {
@@ -29,7 +41,7 @@ test.describe("auth", () => {
 
     await page.goto("/login");
     await page.getByLabel("Email").fill(email);
-    await page.getByLabel("Password").fill("salah-banget");
+    await page.getByLabel("Password", { exact: true }).fill("salah-banget");
     await page.getByRole("button", { name: "Masuk" }).click();
     await expect(page.getByText("Email atau password salah")).toBeVisible();
     await expect(page).toHaveURL(/\/login/);
@@ -63,7 +75,7 @@ test.describe("auth", () => {
     await page.goto("/register");
     await page.getByLabel("Nama").fill("Donny");
     await page.getByLabel("Email").fill(`short+${Date.now()}@example.com`);
-    await page.getByLabel("Password").fill("1234567");
+    await page.getByLabel("Password", { exact: true }).fill("1234567");
     await page.getByRole("button", { name: "Daftar" }).click();
     await expect(page.getByText("Password minimal 8 karakter")).toBeVisible();
     await expect(page).toHaveURL(/\/register/);

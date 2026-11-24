@@ -36,7 +36,7 @@ export async function registerUser(
   await page.goto("/register");
   await page.getByLabel("Nama").fill(opts.name ?? "Donny");
   await page.getByLabel("Email").fill(email);
-  await page.getByLabel("Password").fill(password);
+  await page.getByLabel("Password", { exact: true }).fill(password);
   await page.getByRole("button", { name: "Daftar" }).click();
   await expect(page).toHaveURL(/\/waiting/);
   if (opts.onboarding === "waiting") return { email, password };
