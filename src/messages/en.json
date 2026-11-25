@@ -493,6 +493,8 @@
     "invoicePrefix": "Invoice number prefix",
     "defaultNotes": "Default notes",
     "uiLanguage": "Display language",
+    "uiLanguageDescription": "The language of the app's menus, buttons and messages for your account. The invoice language is set separately in Invoice defaults.",
+    "uiLanguageSaved": "Display language changed to {language}.",
     "saved": "Settings saved.",
     "businessProfileDescription": "This information appears on every invoice.",
     "baseCurrencyHint": "Currency for reports and summaries.",

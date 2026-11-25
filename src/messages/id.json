@@ -493,6 +493,8 @@
     "invoicePrefix": "Awalan nomor invoice",
     "defaultNotes": "Catatan default",
     "uiLanguage": "Bahasa tampilan",
+    "uiLanguageDescription": "Bahasa menu, tombol, dan pesan aplikasi untuk akunmu. Bahasa invoice diatur terpisah di Default invoice.",
+    "uiLanguageSaved": "Bahasa tampilan diganti ke {language}.",
     "saved": "Pengaturan disimpan.",
     "businessProfileDescription": "Informasi ini tampil di setiap invoice Anda.",
     "baseCurrencyHint": "Mata uang untuk laporan dan ringkasan.",

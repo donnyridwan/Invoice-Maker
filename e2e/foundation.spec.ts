@@ -141,6 +141,24 @@ test.describe("shell", () => {
       page.getByRole("navigation", { name: "Menu utama" }).getByRole("link", { name: "Klien" }),
     ).toBeVisible();
   });
+
+  test("sets the display language from Settings, apart from the invoice language", async ({ page }) => {
+    await registerUser(page);
+    await page.goto("/settings");
+
+    const card = page.getByRole("region", { name: "Bahasa tampilan" });
+    await card.getByLabel("Bahasa tampilan").click();
+    await page.getByRole("option", { name: "English" }).click();
+    await expect(page.getByRole("heading", { level: 1, name: "Settings" })).toBeVisible();
+    await expect(page.getByRole("navigation", { name: "Main menu" }).getByRole("link", { name: "Clients" })).toBeVisible();
+    // The invoice language default is untouched.
+    await expect(page.getByLabel("Default invoice language")).toContainText("Bahasa Indonesia");
+
+    await page.reload();
+    await expect(page.getByRole("region", { name: "Display language" }).getByLabel("Display language")).toContainText(
+      "English",
+    );
+  });
 });
 
 test.describe("onboarding", () => {

@@ -3,6 +3,7 @@ import { PageHeader } from "@/components/ui/page-header";
 import { AccountCard } from "@/features/profile/account-card";
 import { LogoUpload } from "@/features/profile/logo-upload";
 import { InvoiceDefaultsForm } from "@/features/profile/invoice-defaults-form";
+import { LanguageCard } from "@/features/profile/language-card";
 import { VerifyEmailCard } from "@/features/profile/verify-email-card";
 import { ProfileForm } from "@/features/profile/profile-form";
 import { getProfile } from "@/features/profile/queries";
@@ -18,6 +19,7 @@ export default async function SettingsPage() {
     { id: "profile", label: t("businessProfile"), content: <ProfileForm profile={profile} /> },
     { id: "logo", label: t("logo"), content: <LogoUpload logoUrl={profile.logoUrl} /> },
     { id: "invoice-defaults", label: t("invoiceDefaults"), content: <InvoiceDefaultsForm profile={profile} /> },
+    { id: "language", label: t("uiLanguage"), content: <LanguageCard /> },
     {
       id: "email",
       label: t("verifyEmail.title"),
